@@ -9,15 +9,15 @@ coanc(Q, F)
 \arguments{
 \item{Q}{The \eqn{n \times k}{n-by-k} admixture proportion matrix}
 
-\item{F}{Either the \eqn{k \times k}{k-by-k} intermediate population coancestry matrix (for the complete admixture model), or the length-\eqn{k} vector of intermediate population \eqn{F_{ST}}{FST} values (for the standard PSD model), or a scalar \eqn{F_{ST}}{FST} value shared by all intermediate populations.}
+\item{F}{Either the \eqn{k \times k}{k-by-k} intermediate subpopulation coancestry matrix (for the complete admixture model), or the length-\eqn{k} vector of intermediate subpopulation \eqn{F_{ST}}{FST} values (for the BN-PSD model), or a scalar \eqn{F_{ST}}{FST} value shared by all intermediate subpopulations.}
 }
 \value{
 The \eqn{n \times n}{n-by-n} coancestry matrix \eqn{\Theta}
 }
 \description{
-In the most general case, the \eqn{n \times n}{n-by-n} coancestry matrix \eqn{\Theta} of admixed individuals is determined by the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q} and the \eqn{k \times k}{k-by-k} intermediate population coancestry matrix \eqn{\Psi}, given by
+In the most general case, the \eqn{n \times n}{n-by-n} coancestry matrix \eqn{\Theta} of admixed individuals is determined by the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q} and the \eqn{k \times k}{k-by-k} intermediate subpopulation coancestry matrix \eqn{\Psi}, given by
 \deqn{\Theta = Q \Psi Q^T}{\Theta = Q * \Psi * Q^T}
-In the PSD model \eqn{\Psi} is a diagonal matrix (with \eqn{F_{ST}}{FST} values for the intermediate populations along the diagonal, zero values off-diagonal).
+In the BN-PSD model \eqn{\Psi} is a diagonal matrix (with \eqn{F_{ST}}{FST} values for the intermediate subpopulations along the diagonal, zero values off-diagonal).
 }
 \examples{
 # a trivial case: unadmixed individuals from independent subpopulations

@@ -68,7 +68,7 @@ test_that("q1d returns valid admixture coefficients", {
     expect_equal(rowSums(Q), rep.int(1,n)) # rows sum to 1, vector length n
 })
 
-test_that("psd2s agrees with explicitly calculated bias coeff s", {
+test_that("q1d_sigma2s agrees with explicitly calculated bias coeff s", {
     n <- 5
     k <- 2
     sigma <- 1
@@ -76,18 +76,18 @@ test_that("psd2s agrees with explicitly calculated bias coeff s", {
     F <- 1:k # scale doesn't matter right now...
     Theta <- coanc(Q, F) # in wrong scale but meh
     sWant <- mean(Theta)/mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
-    s <- psd2s(sigma, F, n) # calculation to compare to
+    s <- q1d_sigma2s(sigma, F, n) # calculation to compare to
     expect_equal(s, sWant)
     expect_true(s > 0) # other obvious properties...
     expect_true(s <= 1)
 })
 
-test_that("solveSigma agrees with reverse func", {
+test_that("q1d_s2sigma agrees with reverse func", {
     n <- 1000
     F <- c(0.1,0.2,0.3)
     k <- length(F)
     sWant <- 0.5
-    sigma <- solveSigma(s=sWant, F=F, n=n) # get sigma
+    sigma <- q1d_s2sigma(s=sWant, F=F, n=n) # get sigma
     ## construct everything and verify s == sWant
     Q <- q1d(n, k, sigma) # now get Q from there
     Theta <- coanc(Q, F)

@@ -23,7 +23,7 @@
 #' k <- 2 # number of intermediate subpops
 #'
 #' # define population structure
-#' F <- c(0.1, 0.3) # FST values for k=2 subpopulations
+#' F <- c(0.1, 0.3) # FST values for k=2 subpops
 #' sigma <- 1 # dispersion parameter of intermediate subpops
 #' Q <- q1d(n, k, sigma) # non-trivial admixture proportions
 #'
@@ -32,7 +32,7 @@
 #' B <- rpint(pAnc, F) # matrix of intermediate subpop allele freqs
 #' P <- rpiaf(B,Q) # matrix of individual-specific allele frequencies
 #'
-#' # draw genotypes from intermediate populations (one individual each)
+#' # draw genotypes from intermediate subpops (one individual each)
 #' Xb <- rgeno(B)
 #' # and genotypes for admixed individuals
 #' Xp <- rgeno(P)
@@ -71,6 +71,7 @@ rgeno <- function(P, Q=NULL, lowMem=FALSE) {
             P <- rpiaf(P, Q) # overwrite P in this case
         }
         ## now P is the IAF matrix (either way), draw binomially from it!
+        ## it appears that rbinom reads P by column, and output is turned back into matrix also by column, therefore retaining consistency!
         X <- matrix(stats::rbinom(P, 2, P), nrow=m, ncol=n)
     }
 

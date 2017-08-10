@@ -1,12 +1,10 @@
-## PUBLIC?: used only by ~/storey/fst/software/ParseTeraStructure.R
-
 #' Construct individual-specific allele frequency matrix
 #'
-#' Here \eqn{m} is the number of loci, \eqn{n} the number of individuals, and \eqn{k} the number of intermediate populations.
-#' The \eqn{m \times n}{m-by-n} Individual-specific Allele Frequency (IAF) matrix \eqn{P} is constructed from the \eqn{m \times k}{m-by-k} intermediate population allele frequency matrix \eqn{B} and the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q} using
+#' Here \eqn{m} is the number of loci, \eqn{n} the number of individuals, and \eqn{k} the number of intermediate subpopulations.
+#' The \eqn{m \times n}{m-by-n} Individual-specific Allele Frequency (IAF) matrix \eqn{P} is constructed from the \eqn{m \times k}{m-by-k} intermediate subpopulation allele frequency matrix \eqn{B} and the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q} using
 #' \deqn{P = B Q^T.}{P = B * Q^T.}
 #' 
-#' @param B The \eqn{m \times k}{m-by-k} intermediate population allele frequency matrix
+#' @param B The \eqn{m \times k}{m-by-k} intermediate subpopulation allele frequency matrix
 #' @param Q The \eqn{n \times k}{n-by-k} admixture proportion matrix
 #'
 #' @return The \eqn{m \times n}{m-by-n} IAF matrix \eqn{P}
@@ -16,7 +14,7 @@
 #' n <- 5 # number of individuals
 #' k <- 2 # number of intermediate subpops
 #' pAnc <- rpanc(m) # random vector of ancestral allele frequencies
-#' F <- c(0.1, 0.3) # FST values for k=2 subpopulations
+#' F <- c(0.1, 0.3) # FST values for k=2 subpops
 #' B <- rpint(pAnc, F) # matrix of intermediate subpop allele freqs
 #' sigma <- 1 # dispersion parameter of intermediate subpops
 #' Q <- q1d(n, k, sigma) # non-trivial admixture proportions

@@ -13,7 +13,7 @@
 #' @examples
 #' m <- 10 # number of loci
 #' pAnc <- rpanc(m) # random vector of ancestral allele frequencies
-#' F <- c(0.1, 0.3) # FST values for two subpopulations
+#' F <- c(0.1, 0.3) # FST values for two subpops
 #' B <- rpint(pAnc, F) # matrix of intermediate subpop allele freqs
 #'
 #' @export
@@ -21,7 +21,7 @@ rpint <- function(pAnc, F) {
     ## generate at each locus random intermediate allele frequencies from BN model
     ## inputs are
     ## - pAnc: ancestral allele frequencies (must be defined here!). Vector of length m (number of loci)
-    ## - F: Fst vector (different for each intermediate population)
+    ## - F: Fst vector (different for each intermediate subpopulation)
 
     ## basic param checking
     if (missing(pAnc)) stop('Fatal in rpint: ancestral allele frequencies missing!')
@@ -33,7 +33,7 @@ rpint <- function(pAnc, F) {
     ## let's translate parameters for Balding-Nichols case
     nu <- 1/F-1 # nu is a vector or a scalar, same as F (whatever that is)
     pAncM <- 1-pAnc # precompute vector of "minus" pAnc's shared by all subpopulations below
-    ## vectorization makes a lot of sense for each population... (doing all SNPs together)
+    ## vectorization makes a lot of sense for each subpopulation... (doing all SNPs together)
     B <- matrix(nrow=m, ncol=k) # matrix of intermediate allele frequencies we want...
     for (j in 1:k) {
         nuj <- nu[j]

@@ -1,13 +1,11 @@
-## PUBLIC: used by ~/storey/fst/software/simPSD{02,15,21}.*.R, teraStruc07.*.R
-
 #' Construct the coancestry matrix of an admixture model
 #'
-#' In the most general case, the \eqn{n \times n}{n-by-n} coancestry matrix \eqn{\Theta} of admixed individuals is determined by the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q} and the \eqn{k \times k}{k-by-k} intermediate population coancestry matrix \eqn{\Psi}, given by
+#' In the most general case, the \eqn{n \times n}{n-by-n} coancestry matrix \eqn{\Theta} of admixed individuals is determined by the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q} and the \eqn{k \times k}{k-by-k} intermediate subpopulation coancestry matrix \eqn{\Psi}, given by
 #' \deqn{\Theta = Q \Psi Q^T}{\Theta = Q * \Psi * Q^T}
-#' In the PSD model \eqn{\Psi} is a diagonal matrix (with \eqn{F_{ST}}{FST} values for the intermediate populations along the diagonal, zero values off-diagonal).
+#' In the BN-PSD model \eqn{\Psi} is a diagonal matrix (with \eqn{F_{ST}}{FST} values for the intermediate subpopulations along the diagonal, zero values off-diagonal).
 #'
 #' @param Q The \eqn{n \times k}{n-by-k} admixture proportion matrix
-#' @param F Either the \eqn{k \times k}{k-by-k} intermediate population coancestry matrix (for the complete admixture model), or the length-\eqn{k} vector of intermediate population \eqn{F_{ST}}{FST} values (for the standard PSD model), or a scalar \eqn{F_{ST}}{FST} value shared by all intermediate populations.
+#' @param F Either the \eqn{k \times k}{k-by-k} intermediate subpopulation coancestry matrix (for the complete admixture model), or the length-\eqn{k} vector of intermediate subpopulation \eqn{F_{ST}}{FST} values (for the BN-PSD model), or a scalar \eqn{F_{ST}}{FST} value shared by all intermediate subpopulations.
 #'
 #' @return The \eqn{n \times n}{n-by-n} coancestry matrix \eqn{\Theta}
 #'
@@ -28,10 +26,6 @@
 #' 
 #' @export 
 coanc <- function(Q, F) {
-    ## construct individual allele covariance matrix "Sigma" that PSD data should have theoretically, which is:
-    ## S <- Q %*% diag(F) %*% t(Q)
-    ## but that is assuming F is vector...
-    ## does not perform validations on Q,F... but R will complain if F and Q's dimensions don't match
     k <- ncol(Q) # dimension that matters the most
     if (is.matrix(F)) {
         if (nrow(F) != k) stop('Fatal: Q and F are not compatible: nrow(F) == ', nrow(F), ' != ', k, ' == ncol(Q)')

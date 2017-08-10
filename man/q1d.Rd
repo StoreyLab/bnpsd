@@ -10,9 +10,9 @@ q1d(n, k, sigma, a = 0.5, b = k + 0.5, s, F, Fst, interval = c(0.1, 10),
 \arguments{
 \item{n}{Number of individuals}
 
-\item{k}{Number of ancestral populations}
+\item{k}{Number of intermediate subpopulations}
 
-\item{sigma}{Spread of ancestral populations (standard deviation of normal densities)}
+\item{sigma}{Spread of intermediate subpopulations (standard deviation of normal densities)}
 
 \item{a}{Location of first individual}
 
@@ -22,7 +22,7 @@ OPTIONS FOR BIAS COEFFICIENT VERSION}
 
 \item{s}{The desired bias coefficient, which specifies \eqn{\sigma} indirectly.  Required if \code{sigma} is missing}
 
-\item{F}{The length-\eqn{k} vector of inbreeding coefficients (or \eqn{F_{ST}}{FST}'s) of the ancestral populations, up to a scaling factor (which cancels out in calculations).  Required if \code{sigma} is missing}
+\item{F}{The length-\eqn{k} vector of inbreeding coefficients (or \eqn{F_{ST}}{FST}'s) of the intermediate subpopulations, up to a scaling factor (which cancels out in calculations).  Required if \code{sigma} is missing}
 
 \item{Fst}{The desired final \eqn{F_{ST}}{FST} of the admixed individuals.  Required if \code{sigma} is missing}
 
@@ -34,7 +34,7 @@ OPTIONS FOR BIAS COEFFICIENT VERSION}
 If \code{sigma} was provided, the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q}.  If \code{sigma} is missing, a named list is returned containing \code{Q}, the rescaled \code{F}, and the \code{sigma} that together give the desired \eqn{s} and final \eqn{F_{ST}}{FST} of the admixed individuals.
 }
 \description{
-Assumes \eqn{k} ancestral populations placed along a line at locations \eqn{1:k} spread by random walks, then \eqn{n} individuals sampled equally spaced in \eqn{[a,b]} (default \eqn{[0.5, k+0.5]}) draw their admixture proportions relative to the Normal density that models the random walks of each of these ancestral populations.
+Assumes \eqn{k} intermediate subpopulations placed along a line at locations \eqn{1:k} spread by random walks, then \eqn{n} individuals sampled equally spaced in \eqn{[a,b]} (default \eqn{[0.5, k+0.5]}) draw their admixture proportions relative to the Normal density that models the random walks of each of these intermediate subpopulations.
 The spread of the random walks (the \eqn{\sigma} of the Normal densities) is set to \code{sigma} if not missing, otherwise \eqn{\sigma} is found numerically to give the desired bias coefficient \code{s}, the vector \code{F} of \eqn{F_{ST}}{FST}'s for the intermediate subpopulations up to a scalar factor, and the final \eqn{F_{ST}}{FST} of the admixed individuals (see details below).
 }
 \details{
@@ -44,7 +44,7 @@ The scaling factor of the input \code{F} is irrelevant because it cancels out in
 However, the function stops with a fatal error if the rescaled \code{F} takes on any values greater than 1, which are not allowed since \code{F} are IBD probabilities.
 }
 \examples{
-## admixture matrix for 1000 individuals drawing alleles from 10 ancestral populations
+## admixture matrix for 1000 individuals drawing alleles from 10 subpops
 ## and a spread of 2 standard deviations along the 1D geography
 Q <- q1d(n=1000, k=10, sigma=2)
 
@@ -55,7 +55,7 @@ Fst <- 0.1 # desired final Fst of admixed individuals
 obj <- q1d(n=1000, k=k, s=0.5, F=F, Fst=Fst)
 ## in this case return value is a named list with three items:
 Q <- obj$Q # admixture proportions
-F <- obj$F # rescaled Fst vector for intermediate subpopulations
+F <- obj$F # rescaled Fst vector for intermediate subpops
 sigma <- obj$sigma # and the sigma that gives the desired s and final Fst
 
 }

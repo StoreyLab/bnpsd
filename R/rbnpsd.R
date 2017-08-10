@@ -1,5 +1,3 @@
-## PUBLIC: used by ~/storey/fst/software/simPSD02.*.R and ReplicatePsd.R
-
 #' Simulate random allele frequencies and genotypes from the BN-PSD admixture model
 #'
 #' This function returns simulated ancestral, intermediate, and individual-specific allele frequencies and genotypes given the admixture structure, as determined by the admixture proportions and the vector of intermediate subpopulation \eqn{F_{ST}}{FST} values.
@@ -42,7 +40,7 @@ rbnpsd <- function(Q, F, m, wantX=TRUE, wantP=TRUE, wantB=TRUE, wantPa=TRUE, low
     
     ## always ask for an admixture matrix (no default)
     if (missing(Q)) stop('Fatal: must provide Q (admixture proportion matrix)')
-    if (missing(F)) stop('Fatal: must provide F (intermediate population Fst vector)')
+    if (missing(F)) stop('Fatal: must provide F (intermediate subpopulation Fst vector)')
     if (missing(m)) stop('Fatal: must provide m (number of loci to draw)')
     
     ## get dimensions, test coherence
@@ -56,13 +54,12 @@ rbnpsd <- function(Q, F, m, wantX=TRUE, wantP=TRUE, wantB=TRUE, wantPa=TRUE, low
     if (verbose) message('rbnpsd: drawing Pa')
     Pa <- rpanc(m)
     
-    ## make ancestral allele frequencies drawn from Balding-Nichols
-    ## that part performs validations for F and k
+    ## draw intermediate allele frequencies from Balding-Nichols
     if (verbose) message('rbnpsd: drawing B')
     B <- rpint(Pa, F)
     
     if (lowMem) {
-        ## simulate genotypes!
+        ## draw genotypes!
         if (wantX) {
             if (verbose) message('rbnpsd: drawing X')
             X <- rgeno(B, Q, lowMem=lowMem)
@@ -70,11 +67,10 @@ rbnpsd <- function(Q, F, m, wantX=TRUE, wantP=TRUE, wantB=TRUE, wantPa=TRUE, low
     } else {
         if (wantP || wantX) {
             if (verbose) message('rbnpsd: drawing P')
-            P <- rpiaf(B, Q) # efficient version of the above
+            P <- rpiaf(B, Q)
         }
         
-        ## simulate genotypes from P
-        ## it appears that rbinom reads P by column, and output is turned back into matrix also by column, therefore retaining consistency!
+        ## draw genotypes from P
         if (wantX) {
             if (verbose) message('rbnpsd: drawing X')
             X <- rgeno(P)

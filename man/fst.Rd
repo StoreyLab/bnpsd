@@ -9,7 +9,7 @@ fst(Q, F, w)
 \arguments{
 \item{Q}{The \eqn{n \times k}{n-by-k} admixture proportion matrix}
 
-\item{F}{The length-\eqn{k} vector of ancestral inbreeding coefficients assumed to be in the wrong scale}
+\item{F}{The length-\eqn{k} vector of subpopulation inbreeding coefficients}
 
 \item{w}{The length-\eqn{n} vector of weights for individuals that define \eqn{F_{ST}}{FST} (default uniform weights)}
 }
@@ -23,10 +23,10 @@ This \eqn{F_{ST}}{FST} equals the weighted mean of the diagonal of the coancestr
 \examples{
 # set desired parameters
 n <- 1000 # number of individuals
-k <- 10 # number of ancestral populations
+k <- 10 # number of intermediate subpopulations
 s <- 0.5 # desired bias coefficient
 sigma <- 1 # for 1D admixture model
-# differentiation of ancestral populations
+# differentiation of intermediate subpopulations
 F <- (1:k)/k
 # construct final admixture proportions
 Q <- q1d(n=n, k=k, sigma=sigma)
