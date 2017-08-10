@@ -67,7 +67,7 @@ q1d <- function(n, k, sigma, a=0.5, b=k+0.5, s, F, Fst, interval=c(0.1,10), tol=
     Q <- Q/rowSums(Q) # return!
 
     if (sigmaMissing) { ## this triggers s version
-        F <- rescaleFst(Q, F, Fst) # let's rescale F now!
+        F <- rescaleF(Q, F, Fst) # let's rescale F now!
         return( list(Q=Q, F=F, sigma=sigma) ) # return all this additional data!
     } else {
         return(Q) # in direct case, always return Q

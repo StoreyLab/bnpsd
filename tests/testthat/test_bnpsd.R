@@ -29,6 +29,33 @@ test_that("coanc works in toy cases", {
     expect_equal(Theta, ThetaExp)
 }) 
 
+test_that("fst works in toy cases", {
+    Q <- diag(c(1,1)) # an IS model with two subpops
+    F <- c(0.1, 0.3)
+    fst1 <- mean(F) # the Theta we expect for this setup
+    fst2 <- fst(Q, F)
+    expect_equal(fst1, fst2)
+
+    ## same Q, scalar F
+    F <- 0.2
+    fst2 <- fst(Q, F)
+    expect_equal(F, fst2)
+
+    ## same Q, matrix F
+    Fv <- c(0.1,0.4) # vector version
+    F <- diag(Fv) # matrix version
+    fst1 <- mean(Fv)
+    fst2 <- fst(Q, F)
+    expect_equal(fst1, fst2) # F is the theta we expect in this case
+
+    ## most complex case, just a general math check
+    Q <- matrix(c(0.7, 0.3, 0.2, 0.8), nrow=2, byrow=TRUE)
+    F <- matrix(c(0.3, 0.1, 0.1, 0.3), nrow=2, byrow=TRUE)
+    fst1 <- mean(diag(Q %*% F %*% t(Q))) # the Fst we expect for this setup (slower but more explicit version)
+    fst2 <- fst(Q, F)
+    expect_equal(fst1, fst2)
+}) 
+
 test_that("q1d returns valid admixture coefficients", {
     n <- 5
     k <- 2
@@ -69,14 +96,14 @@ test_that("solveSigma agrees with reverse func", {
     ## since we set 0<sWant<1, nothing else to test
 })
 
-test_that("rescaleFst agrees with explicitly Fst calculation", {
+test_that("rescaleF agrees with explicitly Fst calculation", {
     n <- 5
     k <- 2
     sigma <- 1
     Fst <- 0.1
     Q <- q1d(n, k, sigma)
     F <- 1:k # scale doesn't matter right now...
-    F2 <- rescaleFst(Q, F, Fst) # calculation to compare to
+    F2 <- rescaleF(Q, F, Fst) # calculation to compare to
     Theta <- coanc(Q, F2) # in wrong scale but meh
     Fst2 <- mean(diag(Theta)) # this is the actual Fst, with uniform weights
     expect_equal(Fst, Fst2)
