@@ -202,3 +202,30 @@ test_that("rbnpsd works well", {
     expect_true(all(pAnc >= 0)) # all are non-negative
     expect_true(all(pAnc <= 1)) # all are smaller or equal than 1
 })
+
+test_that("rbnpsd lowMem=TRUE works well", {
+    m <- 1000
+    F <- c(0.1,0.2,0.3)
+    k <- length(F)
+    Q <- diag(rep.int(1,k)) # island model for test...
+    Q <- rbind(Q,Q,Q) # repeat so we have multiple people per island
+    n <- nrow(Q) # number of individuals (3*k)
+    ## run rbnpsd
+    out <- rbnpsd(Q, F, m, lowMem=TRUE)
+    X <- out$X # genotypes
+    B <- out$B # Intermediate AFs
+    pAnc <- out$Pa # Ancestral AFs
+    ## test X
+    expect_equal(nrow(X), m)
+    expect_equal(ncol(X), n)
+    expect_true(all(X %in% c(0,1,2))) # only three values allowed!
+    ## test B
+    expect_equal(nrow(B), m)
+    expect_equal(ncol(B), k)
+    expect_true(all(B >= 0)) # all are non-negative
+    expect_true(all(B <= 1)) # all are smaller or equal than 1
+    ## test pAnc
+    expect_equal(length(pAnc), m)
+    expect_true(all(pAnc >= 0)) # all are non-negative
+    expect_true(all(pAnc <= 1)) # all are smaller or equal than 1
+})
