@@ -63,7 +63,7 @@ X <- rgeno(P) # "geno"types
 More details
 ===
 
-Please see the [popkin vignette](https://github.com/StoreyLab/alexviiia/blob/master/fst/software/bnpsd/inst/doc/bnpsd.pdf) for a description of the key parameters and more detailed examples.
+Please see the [bnpsd vignette](https://github.com/StoreyLab/alexviiia/blob/master/fst/software/bnpsd/inst/doc/bnpsd.pdf) for a description of the key parameters and more detailed examples.
 
 Citations
 ===
