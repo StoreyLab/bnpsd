@@ -56,6 +56,53 @@ test_that("fst works in toy cases", {
     expect_equal(fst1, fst2)
 }) 
 
+test_that("qis returns valid admixture coefficients", {
+    labs <- c(1,2,2,3,3,3,4,4,4,4)
+    n <- length(labs)
+    k <- length(unique(labs))
+    Q <- qis(labs)
+    ## general tests for admixture matrices
+    expect_equal(nrow(Q), n) # n rows
+    expect_equal(ncol(Q), k) # k columns
+    expect_true(all(Q >= 0)) # all are non-negative
+    expect_true(all(Q <= 1)) # all are smaller or equal than 1
+    expect_equal(rowSums(Q), rep.int(1,n)) # rows sum to 1, vector length n
+    ## specific tests for qis
+    expect_true(all(Q %in% c(TRUE,FALSE)))
+    expect_true(all(colnames(Q) == sort(unique(labs))))
+    
+    ## test with provided subpops
+    subpops <- 4:1
+    Q <- qis(labs, subpops)
+    ## general tests for admixture matrices
+    expect_equal(nrow(Q), n) # n rows
+    expect_equal(ncol(Q), k) # k columns
+    expect_true(all(Q >= 0)) # all are non-negative
+    expect_true(all(Q <= 1)) # all are smaller or equal than 1
+    expect_equal(rowSums(Q), rep.int(1,n)) # rows sum to 1, vector length n
+    ## specific tests for qis
+    expect_true(all(Q %in% c(TRUE,FALSE)))
+    expect_true(all(colnames(Q) == subpops))
+    
+    ## test with provided subpops (additional labels)
+    k <- 10
+    subpops <- 1:k
+    Q <- qis(labs, subpops)
+    ## general tests for admixture matrices
+    expect_equal(nrow(Q), n) # n rows
+    expect_equal(ncol(Q), k) # k columns
+    expect_true(all(Q >= 0)) # all are non-negative
+    expect_true(all(Q <= 1)) # all are smaller or equal than 1
+    expect_equal(rowSums(Q), rep.int(1,n)) # rows sum to 1, vector length n
+    ## specific tests for qis
+    expect_true(all(Q %in% c(TRUE,FALSE)))
+    expect_true(all(colnames(Q) == subpops))
+
+    ## test with provided subpops (missing labels, must die!)
+    subpops <- 1:3 # missing 4!
+    expect_error( qis(labs, subpops) )
+})
+
 test_that("q1d returns valid admixture coefficients", {
     n <- 5
     k <- 2

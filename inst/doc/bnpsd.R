@@ -30,7 +30,7 @@ s2 <- mean(Theta)/Fst
 s2
 
 ## ---- fig.width=4, fig.height=2, fig.align='center'----------------------
-# visualize the per-subpopulation inbreeding coefficients (FST's)
+# visualize the per-subpopulation inbreeding coefficients (FSTs)
 par(mar=c(4,4,0,0)+0.2) # shrink default margins
 colIS <- brewer.pal(k, "Paired") # indep. subpop. colors
 barplot(F, col=colIS, names.arg=1:k, ylim=c(0,1),
@@ -52,7 +52,7 @@ par(mar=c(0,0,0,0)+0.2)
 plotPopkin(Theta)
 
 ## ------------------------------------------------------------------------
-m <- 10000 # number of loci in simulation
+m <- 10000 # number of loci in simulation (NOTE this is 30x less than in publication!)
 # draw all random Allele Freqs (AFs) and genotypes
 # reuse the previous F,Q
 out <- rbnpsd(Q, F, m)
@@ -127,4 +127,51 @@ pAnc <- out$Pa # ancestral AFs
 
 ## ------------------------------------------------------------------------
 X <- rgeno(B, Q, lowMem=TRUE)
+
+## ------------------------------------------------------------------------
+# define population structure
+# we'll have k=3 subpopulations, each with these sizes:
+k <- 3
+n1 <- 100; n2 <- 50; n3 <- 20
+# here's the labels (for simplicity, list all individuals of S1 first, then S2, then S3)
+labs <- c( rep.int('S1', n1), rep.int('S2', n2), rep.int('S3', n3) )
+# data dimensions infered from labs:
+length(labs) # number of individuals "n"
+length(unique(labs)) # number of subpopulations "k"
+
+# desired admixture matrix ("is" stands for "Independent Subpopulations")
+Q <- qis(labs)
+# got a boolean matrix with a single TRUE value per row
+# (denoting the sole subpopulation from which each individual draws its ancestry)
+head(Q, 2)
+
+# construct the intermediate subpopulation FST vector
+Fst <- 0.2 # the desired final FST
+F <- 1:k # subpopulation FST vector, unnormalized so far
+F <- F/popkin::fst(F)*Fst # normalized to have the desired Fst
+popkin::fst(F) # verify FST for the intermediate subpopulations
+
+# get coancestry of the admixed individuals
+Theta <- coanc(Q,F) # the coancestry matrix
+# before getting FST for individuals, weigh then inversely proportional to subpop sizes
+w <- weightsSubpops(labs) # function from `popkin` package
+# verify Fst for individuals (same as for intermediate subpops for this pop structure)
+fst(Q, F, w)
+
+## ---- fig.width=4, fig.height=1.2, fig.align='center'--------------------
+# visualize the per-subpopulation inbreeding coefficients (FSTs)
+par(mar=c(2.5,2.5,0,0)+0.2, lab=c(2,1,7), mgp=c(1.5,0.5,0)) # tweak margins/etc
+colIS <- brewer.pal(k, "Paired") # indep. subpop. colors
+barplot(F, col=colIS, names.arg=colnames(Q), xlab='Subpopulation', ylab='Inbr')
+
+## ---- fig.width=4, fig.height=1, fig.align='center'----------------------
+# visualize the admixture proportions
+par(mar=c(1,4,0.4,0)+0.2, lab=c(2,2,7)) # tweak margins/etc
+barplot(t(Q), col=colIS, border=NA, space=0, ylab='Admix prop')
+mtext('Individuals', 1)
+
+## ---- fig.width=3.1, fig.height=2, fig.align='center'--------------------
+# Visualize the coancestry matrix using "popkin"!
+par(oma=c(0,1.5,0,3), mar=c(0,0,0.4,0)+0.2) # tweak margins/etc
+plotPopkin(Theta, nPretty=3)
 

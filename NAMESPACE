@@ -3,6 +3,7 @@
 export(coanc)
 export(fst)
 export(q1d)
+export(qis)
 export(rbnpsd)
 export(rgeno)
 export(rpanc)

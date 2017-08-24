@@ -4,7 +4,6 @@
 \name{bnpsd}
 \alias{bnpsd}
 \alias{bnpsd-package}
-\alias{bnpsd-package}
 \title{A package for modeling and simulating an admixed population}
 \description{
 The underlying model is called the BN-PSD admixture model, which combines the Balding-Nichols (BN) allele frequency model for the intermediate subpopulations with the Pritchard-Stephens-Donnelly (PSD) model of individual-specific admixture proportions.
