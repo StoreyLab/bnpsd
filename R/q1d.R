@@ -1,4 +1,4 @@
-## TODO: add other q* scenarios (fixed island, 1D circular, 2D, etc)
+## TODO: add other q* scenarios (1D circular, 2D, etc)
 
 #' Construct admixture proportion matrix for 1D geography
 #'
