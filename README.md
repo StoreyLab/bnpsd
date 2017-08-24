@@ -26,6 +26,7 @@ This is a quick overview of the main `bnpsd` functions.
 
 Define the population structure (in this case for 1D admixture scenario).
 ```R
+library(bnpsd)
 # dimensions of data/model
 m <- 10 # number of loci
 n <- 5 # number of individuals
