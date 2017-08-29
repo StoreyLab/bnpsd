@@ -1,9 +1,9 @@
-## TODO: add other q* scenarios (1D circular, 2D, etc)
+## 1/kappa = sigma^2
 
-#' Construct admixture proportion matrix for 1D geography
+#' Construct admixture proportion matrix for circular 1D geography
 #'
-#' Assumes \eqn{k} intermediate subpopulations placed along a line at locations \eqn{1:k} spread by random walks, then \eqn{n} individuals sampled equally spaced in \eqn{[a,b]} (default \eqn{[0.5, k+0.5]}) draw their admixture proportions relative to the Normal density that models the random walks of each of these intermediate subpopulations.
-#' The spread of the random walks (the \eqn{\sigma} of the Normal densities) is set to \code{sigma} if not missing, otherwise \eqn{\sigma} is found numerically to give the desired bias coefficient \code{s}, the vector \code{F} of \eqn{F_{ST}}{FST}'s for the intermediate subpopulations up to a scalar factor, and the final \eqn{F_{ST}}{FST} of the admixed individuals (see details below).
+#' Assumes \eqn{k} intermediate subpopulations placed along a circumference (the \eqn{[0, 2\pi]} line that wraps around) with even spacing spread by random walks, then \eqn{n} individuals sampled equally spaced in \eqn{[a,b]} (default \eqn{[0, 2\pi]}) draw their admixture proportions relative to the Von Mises density that models the random walks of each of these intermediate subpopulations.
+#' The spread of the random walks (the \eqn{\sigma=1/\sqrt{\kappa}} of the Von Mises densities) is set to \code{sigma} if not missing, otherwise \eqn{\sigma} is found numerically to give the desired bias coefficient \code{s}, the vector \code{F} of \eqn{F_{ST}}{FST}'s for the intermediate subpopulations up to a scalar factor, and the final \eqn{F_{ST}}{FST} of the admixed individuals (see details below).
 #'
 #' When \code{sigma} is missing, the function determines its value using the desired \code{s}, \code{F} up to a scalar factor, and \code{Fst}.
 #' Uniform weights for the final generalized \eqn{F_{ST}}{FST} are assumed.
@@ -12,7 +12,7 @@
 #'
 #' @param n Number of individuals
 #' @param k Number of intermediate subpopulations
-#' @param sigma Spread of intermediate subpopulations (standard deviation of normal densities)
+#' @param sigma Spread of intermediate subpopulations (approximate standard deviation of Von Mises densities, see above)
 #' @param a Location of first individual
 #' @param b Location of last individual
 #'
@@ -28,38 +28,41 @@
 #'
 #' @examples
 #' ## admixture matrix for 1000 individuals drawing alleles from 10 subpops
-#' ## and a spread of 2 standard deviations along the 1D geography
-#' Q <- q1d(n=1000, k=10, sigma=2)
+#' ## and a spread of about 2 standard deviations along the circular 1D geography
+#' Q <- q1dc(n=1000, k=10, sigma=2)
 #'
 #' ## a similar model but with a bias coefficient "s" of exactly 1/2
 #' k <- 10
 #' F <- 1:k # Fst vector for intermediate subpops, up to a factor (will be rescaled below)
 #' Fst <- 0.1 # desired final Fst of admixed individuals
-#' obj <- q1d(n=1000, k=k, s=0.5, F=F, Fst=Fst)
+#' obj <- q1dc(n=1000, k=k, s=0.5, F=F, Fst=Fst)
 #' ## in this case return value is a named list with three items:
 #' Q <- obj$Q # admixture proportions
 #' F <- obj$F # rescaled Fst vector for intermediate subpops
 #' sigma <- obj$sigma # and the sigma that gives the desired s and final Fst
 #'
 #' @export
-q1d <- function(n, k, sigma, a=0.5, b=k+0.5, s, F, Fst, interval=c(0.1,10), tol=.Machine$double.eps) {
+q1dc <- function(n, k, sigma, a=0, b=2*pi, s, F, Fst, interval=c(0.1,10), tol=.Machine$double.eps) {
+    
     ## figure out if we need the more complicated algorithm...
     sigmaMissing <- missing(sigma) # remember after it was set
     if (sigmaMissing) { ## this triggers s version
-        if (missing(s)) stop('Fatal in q1d: s is required when sigma is missing!')
-        if (missing(F)) stop('Fatal in q1d: F is required when sigma is missing!')
-        if (missing(Fst)) stop('Fatal in q1d: Fst is required when sigma is missing!')
-        sigma <- biasCoeffSolveParam(s, F, n, q1d, interval, tol)
+        if (missing(s)) stop('Fatal in q1dc: s is required when sigma is missing!')
+        if (missing(F)) stop('Fatal in q1dc: F is required when sigma is missing!')
+        if (missing(Fst)) stop('Fatal in q1dc: Fst is required when sigma is missing!')
+        sigma <- biasCoeffSolveParam(s, F, n, q1dc, interval, tol)
     }
     
     ## the x-coordinates of the n individuals based on [a,b] limits
-    xs <- a + (0:(n-1))/(n-1)*(b-a)
+    xs <- a + (0:(n-1))/n*(b-a)
+    ## and subpopulations (same deal, except fixed [0,2*pi] range)
+    mus <- (0:(k-1))/k*2*pi
     
     ## construct the coefficients of each person now!
     Q <- matrix(nrow=n, ncol=k) # dimensions match that of makeQ
     for (i in 1:n) {
         ## collect the density values for each intermediate subpopulation at individual i's position
-        Q[i,] <- stats::dnorm(xs[i], mean=1:k, sd=sigma)
+        Q[i,] <- dvonmises(xs[i], mu=mus, sigma=sigma)
     }
     ## normalize to have rows/coefficients sum to 1!
     Q <- Q/rowSums(Q) # return!
@@ -72,3 +75,11 @@ q1d <- function(n, k, sigma, a=0.5, b=k+0.5, s, F, Fst, interval=c(0.1,10), tol=
     }
 }
 
+dvonmises <- function (x, mu, sigma) {
+    ## fairly bare-bones implementation of this density
+    ## borrowed "expon.scaled" trick from R package "circular", though I'm not sure it's needed in my setting
+    ## Didn't just use "circular" because it reqs length(mu)==1 (I need vector mu's; package is too bloated for my needs anyway)
+    ## though my code assumes length(sigma)==1, this is not tested for here or elsewhere for maximum flexibility
+    kappa <- 1/(sigma^2) # convert to usual von Mises notation of kappa
+    (exp(cos(x - mu) - 1))^kappa / (2 * pi * besselI(kappa, 0, expon.scaled = TRUE))
+}

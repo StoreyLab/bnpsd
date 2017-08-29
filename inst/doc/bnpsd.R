@@ -6,7 +6,7 @@ library(popkin) # for visualizing coancestry matrix with plotPopkin
 library(bnpsd)
 
 # dimensions of data/model
-n <- 1000 # number of individuals
+n <- 100 # number of individuals (NOTE this is 10x less than in publication!)
 k <- 10 # number of intermediate subpops
 
 # define population structure
@@ -127,6 +127,44 @@ pAnc <- out$Pa # ancestral AFs
 
 ## ------------------------------------------------------------------------
 X <- rgeno(B, Q, lowMem=TRUE)
+
+## ------------------------------------------------------------------------
+# reuse earlier (n,k) dimensions
+n <- 100 # number of individuals
+k <- 10 # number of intermediate subpops
+
+# define population structure
+F <- 1:k # subpopulation FST vector, up to a scalar
+s <- 0.5 # desired bias coefficient
+Fst <- 0.1 # desired FST for the admixed individuals
+obj <- q1dc(n, k, s=s, F=F, Fst=Fst) # admixture proportions from *circular* 1D geography
+Q <- obj$Q
+F <- obj$F
+
+# get pop structure parameters of the admixed individuals
+Theta <- coanc(Q,F) # the coancestry matrix
+# verify that we got the desired Fst!
+fst(Q,F)
+
+# verify that we got the desired s too!
+mean(Theta)/Fst
+
+## ---- fig.width=4, fig.height=1.2, fig.align='center'--------------------
+# visualize the per-subpopulation inbreeding coefficients (FSTs)
+par(mar=c(2.5,2.5,0.3,0)+0.2, lab=c(2,1,7), mgp=c(1.5,0.5,0)) # tweak margins/etc
+colIS <- brewer.pal(k, "Paired") # indep. subpop. colors
+barplot(F, col=colIS, names.arg=colnames(Q), xlab='Subpopulation', ylab='Inbr')
+
+## ---- fig.width=4, fig.height=1, fig.align='center'----------------------
+# visualize the admixture proportions
+par(mar=c(1,4,0.4,0)+0.2, lab=c(2,2,7)) # tweak margins/etc
+barplot(t(Q), col=colIS, border=NA, space=0, ylab='Admix prop')
+mtext('Individuals', 1)
+
+## ---- fig.width=3.1, fig.height=2, fig.align='center'--------------------
+# Visualize the coancestry matrix using "popkin"!
+par(oma=c(0,1.5,0,3), mar=c(0,0,0.4,0)+0.2) # tweak margins/etc
+plotPopkin(Theta, nPretty=3)
 
 ## ------------------------------------------------------------------------
 # define population structure

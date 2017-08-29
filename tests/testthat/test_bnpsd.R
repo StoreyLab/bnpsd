@@ -54,7 +54,30 @@ test_that("fst works in toy cases", {
     fst1 <- mean(diag(Q %*% F %*% t(Q))) # the Fst we expect for this setup (slower but more explicit version)
     fst2 <- fst(Q, F)
     expect_equal(fst1, fst2)
-}) 
+})
+
+test_that("biasCoeff agrees with explicitly calculated bias coeff s", {
+    n <- 5
+    k <- 2
+    sigma <- 1
+    Q <- q1d(n, k, sigma)
+    F <- 1:k # scale doesn't matter right now...
+    Theta <- coanc(Q, F) # in wrong scale but meh
+    sWant <- mean(Theta)/mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
+    s <- biasCoeff(Q, F) # calculation to compare to
+    expect_equal(s, sWant)
+    expect_true(s > 0) # other obvious properties...
+    expect_true(s <= 1)
+
+    ## repeat with non-uniform weights...
+    w <- runif(n) # random weights for given number of individuals
+    w <- w/sum(w) # normalize to add up to 1! # NOTE: should check sum(w)!= 0, meh...
+    sWant <- drop(w %*% Theta %*% w)/drop( diag(Theta) %*% w ) # this is the correct bias coeff, with uniform weights
+    s <- biasCoeff(Q, F, w) # calculation to compare to
+    expect_equal(s, sWant)
+    expect_true(s > 0) # other obvious properties...
+    expect_true(s <= 1)
+})
 
 test_that("qis returns valid admixture coefficients", {
     labs <- c(1,2,2,3,3,3,4,4,4,4)
@@ -104,7 +127,7 @@ test_that("qis returns valid admixture coefficients", {
 })
 
 test_that("q1d returns valid admixture coefficients", {
-    n <- 5
+    n <- 10
     k <- 2
     sigma <- 1
     Q <- q1d(n, k, sigma)
@@ -113,30 +136,63 @@ test_that("q1d returns valid admixture coefficients", {
     expect_true(all(Q >= 0)) # all are non-negative
     expect_true(all(Q <= 1)) # all are smaller or equal than 1
     expect_equal(rowSums(Q), rep.int(1,n)) # rows sum to 1, vector length n
+
+    ## test s version
+    s <- 0.5
+    F <- 1:k # scale doesn't matter right now...
+    Fst <- 0.1
+    obj <- q1d(n, k, s=s, F=F, Fst=Fst)
+    Q <- obj$Q # returns many things in this case, get Q here
+    expect_equal(nrow(Q), n) # n rows
+    expect_equal(ncol(Q), k) # k columns
+    expect_true(all(Q >= 0)) # all are non-negative
+    expect_true(all(Q <= 1)) # all are smaller or equal than 1
+    expect_equal(rowSums(Q), rep.int(1,n)) # rows sum to 1, vector length n
 })
 
-test_that("q1d_sigma2s agrees with explicitly calculated bias coeff s", {
-    n <- 5
+test_that("q1dc returns valid admixture coefficients", {
+    n <- 10
     k <- 2
     sigma <- 1
-    Q <- q1d(n, k, sigma)
+    Q <- q1dc(n, k, sigma)
+    expect_equal(nrow(Q), n) # n rows
+    expect_equal(ncol(Q), k) # k columns
+    expect_true(all(Q >= 0)) # all are non-negative
+    expect_true(all(Q <= 1)) # all are smaller or equal than 1
+    expect_equal(rowSums(Q), rep.int(1,n)) # rows sum to 1, vector length n
+
+    ## test s version
+    s <- 0.5
     F <- 1:k # scale doesn't matter right now...
-    Theta <- coanc(Q, F) # in wrong scale but meh
-    sWant <- mean(Theta)/mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
-    s <- q1d_sigma2s(sigma, F, n) # calculation to compare to
-    expect_equal(s, sWant)
-    expect_true(s > 0) # other obvious properties...
-    expect_true(s <= 1)
+    Fst <- 0.1
+    obj <- q1dc(n, k, s=s, F=F, Fst=Fst)
+    Q <- obj$Q # returns many things in this case, get Q here
+    expect_equal(nrow(Q), n) # n rows
+    expect_equal(ncol(Q), k) # k columns
+    expect_true(all(Q >= 0)) # all are non-negative
+    expect_true(all(Q <= 1)) # all are smaller or equal than 1
+    expect_equal(rowSums(Q), rep.int(1,n)) # rows sum to 1, vector length n
 })
 
-test_that("q1d_s2sigma agrees with reverse func", {
+test_that("biasCoeffSolveParam agrees with reverse func", {
     n <- 1000
     F <- c(0.1,0.2,0.3)
     k <- length(F)
     sWant <- 0.5
-    sigma <- q1d_s2sigma(s=sWant, F=F, n=n) # get sigma
+
+    ## test with q1d
+    sigma <- biasCoeffSolveParam(s=sWant, F=F, n=n, q1d) # get sigma
     ## construct everything and verify s == sWant
     Q <- q1d(n, k, sigma) # now get Q from there
+    Theta <- coanc(Q, F)
+    s <- mean(Theta)/mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
+    expect_equal(s, sWant)
+    ## since we set 0<sWant<1, nothing else to test
+
+    ## test with q1dc
+    sigma <- biasCoeffSolveParam(s=sWant, F=F, n=n, q1dc) # get sigma
+    ## construct everything and verify s == sWant
+    Q <- q1dc(n, k, sigma) # now get Q from there
     Theta <- coanc(Q, F)
     s <- mean(Theta)/mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
     expect_equal(s, sWant)
