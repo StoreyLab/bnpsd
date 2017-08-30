@@ -51,15 +51,19 @@ q1d <- function(n, k, sigma, a=0.5, b=k+0.5, s, F, Fst, interval=c(0.1,10), tol=
         if (missing(Fst)) stop('Fatal in q1d: Fst is required when sigma is missing!')
         sigma <- biasCoeffSolveParam(s, F, n, q1d, interval, tol)
     }
+    sigma2 <- -2*sigma^2 # square once for loop below (plus other Normal constants)
     
     ## the x-coordinates of the n individuals based on [a,b] limits
     xs <- a + (0:(n-1))/(n-1)*(b-a)
+    ## and subpopulations (same deal, except fixed [1,k] range)
+    mus <- 1:k
     
     ## construct the coefficients of each person now!
     Q <- matrix(nrow=n, ncol=k) # dimensions match that of makeQ
     for (i in 1:n) {
         ## collect the density values for each intermediate subpopulation at individual i's position
-        Q[i,] <- stats::dnorm(xs[i], mean=1:k, sd=sigma)
+        ## line implements super fast Normal without constant factors (which only involve constant sigma)
+        Q[i,] <- exp( (xs[i] - mus)^2 / sigma2 )
     }
     ## normalize to have rows/coefficients sum to 1!
     Q <- Q/rowSums(Q) # return!

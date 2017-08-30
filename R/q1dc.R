@@ -52,6 +52,7 @@ q1dc <- function(n, k, sigma, a=0, b=2*pi, s, F, Fst, interval=c(0.1,10), tol=.M
         if (missing(Fst)) stop('Fatal in q1dc: Fst is required when sigma is missing!')
         sigma <- biasCoeffSolveParam(s, F, n, q1dc, interval, tol)
     }
+    sigma2 <- sigma^2 # square once for loop below
     
     ## the x-coordinates of the n individuals based on [a,b] limits
     xs <- a + (0:(n-1))/n*(b-a)
@@ -62,7 +63,8 @@ q1dc <- function(n, k, sigma, a=0, b=2*pi, s, F, Fst, interval=c(0.1,10), tol=.M
     Q <- matrix(nrow=n, ncol=k) # dimensions match that of makeQ
     for (i in 1:n) {
         ## collect the density values for each intermediate subpopulation at individual i's position
-        Q[i,] <- dvonmises(xs[i], mu=mus, sigma=sigma)
+        ## line implements super fast Von Mises without constant factors (which only involve constant sigma)
+        Q[i,] <- exp( cos(xs[i] - mus) / sigma2 )
     }
     ## normalize to have rows/coefficients sum to 1!
     Q <- Q/rowSums(Q) # return!
@@ -73,13 +75,4 @@ q1dc <- function(n, k, sigma, a=0, b=2*pi, s, F, Fst, interval=c(0.1,10), tol=.M
     } else {
         return(Q) # in direct case, always return Q
     }
-}
-
-dvonmises <- function (x, mu, sigma) {
-    ## fairly bare-bones implementation of this density
-    ## borrowed "expon.scaled" trick from R package "circular", though I'm not sure it's needed in my setting
-    ## Didn't just use "circular" because it reqs length(mu)==1 (I need vector mu's; package is too bloated for my needs anyway)
-    ## though my code assumes length(sigma)==1, this is not tested for here or elsewhere for maximum flexibility
-    kappa <- 1/(sigma^2) # convert to usual von Mises notation of kappa
-    (exp(cos(x - mu) - 1))^kappa / (2 * pi * besselI(kappa, 0, expon.scaled = TRUE))
 }
