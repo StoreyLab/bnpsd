@@ -14,10 +14,8 @@ You can install the package from the GitHub repository using `devtools`:
 ```R
 install.packages("devtools") # if needed
 library(devtools)
-install_github('StoreyLab/alexviiia/fst/software/bnpsd')
+install_github('StoreyLab/bnpsd')
 ```
-
-While the repository remains private to Storey Lab members, install [following these instructions](https://github.com/StoreyLab/misc/blob/master/github.md).
 
 Synopsis of commands
 ===
@@ -63,7 +61,7 @@ X <- rgeno(P) # "geno"types
 More details
 ===
 
-Please see the [bnpsd vignette](https://github.com/StoreyLab/alexviiia/blob/master/fst/software/bnpsd/inst/doc/bnpsd.pdf) for a description of the key parameters and more detailed examples.
+Please see the [bnpsd vignette](https://github.com/StoreyLab/bnpsd/raw/master/inst/doc/bnpsd.pdf) for a description of the key parameters and more detailed examples.
 
 Citations
 ===
