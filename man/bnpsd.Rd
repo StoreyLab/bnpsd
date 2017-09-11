@@ -45,7 +45,7 @@ X <- rgeno(P) # "geno"types
 
 Authors:
 \itemize{
-  \item John Storey \email{jstorey@princeton.edu}
+  \item John D. Storey \email{jstorey@princeton.edu}
 }
 
 }
