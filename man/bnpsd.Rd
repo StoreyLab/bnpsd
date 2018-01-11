@@ -40,6 +40,14 @@ P <- rpiaf(B, Q) # "IAF"s (individual-specific AFs)
 X <- rgeno(P) # "geno"types
 
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/StoreyLab/bnpsd/}
+  \item Report bugs at \url{https://github.com/StoreyLab/bnpsd/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Alejandro Ochoa \email{ochoa@princeton.edu}
 
