@@ -5,12 +5,11 @@ date: "`r Sys.Date()`"
 output:
   pdf_document:
     number_sections: true
-#  - rmarkdown::html_vignette
 bibliography: bnpsd.bib
 vignette: >
-  %\VignetteIndexEntry{Simulate Genotypes From the BN-PSD Admixture Model}
+  %\VignetteIndexEntry{Simulate Genotypes from the BN-PSD Admixture Model}
   %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+  %\VignetteEncoding{UTF-8}
 ---
 
 \newcommand{\Fst}{F_{\text{ST}}}
