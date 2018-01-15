@@ -29,8 +29,20 @@ vigcomp:
 
 .PHONY: man
 
+.PHONY: build
+
 man:
 	cd ..; if [ -f bnpsd.pdf ]; then rm bnpsd.pdf; fi; R CMD Rd2pdf bnpsd
 
 install:
 	R -e 'devtools::install()'
+
+### required steps (first time only):
+# dnf install aspell aspell-en valgrind
+# install.packages(c('rversions', 'hunspell'))
+### can't run this way (must be interactive session), but need this trick:
+# release:
+# 	R -e 'devtools::release(args="--no-build-vignettes")'
+
+### after building, ran this separately:
+# R CMD check --use-valgrind bnpsd_1.0.1.tar.gz 

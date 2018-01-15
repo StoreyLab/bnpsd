@@ -3,6 +3,6 @@
 \.git
 \.gitignore
 ^README\.md$
-^NEWS\.md$
-Makefile
+^Makefile$
+^cran-comments\.md$
 ^\.travis\.yml$
