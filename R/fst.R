@@ -1,7 +1,7 @@
 #' Calculate FST for the admixed individuals
 #'
 #' Given the admixture proportion matrix \eqn{Q} for \eqn{n} individuals and \eqn{k} intermediate subpopulations, the vector of intermediate inbreeding coefficients \eqn{F} (per-subpopulation \eqn{F_{ST}}{FST}'s), and weights for individuals, this function returns the \eqn{F_{ST}}{FST} of the admixed individuals.
-#' This \eqn{F_{ST}}{FST} equals the weighted mean of the diagonal of the coancestr matrix (see \code{\link{coanc}}).
+#' This \eqn{F_{ST}}{FST} equals the weighted mean of the diagonal of the coancestry matrix (see \code{\link{coanc}}).
 #' 
 #' @param Q The \eqn{n \times k}{n-by-k} admixture proportion matrix
 #' @param F The length-\eqn{k} vector of subpopulation inbreeding coefficients
