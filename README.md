@@ -9,8 +9,12 @@ Note that simulated loci are drawn independently (in linkage equilibrium).
 Installation
 ===
 
-You can install the package from the GitHub repository using `devtools`:
+The stable version of the package is now on CRAN and can be installed using
+```R
+install.packages("bnpsd")
+```
 
+The current development version can be installed from the GitHub repository using `devtools`:
 ```R
 install.packages("devtools") # if needed
 library(devtools)

@@ -6,3 +6,7 @@
 
 * Minor non-code changes for first CRAN submission.
 
+# 2018-02-01 - bnpsd 1.0.1.9000
+
+* README.md now contains instructions for installing from CRAN as well as from GitHub.
+
