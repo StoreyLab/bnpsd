@@ -4,8 +4,8 @@
 \alias{rbnpsd}
 \title{Simulate random allele frequencies and genotypes from the BN-PSD admixture model}
 \usage{
-rbnpsd(Q, F, m, wantX = TRUE, wantP = TRUE, wantB = TRUE, wantPa = TRUE,
-  lowMem = FALSE, verbose = FALSE)
+rbnpsd(Q, F, m, wantX = TRUE, wantP = TRUE, wantB = TRUE,
+  wantPa = TRUE, lowMem = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{Q}{The \eqn{n \times k}{n-by-k} matrix of admixture proportions}

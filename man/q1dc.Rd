@@ -4,8 +4,8 @@
 \alias{q1dc}
 \title{Construct admixture proportion matrix for circular 1D geography}
 \usage{
-q1dc(n, k, sigma, a = 0, b = 2 * pi, s, F, Fst, interval = c(0.1, 10),
-  tol = .Machine$double.eps)
+q1dc(n, k, sigma, a = 0, b = 2 * pi, s, F, Fst, interval = c(0.1,
+  10), tol = .Machine$double.eps)
 }
 \arguments{
 \item{n}{Number of individuals}
