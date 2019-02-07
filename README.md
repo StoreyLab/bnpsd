@@ -65,7 +65,7 @@ X <- rgeno(P) # "geno"types
 More details
 ===
 
-Please see the [bnpsd vignette](https://github.com/StoreyLab/bnpsd/raw/master/inst/doc/bnpsd.pdf) for a description of the key parameters and more detailed examples.
+Please see the bnpsd vignette in R for a description of the key parameters and more detailed examples.
 
 Citations
 ===
