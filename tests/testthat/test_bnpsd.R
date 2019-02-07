@@ -2,6 +2,23 @@ context('bnpsd')
 
 ## start with lower-level/internal tests, more informative that higher-level function errors
 
+test_that("fixed_loci works in toy cases", {
+    # here's a toy matrix
+    X <- matrix(
+           data=c(
+                  2, 2, NA, # fixed locus (with one missing element)
+                  0, NA, 0, # another fixed locus, for opposite allele
+                  1, 1, 1, # NOT fixed (heterozygotes are not considered fixed)
+                  0, 1, 2, # a completely variable locus
+                  NA, NA, NA # completely missing locus (will be treated as fixed)
+                 ),
+           ncol=3, byrow=TRUE)
+    # test that we get the desired values
+    expect_equal(
+      fixed_loci(X), c(TRUE, TRUE, FALSE, FALSE, TRUE)
+    )
+})
+
 test_that("coanc works in toy cases", {
     Q <- diag(c(1,1)) # an IS model with two subpops
     F <- c(0.1, 0.3)
@@ -290,6 +307,40 @@ test_that("rbnpsd works well", {
     expect_equal(nrow(X), m)
     expect_equal(ncol(X), n)
     expect_true(all(X %in% c(0,1,2))) # only three values allowed!
+    ## test P
+    expect_equal(nrow(P), m)
+    expect_equal(ncol(P), n)
+    expect_true(all(P >= 0)) # all are non-negative
+    expect_true(all(P <= 1)) # all are smaller or equal than 1
+    ## test B
+    expect_equal(nrow(B), m)
+    expect_equal(ncol(B), k)
+    expect_true(all(B >= 0)) # all are non-negative
+    expect_true(all(B <= 1)) # all are smaller or equal than 1
+    ## test pAnc
+    expect_equal(length(pAnc), m)
+    expect_true(all(pAnc >= 0)) # all are non-negative
+    expect_true(all(pAnc <= 1)) # all are smaller or equal than 1
+})
+
+test_that("rbnpsd noFixed=TRUE works well", {
+    m <- 1000
+    F <- c(0.1,0.2,0.3)
+    k <- length(F)
+    Q <- diag(rep.int(1,k)) # island model for test...
+    Q <- rbind(Q,Q,Q) # repeat so we have multiple people per island
+    n <- nrow(Q) # number of individuals (3*k)
+    ## run rbnpsd
+    out <- rbnpsd(Q, F, m, noFixed=TRUE)
+    X <- out$X # genotypes
+    P <- out$P # IAFs
+    B <- out$B # Intermediate AFs
+    pAnc <- out$Pa # Ancestral AFs
+    ## test X
+    expect_equal(nrow(X), m)
+    expect_equal(ncol(X), n)
+    expect_true(all(X %in% c(0,1,2))) # only three values allowed!
+    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
     ## test P
     expect_equal(nrow(P), m)
     expect_equal(ncol(P), n)

@@ -5,7 +5,7 @@
 \title{Simulate random allele frequencies and genotypes from the BN-PSD admixture model}
 \usage{
 rbnpsd(Q, F, m, wantX = TRUE, wantP = TRUE, wantB = TRUE,
-  wantPa = TRUE, lowMem = FALSE, verbose = FALSE)
+  wantPa = TRUE, lowMem = FALSE, verbose = FALSE, noFixed = FALSE)
 }
 \arguments{
 \item{Q}{The \eqn{n \times k}{n-by-k} matrix of admixture proportions}
@@ -25,6 +25,8 @@ rbnpsd(Q, F, m, wantX = TRUE, wantP = TRUE, wantB = TRUE,
 \item{lowMem}{If TRUE, uses a low-memory algorithm to raw genotypes without storing or returning the corresponding IAF matrix.}
 
 \item{verbose}{If TRUE, prints messages for every stage in the algorithm}
+
+\item{noFixed}{If TRUE, returned matrix will not include any fixed loci (loci that happened to be fixed are drawn again, starting from the ancestral allele frequency, and checked iteratively until no fixed loci remain, so that the final number of loci is exactly \eqn{m} as specified).}
 }
 \value{
 A named list that includes the following random matrices: X=genotypes, P=IAFs, B=intermediate pop allele freqs, Pa=vector of ancestral allele frequencies.  Items may be omitted depending on the values of wantX, wantP, wantB, or wantPa above.

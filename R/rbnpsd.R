@@ -13,6 +13,7 @@
 #' @param wantPa If TRUE (default), includes the random ancestral allele freq matrix in the return list
 #' @param lowMem If TRUE, uses a low-memory algorithm to raw genotypes without storing or returning the corresponding IAF matrix.
 #' @param verbose If TRUE, prints messages for every stage in the algorithm
+#' @param noFixed If TRUE, returned matrix will not include any fixed loci (loci that happened to be fixed are drawn again, starting from the ancestral allele frequency, and checked iteratively until no fixed loci remain, so that the final number of loci is exactly \eqn{m} as specified).
 #'
 #' @return A named list that includes the following random matrices: X=genotypes, P=IAFs, B=intermediate pop allele freqs, Pa=vector of ancestral allele frequencies.  Items may be omitted depending on the values of wantX, wantP, wantB, or wantPa above.
 #'
@@ -35,7 +36,7 @@
 #' pAnc <- out$Pa # Ancestral AFs
 #' 
 #' @export
-rbnpsd <- function(Q, F, m, wantX=TRUE, wantP=TRUE, wantB=TRUE, wantPa=TRUE, lowMem=FALSE, verbose=FALSE) {
+rbnpsd <- function(Q, F, m, wantX=TRUE, wantP=TRUE, wantB=TRUE, wantPa=TRUE, lowMem=FALSE, verbose=FALSE, noFixed=FALSE) {
     ## simulation of Pritchard-Stephens-Donnelly "admixture" model for allele frequencies/genotypes.
     
     ## always ask for an admixture matrix (no default)
@@ -74,6 +75,23 @@ rbnpsd <- function(Q, F, m, wantX=TRUE, wantP=TRUE, wantB=TRUE, wantPa=TRUE, low
         if (wantX) {
             if (verbose) message('rbnpsd: drawing X')
             X <- rgeno(P)
+        }
+    }
+    
+    if (noFixed && wantX) {
+        # check for fixed loci, draw them again if needed
+        # Note this only applies to wantX==TRUE, since P and B are continuous and therefore practically never truly fixed
+        fixedLoci <- fixed_loci(X) # boolean vector identifies fixed loci
+        m2 <- sum(fixedLoci) # number of cases
+        if (m2 > 0) {
+            # call self with desired number of loci, all the same parameters otherwise
+            # note that since this is also called asking for no fixed loci, it will work recursively within itself and return when all loci desired are not fixed!
+            obj <- rbnpsd(Q, F, m2, wantX=wantX, wantP=wantP, wantB=wantB, wantPa=wantPa, lowMem=lowMem, verbose=verbose, noFixed=noFixed)
+            # overwrite fixed loci with redrawn polymorphic data
+            X[fixedLoci,] <- obj$X # guaranteed to be there
+            if (wantP && !lowMem) P[fixedLoci,] <- obj$P
+            if (wantB) B[fixedLoci,] <- obj$B
+            if (wantPa) Pa[fixedLoci] <- obj$Pa
         }
     }
     
