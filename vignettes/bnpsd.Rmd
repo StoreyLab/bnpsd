@@ -14,7 +14,6 @@ vignette: >
 
 \newcommand{\Fst}{F_{\text{ST}}}
 \newcommand{\ft}[1][j]{f_{#1}^T}
-\newcommand{\kt}[1][k]{\varphi_{j#1}^T} % total kinship coefficient
 
 # Introduction
 
