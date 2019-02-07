@@ -46,6 +46,40 @@ test_that("coanc works in toy cases", {
     expect_equal(Theta, ThetaExp)
 }) 
 
+test_that("coanc_to_kinship works in toy cases", {
+    Q <- diag(c(1,1)) # an IS model with two subpops
+    F <- c(0.1, 0.3)
+    PhiExp <- diag( (1+F)/2 ) # the Phi we expect for this setup
+    Theta <- coanc(Q, F)
+    Phi <- coanc_to_kinship(Theta)
+    expect_equal(Phi, PhiExp)
+
+    ## same Q, scalar F
+    F <- 0.2
+    K <- (1+F)/2 # transform at this stage
+    PhiExp <- diag(c(K,K)) # the Phi we expect for this setup
+    Theta <- coanc(Q, F)
+    Phi <- coanc_to_kinship(Theta)
+    expect_equal(Phi, PhiExp)
+
+    ## same Q, matrix F
+    Fv <- c(0.1,0.4) # vector version
+    F <- diag(Fv) # matrix version
+    PhiExp <- diag((1+Fv)/2)
+    Theta <- coanc(Q, F)
+    Phi <- coanc_to_kinship(Theta)
+    expect_equal(Phi, PhiExp)
+
+    ## most complex case, just a general math check
+    Q <- matrix(c(0.7, 0.3, 0.2, 0.8), nrow=2, byrow=TRUE)
+    F <- matrix(c(0.3, 0.1, 0.1, 0.3), nrow=2, byrow=TRUE)
+    PhiExp <- Q %*% F %*% t(Q) # the Theta we expect for this setup (slower but more explicit version)
+    diag(PhiExp) <- (1 + diag(PhiExp))/2 # explicit transformation to kinship
+    Theta <- coanc(Q, F)
+    Phi <- coanc_to_kinship(Theta)
+    expect_equal(Phi, PhiExp)
+}) 
+
 test_that("fst works in toy cases", {
     Q <- diag(c(1,1)) # an IS model with two subpops
     F <- c(0.1, 0.3)

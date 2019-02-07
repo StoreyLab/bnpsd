@@ -1,6 +1,6 @@
 Package: bnpsd
 Title: Simulate Genotypes from the BN-PSD Admixture Model
-Version: 1.0.2.9000
+Version: 1.0.3.9000
 Authors@R: c(
 	   person("Alejandro", "Ochoa", email = "alejandro.ochoa@duke.edu", role = c("aut", "cre")),
 	   person("John D.", "Storey", email = "jstorey@princeton.edu", role = c("aut"))
