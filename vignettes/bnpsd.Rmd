@@ -21,7 +21,7 @@ The `bnpsd` package simulates the genotypes of an admixed population.
 In the PSD model [@pritchard_inference_2000], admixed individuals draw their alleles with individual-specific probabilities (admixture proportions) from $K$ intermediate subpopulations.
 We impose the BN model [@balding_method_1995] to the intermediate subpopulation allele frequency, which thus evolve independently with subpopulation-specific inbreeding coefficients ($\Fst$ values) from a common ancestral population $T$.
 The kinship coefficients and generalized $\Fst$ of the admixed individuals were derived in recent work [@Ochoa083915].
-A simulated admixed population was used to benchmark kinship and $\Fst$ estimators in the accompaning paper [@Ochoa083923].
+A simulated admixed population was used to benchmark kinship and $\Fst$ estimators in the accompanying paper [@Ochoa083923].
 Here we briefly summarize the notation and intuition behind the key parameters (see [@Ochoa083915] for precise definitions).
 
 ## The BN-PSD population structure
@@ -237,7 +237,7 @@ Xint <- rgeno(B)
 ## Low-memory genotype simulation algorithm
 
 If you desire to simulate a very large number of individuals ($n$) and loci ($m$), you might run out of memory while running `rbnpsd`.
-Memory consumption is reduced by passing the `lowMem=TRUE` option to `rbnpsd`, which draws the genotypes `X` directly fromm the subpopulation AF matrix `B` and the admixture coefficients `Q`, without storing the whole IAF matrix `P` at any given time.
+Memory consumption is reduced by passing the `lowMem=TRUE` option to `rbnpsd`, which draws the genotypes `X` directly from the subpopulation AF matrix `B` and the admixture coefficients `Q`, without storing the whole IAF matrix `P` at any given time.
 However, this algorithm is much slower than the default one (`lowMem=FALSE`).
 
 ```{r}
