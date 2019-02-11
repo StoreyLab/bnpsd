@@ -4,7 +4,7 @@
 #' \eqn{\Theta = (\theta_{jk})} be the coancestry matrix and
 #' \eqn{\Phi = (\varphi_{jk})} be the kinship matrix.
 #' These matrices agree off-diagonal, but the diagonal gets transformed as
-#' \deqn{\phi_{jj} = \fracc{1 + \theta_{jj}}{2}.}
+#' \deqn{\phi_{jj} = \frac{1 + \theta_{jj}}{2}.}
 #' Below \eqn{n} is the number of individuals.
 #'
 #' This function starts by copying the input matrix, so it preserves column and row names.
