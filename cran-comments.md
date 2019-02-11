@@ -1,23 +1,21 @@
 ## Test environments
-* local x86_64-redhat-linux-gnu install, R 3.4.3
-* win-builder (devel and release)
+* local: x86_64-redhat-linux-gnu R 3.5.2
+* win-builder devel: x86_64-w64-mingw32 R Under development (unstable) (2019-02-07 r76069)
+* win-builder release: x86_64-w64-mingw32 R 3.5.2
 
 ## R CMD check results
 There were no ERRORs or WARNINGs. 
 
 There was 1 NOTE:
 
-* New submission
+* Maintainer: 'Alejandro Ochoa <alejandro.ochoa@duke.edu>'
 
-* Possibly mis-spelled words in DESCRIPTION:
-    BN (2:36, 8:212, 8:267, 8:477)
-    Donnelly (8:37)
-    FST (8:430)
-    PSD (2:39, 8:47, 8:215, 8:480)
-    Pritchard (8:18)
-    subpopulation (8:407)
+  New maintainer:
+    Alejandro Ochoa <alejandro.ochoa@duke.edu>
+  Old maintainer(s):
+    Alejandro Ochoa <ochoa@princeton.edu>
 
-  These words are all spelled correctly.
+  This change is correct, my email has changed.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.

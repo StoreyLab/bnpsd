@@ -21,3 +21,7 @@ These loci are not polymorphic so they would normally not be considered in analy
 
 * Added function `coanc_to_kinship` to easily obtain kinship matrices from coancestry matrices.
 
+# 2019-02-11 - bnpsd 1.0.4
+
+* Second CRAN submission.
+
