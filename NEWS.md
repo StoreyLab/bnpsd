@@ -25,3 +25,7 @@ These loci are not polymorphic so they would normally not be considered in analy
 
 * Second CRAN submission.
 
+# 2019-02-13 - bnpsd 1.0.4.9000
+
+* Converted the vignette from PDF to HTML
+

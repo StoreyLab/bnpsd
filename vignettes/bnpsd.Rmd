@@ -2,9 +2,7 @@
 title: "Simulate Admixed Populations with `bnpsd`"
 author: "Alejandro Ochoa and John D. Storey"
 date: "`r Sys.Date()`"
-output:
-  pdf_document:
-    number_sections: true
+output: rmarkdown::html_vignette
 bibliography: bnpsd.bib
 vignette: >
   %\VignetteIndexEntry{Simulate Genotypes from the BN-PSD Admixture Model}
@@ -12,8 +10,18 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+<!-- Weird way to include these definitions for HTML Markdown -->
+$$
 \newcommand{\Fst}{F_{\text{ST}}}
 \newcommand{\ft}[1][j]{f_{#1}^T}
+$$
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
 # Introduction
 
