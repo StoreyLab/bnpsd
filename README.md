@@ -18,7 +18,12 @@ The current development version can be installed from the GitHub repository usin
 ```R
 install.packages("devtools") # if needed
 library(devtools)
-install_github('StoreyLab/bnpsd')
+devtools::install_github('StoreyLab/bnpsd', build_opts=c())
+```
+
+You can see the package vignette, which has additional documentation, by typing this into your R session:
+``` r
+vignette('bnpsd')
 ```
 
 Synopsis of commands
