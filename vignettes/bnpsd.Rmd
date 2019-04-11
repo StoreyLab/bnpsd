@@ -102,44 +102,44 @@ k <- 10 # number of intermediate subpops
 F <- 1:k # subpopulation FST vector, up to a scalar
 s <- 0.5 # desired bias coefficient
 Fst <- 0.1 # desired FST for the admixed individuals
-obj <- q1d(n, k, s=s, F=F, Fst=Fst) # admixture proportions from 1D geography
+obj <- q1d(n, k, s = s, F = F, Fst = Fst) # admixture proportions from 1D geography
 Q <- obj$Q
 F <- obj$F
 
 # get pop structure parameters of the admixed individuals
-Theta <- coanc(Q,F) # the coancestry matrix
+Theta <- coanc(Q, F) # the coancestry matrix
 # verify that we got the desired Fst!
-Fst2 <- fst(Q,F)
+Fst2 <- fst(Q, F)
 Fst2
 # this should also equal Fst
 inbr <- diag(Theta)
 popkin::fst(inbr)
 # verify that we got the desired s too!
-s2 <- mean(Theta)/Fst
+s2 <- mean(Theta) / Fst
 s2
 ```
 
-```{r, fig.width=4, fig.height=2, fig.align='center'}
+```{r, fig.width = 4, fig.height = 2, fig.align = 'center'}
 # visualize the per-subpopulation inbreeding coefficients (FSTs)
-par(mar=c(4,4,0,0)+0.2) # shrink default margins
+par(mar = c(4, 4, 0, 0) + 0.2) # shrink default margins
 colIS <- brewer.pal(k, "Paired") # indep. subpop. colors
-barplot(F, col=colIS, names.arg=1:k, ylim=c(0,1),
-	xlab='Subpopulation', ylab='Inbreeding coeff.')
+barplot(F, col = colIS, names.arg = 1:k, ylim = c(0,1),
+	xlab = 'Subpopulation', ylab = 'Inbreeding coeff.')
 ```
 
-```{r, fig.width=6, fig.height=1.5, fig.align='center'}
+```{r, fig.width = 6, fig.height = 1.5, fig.align = 'center'}
 # visualize the admixture proportions
-par(mar=c(1,4,0,0)+0.2) # shrink default margins
-barplot(t(Q), col=colIS, border=NA, space=0, ylab='Admixture prop.')
+par(mar = c(1, 4, 0, 0) + 0.2) # shrink default margins
+barplot(t(Q), col = colIS, border = NA, space = 0, ylab = 'Admixture prop.')
 mtext('Individuals', 1)
 ```
 
-```{r, fig.width=4.2, fig.height=3, fig.align='center'}
+```{r, fig.width = 4.2, fig.height = 3, fig.align = 'center'}
 # Visualize the coancestry matrix using "popkin"!
 # set outer margin for axis labels (left and right are non-zero)
-par(oma=c(0,1.5,0,3))
+par(oma = c(0, 1.5, 0, 3))
 # zero inner margin (plus padding) because we have no individual or subpopulation labels
-par(mar=c(0,0,0,0)+0.2)
+par(mar = c(0, 0, 0, 0) + 0.2)
 # now plot!
 plot_popkin(Theta)
 ```
@@ -160,28 +160,28 @@ B <- out$B # intermediate AFs
 pAnc <- out$Pa # ancestral AFs
 ```
 
-```{r, fig.width=4, fig.height=2, fig.align='center'}
-# inspect distribution of ancestral AFs (~ Uniform(0.01,0.5))
-par(mar=c(4,4,0,0)+0.2) # shrink default margins for these figures
-hist(pAnc, xlab='Ancestral AF', main='', xlim=c(0,1))
+```{r, fig.width = 4, fig.height = 2, fig.align = 'center'}
+# inspect distribution of ancestral AFs (~ Uniform(0.01, 0.5))
+par(mar = c(4, 4, 0, 0) + 0.2) # shrink default margins for these figures
+hist(pAnc, xlab = 'Ancestral AF', main = '', xlim = c(0, 1))
 # distribution of intermediate population AFs
 # (all subpopulations combined)
 # (will be more dispersed toward 0 and 1 than ancestral AFs)
-hist(B, xlab='Intermediate Subpopulation AF', main='', xlim=c(0,1))
+hist(B, xlab = 'Intermediate Subpopulation AF', main = '', xlim = c(0, 1))
 # distribution of IAFs (admixed individuals)
 # (admixture reduces differentiation, so these resemble ancestral AFs a bit more)
-hist(P, xlab='Individual-specific AF', main='', xlim=c(0,1))
+hist(P, xlab = 'Individual-specific AF', main = '', xlim = c(0, 1))
 # genotype distribution of admixed individuals
-barplot(table(X), xlab='Genotypes', ylab='Frequency', col='white')
+barplot(table(X), xlab = 'Genotypes', ylab = 'Frequency', col = 'white')
 ```
 
 Lastly, let's verify that the correlation structure of the genotypes matches the theoretical coancestry matrix we constructed earlier.
 For this we use the `popkin` function of the package with the same name.
 
-```{r, fig.width=6, fig.height=2.8, fig.align='center'}
+```{r, fig.width = 6, fig.height = 2.8, fig.align = 'center'}
 # for best estimates, group individuals into subpopulations using the geography
 # this averages more individuals in estimating the minimum kinship
-subpops <- ceiling( (1:n)/n*k )
+subpops <- ceiling( (1:n) / n * k )
 table(subpops) # got k=10 subpops with 100 individuals each
 # now estimate kinship using popkin
 PhiHat <- popkin(X, subpops)
@@ -190,9 +190,9 @@ ThetaHat <- inbr_diag(PhiHat)
 
 # Visualize the coancestry matrix using "popkin"!
 # set outer margin for axis labels (left and right are non-zero)
-par(oma=c(0,1.5,0,3))
+par(oma = c(0, 1.5, 0, 3))
 # increase inner top margin for panel titles
-par(mar=c(0,0,2.5,0)+0.2)
+par(mar = c(0, 0, 2.5, 0) + 0.2)
 # now plot!
 x <- list(Theta, ThetaHat)
 titles <- c('Truth', 'Estimate')
@@ -222,11 +222,11 @@ X <- rgeno(P) # draw genotypes
 We provide functions for these separate steps to allow for more flexibility.
 For example, the ancestral allele frequencies could be drawn from a Symmetric Beta:
 
-```{r, fig.width=4, fig.height=2, fig.align='center'}
+```{r, fig.width = 4, fig.height = 2, fig.align = 'center'}
 alpha <- 1/2 # this increases rare alleles
 pAnc <- rbeta(m, alpha, alpha)
-par(mar=c(4,4,0,0)+0.2) # shrink default margins for these figures
-hist(pAnc, xlab='Ancestral AF', main='', xlim=c(0,1))
+par(mar = c(4, 4, 0, 0) + 0.2) # shrink default margins for these figures
+hist(pAnc, xlab = 'Ancestral AF', main = '', xlim = c(0, 1))
 ```
 
 You could also draw genotypes from the ancestral population or the intermediate populations:
@@ -245,11 +245,11 @@ Xint <- rgeno(B)
 ## Low-memory genotype simulation algorithm
 
 If you desire to simulate a very large number of individuals ($n$) and loci ($m$), you might run out of memory while running `rbnpsd`.
-Memory consumption is reduced by passing the `lowMem=TRUE` option to `rbnpsd`, which draws the genotypes `X` directly from the subpopulation AF matrix `B` and the admixture coefficients `Q`, without storing the whole IAF matrix `P` at any given time.
-However, this algorithm is much slower than the default one (`lowMem=FALSE`).
+Memory consumption is reduced by passing the `lowMem = TRUE` option to `rbnpsd`, which draws the genotypes `X` directly from the subpopulation AF matrix `B` and the admixture coefficients `Q`, without storing the whole IAF matrix `P` at any given time.
+However, this algorithm is much slower than the default one (`lowMem = FALSE`).
 
 ```{r}
-out <- rbnpsd(Q, F, m, lowMem=TRUE)
+out <- rbnpsd(Q, F, m, lowMem = TRUE)
 X <- out$X # genotypes
 B <- out$B # intermediate AFs
 pAnc <- out$Pa # ancestral AFs
@@ -259,7 +259,7 @@ pAnc <- out$Pa # ancestral AFs
 The same option exists for `rgeno`, which instead of accepting the IAF matrix `P` as input requires both `B` and `Q` as above:
 
 ```{r}
-X <- rgeno(B, Q, lowMem=TRUE)
+X <- rgeno(B, Q, lowMem = TRUE)
 ```
 
 
@@ -291,37 +291,37 @@ k <- 10 # number of intermediate subpops
 F <- 1:k # subpopulation FST vector, up to a scalar
 s <- 0.5 # desired bias coefficient
 Fst <- 0.1 # desired FST for the admixed individuals
-obj <- q1dc(n, k, s=s, F=F, Fst=Fst) # admixture proportions from *circular* 1D geography
+obj <- q1dc(n, k, s = s, F = F, Fst = Fst) # admixture proportions from *circular* 1D geography
 Q <- obj$Q
 F <- obj$F
 
 # get pop structure parameters of the admixed individuals
-Theta <- coanc(Q,F) # the coancestry matrix
+Theta <- coanc(Q, F) # the coancestry matrix
 # verify that we got the desired Fst!
-fst(Q,F)
+fst(Q, F)
 
 # verify that we got the desired s too!
-mean(Theta)/Fst
+mean(Theta) / Fst
 ```
 
-```{r, fig.width=4, fig.height=1.2, fig.align='center'}
+```{r, fig.width = 4, fig.height = 1.2, fig.align = 'center'}
 # visualize the per-subpopulation inbreeding coefficients (FSTs)
-par(mar=c(2.5,2.5,0.3,0)+0.2, lab=c(2,1,7), mgp=c(1.5,0.5,0)) # tweak margins/etc
+par(mar = c(2.5, 2.5, 0.3, 0) + 0.2, lab = c(2, 1, 7), mgp = c(1.5, 0.5, 0)) # tweak margins/etc
 colIS <- brewer.pal(k, "Paired") # indep. subpop. colors
-barplot(F, col=colIS, names.arg=colnames(Q), xlab='Subpopulation', ylab='Inbr')
+barplot(F, col = colIS, names.arg = colnames(Q), xlab = 'Subpopulation', ylab = 'Inbr')
 ```
 
-```{r, fig.width=4, fig.height=1, fig.align='center'}
+```{r, fig.width = 4, fig.height = 1, fig.align = 'center'}
 # visualize the admixture proportions
-par(mar=c(1,4,0.4,0)+0.2, lab=c(2,2,7)) # tweak margins/etc
-barplot(t(Q), col=colIS, border=NA, space=0, ylab='Admix prop')
+par(mar = c(1, 4, 0.4, 0) + 0.2, lab = c(2, 2, 7)) # tweak margins/etc
+barplot(t(Q), col = colIS, border = NA, space = 0, ylab = 'Admix prop')
 mtext('Individuals', 1)
 ```
 
-```{r, fig.width=3.1, fig.height=2, fig.align='center'}
+```{r, fig.width = 3.1, fig.height = 2, fig.align = 'center'}
 # Visualize the coancestry matrix using "popkin"!
-par(oma=c(0,1.5,0,3), mar=c(0,0,0.4,0)+0.2) # tweak margins/etc
-plot_popkin(Theta, leg_n=3)
+par(oma = c(0, 1.5, 0, 3), mar = c(0, 0, 0.4, 0) + 0.2) # tweak margins/etc
+plot_popkin(Theta, leg_n = 3)
 ```
 
 
@@ -334,9 +334,15 @@ The independent subpopulations model, where individuals are actually unadmixed, 
 # define population structure
 # we'll have k=3 subpopulations, each with these sizes:
 k <- 3
-n1 <- 100; n2 <- 50; n3 <- 20
+n1 <- 100
+n2 <- 50
+n3 <- 20
 # here's the labels (for simplicity, list all individuals of S1 first, then S2, then S3)
-labs <- c( rep.int('S1', n1), rep.int('S2', n2), rep.int('S3', n3) )
+labs <- c(
+    rep.int('S1', n1),
+    rep.int('S2', n2),
+    rep.int('S3', n3)
+)
 # data dimensions infered from labs:
 length(labs) # number of individuals "n"
 length(unique(labs)) # number of subpopulations "k"
@@ -350,39 +356,35 @@ head(Q, 2)
 # construct the intermediate subpopulation FST vector
 Fst <- 0.2 # the desired final FST
 F <- 1:k # subpopulation FST vector, unnormalized so far
-F <- F/popkin::fst(F)*Fst # normalized to have the desired Fst
+F <- F / popkin::fst(F) * Fst # normalized to have the desired Fst
 popkin::fst(F) # verify FST for the intermediate subpopulations
 
 # get coancestry of the admixed individuals
-Theta <- coanc(Q,F) # the coancestry matrix
+Theta <- coanc(Q, F) # the coancestry matrix
 # before getting FST for individuals, weigh then inversely proportional to subpop sizes
 w <- weights_subpops(labs) # function from `popkin` package
 # verify Fst for individuals (same as for intermediate subpops for this pop structure)
 fst(Q, F, w)
 ```
 
-```{r, fig.width=4, fig.height=1.2, fig.align='center'}
+```{r, fig.width = 4, fig.height = 1.2, fig.align = 'center'}
 # visualize the per-subpopulation inbreeding coefficients (FSTs)
-par(mar=c(2.5,2.5,0,0)+0.2, lab=c(2,1,7), mgp=c(1.5,0.5,0)) # tweak margins/etc
+par(mar = c(2.5, 2.5, 0, 0) + 0.2, lab = c(2, 1, 7), mgp = c(1.5, 0.5, 0)) # tweak margins/etc
 colIS <- brewer.pal(k, "Paired") # indep. subpop. colors
-barplot(F, col=colIS, names.arg=colnames(Q), xlab='Subpopulation', ylab='Inbr')
+barplot(F, col = colIS, names.arg = colnames(Q), xlab = 'Subpopulation', ylab = 'Inbr')
 ```
 
-```{r, fig.width=4, fig.height=1, fig.align='center'}
+```{r, fig.width = 4, fig.height = 1, fig.align = 'center'}
 # visualize the admixture proportions
-par(mar=c(1,4,0.4,0)+0.2, lab=c(2,2,7)) # tweak margins/etc
-barplot(t(Q), col=colIS, border=NA, space=0, ylab='Admix prop')
+par(mar = c(1, 4, 0.4, 0) + 0.2, lab = c(2, 2, 7)) # tweak margins/etc
+barplot(t(Q), col = colIS, border = NA, space = 0, ylab = 'Admix prop')
 mtext('Individuals', 1)
 ```
 
-```{r, fig.width=3.1, fig.height=2, fig.align='center'}
+```{r, fig.width = 3.1, fig.height = 2, fig.align = 'center'}
 # Visualize the coancestry matrix using "popkin"!
-par(oma=c(0,1.5,0,3), mar=c(0,0,0.4,0)+0.2) # tweak margins/etc
-plot_popkin(Theta, leg_n=3)
+par(oma = c(0, 1.5, 0, 3), mar = c(0, 0, 0.4, 0) + 0.2) # tweak margins/etc
+plot_popkin(Theta, leg_n = 3)
 ```
-
-
-
-
 
 # References
