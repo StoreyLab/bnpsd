@@ -91,7 +91,7 @@ Let's generate the same population structure used in the simulation of [@Ochoa08
 library(RColorBrewer) # for nice colors
 # load this package (bnpsd) and a related popgen package (popkin)
 # since both packages have an "fst" function, load "bnpsd" last so its function isn't masked
-library(popkin) # for visualizing coancestry matrix with plotPopkin
+library(popkin) # for visualizing coancestry matrix with plot_popkin
 library(bnpsd)
 
 # dimensions of data/model
@@ -141,7 +141,7 @@ par(oma=c(0,1.5,0,3))
 # zero inner margin (plus padding) because we have no individual or subpopulation labels
 par(mar=c(0,0,0,0)+0.2)
 # now plot!
-plotPopkin(Theta)
+plot_popkin(Theta)
 ```
 
 ## Draw random allele frequencies and genotypes
@@ -186,7 +186,7 @@ table(subpops) # got k=10 subpops with 100 individuals each
 # now estimate kinship using popkin
 PhiHat <- popkin(X, subpops)
 # replace diagonal with inbreeding coeffs. to match coancestry matrix
-ThetaHat <- inbrDiag(PhiHat)
+ThetaHat <- inbr_diag(PhiHat)
 
 # Visualize the coancestry matrix using "popkin"!
 # set outer margin for axis labels (left and right are non-zero)
@@ -196,7 +196,7 @@ par(mar=c(0,0,2.5,0)+0.2)
 # now plot!
 x <- list(Theta, ThetaHat)
 titles <- c('Truth', 'Estimate')
-plotPopkin(x, titles)
+plot_popkin(x, titles)
 ```
 
 
@@ -321,7 +321,7 @@ mtext('Individuals', 1)
 ```{r, fig.width=3.1, fig.height=2, fig.align='center'}
 # Visualize the coancestry matrix using "popkin"!
 par(oma=c(0,1.5,0,3), mar=c(0,0,0.4,0)+0.2) # tweak margins/etc
-plotPopkin(Theta, nPretty=3)
+plot_popkin(Theta, leg_n=3)
 ```
 
 
@@ -356,7 +356,7 @@ popkin::fst(F) # verify FST for the intermediate subpopulations
 # get coancestry of the admixed individuals
 Theta <- coanc(Q,F) # the coancestry matrix
 # before getting FST for individuals, weigh then inversely proportional to subpop sizes
-w <- weightsSubpops(labs) # function from `popkin` package
+w <- weights_subpops(labs) # function from `popkin` package
 # verify Fst for individuals (same as for intermediate subpops for this pop structure)
 fst(Q, F, w)
 ```
@@ -378,7 +378,7 @@ mtext('Individuals', 1)
 ```{r, fig.width=3.1, fig.height=2, fig.align='center'}
 # Visualize the coancestry matrix using "popkin"!
 par(oma=c(0,1.5,0,3), mar=c(0,0,0.4,0)+0.2) # tweak margins/etc
-plotPopkin(Theta, nPretty=3)
+plot_popkin(Theta, leg_n=3)
 ```
 
 

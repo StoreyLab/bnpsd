@@ -43,7 +43,7 @@ n <- 5 # number of individuals
 k <- 2 # number of intermediate subpops
 
 # define population structure
-F <- c(0.1, 0.3) # FST values for k=2 subpopulations
+F <- c(0.1, 0.3) # FST values for k = 2 subpopulations
 sigma <- 1 # dispersion parameter of intermediate subpops
 Q <- q1d(n, k, sigma) # admixture proportions from 1D geography
 

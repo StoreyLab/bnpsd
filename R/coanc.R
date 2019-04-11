@@ -28,13 +28,16 @@
 coanc <- function(Q, F) {
     k <- ncol(Q) # dimension that matters the most
     if (is.matrix(F)) {
-        if (nrow(F) != k) stop('Fatal: Q and F are not compatible: nrow(F) == ', nrow(F), ' != ', k, ' == ncol(Q)')
-        if (ncol(F) != k) stop('Fatal: Q and F are not compatible: ncol(F) == ', ncol(F), ' != ', k, ' == ncol(Q)')
+        if (nrow(F) != k)
+            stop('Q and F are not compatible: nrow(F) == ', nrow(F), ' != ', k, ' == ncol(Q)')
+        if (ncol(F) != k)
+            stop('Q and F are not compatible: ncol(F) == ', ncol(F), ' != ', k, ' == ncol(Q)')
         tcrossprod(Q %*% F, Q) # most general version, F is an arbitrary matrix of coancestries!
     } else if (length(F) == k) {
         tcrossprod(Q %*% diag(F), Q) # version for vector F of non-equal values (intermediate generality)
     } else if (length(F) == 1) {
         tcrossprod(Q) * F # this is the matrix we want
-    } else stop('Fatal: Q and F are not compatible: length(F) = ', length(F), ' != ', k, ' == ncol(Q)')
+    } else
+        stop('Q and F are not compatible: length(F) = ', length(F), ' != ', k, ' == ncol(Q)')
 }
 

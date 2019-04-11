@@ -1,4 +1,4 @@
-## 1/kappa = sigma^2
+# 1/kappa = sigma^2
 
 #' Construct admixture proportion matrix for circular 1D geography
 #'
@@ -27,51 +27,54 @@
 #' @return If \code{sigma} was provided, the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q}.  If \code{sigma} is missing, a named list is returned containing \code{Q}, the rescaled \code{F}, and the \code{sigma} that together give the desired \eqn{s} and final \eqn{F_{ST}}{FST} of the admixed individuals.
 #'
 #' @examples
-#' ## admixture matrix for 1000 individuals drawing alleles from 10 subpops
-#' ## and a spread of about 2 standard deviations along the circular 1D geography
-#' Q <- q1dc(n=1000, k=10, sigma=2)
+#' # admixture matrix for 1000 individuals drawing alleles from 10 subpops
+#' # and a spread of about 2 standard deviations along the circular 1D geography
+#' Q <- q1dc(n = 1000, k = 10, sigma = 2)
 #'
-#' ## a similar model but with a bias coefficient "s" of exactly 1/2
+#' # a similar model but with a bias coefficient "s" of exactly 1/2
 #' k <- 10
 #' F <- 1:k # Fst vector for intermediate subpops, up to a factor (will be rescaled below)
 #' Fst <- 0.1 # desired final Fst of admixed individuals
-#' obj <- q1dc(n=1000, k=k, s=0.5, F=F, Fst=Fst)
-#' ## in this case return value is a named list with three items:
+#' obj <- q1dc(n = 1000, k = k, s = 0.5, F = F, Fst = Fst)
+#' # in this case return value is a named list with three items:
 #' Q <- obj$Q # admixture proportions
 #' F <- obj$F # rescaled Fst vector for intermediate subpops
 #' sigma <- obj$sigma # and the sigma that gives the desired s and final Fst
 #'
 #' @export
-q1dc <- function(n, k, sigma, a=0, b=2*pi, s, F, Fst, interval=c(0.1,10), tol=.Machine$double.eps) {
+q1dc <- function(n, k, sigma, a = 0, b = 2 * pi, s, F, Fst, interval = c(0.1,10), tol = .Machine$double.eps) {
     
-    ## figure out if we need the more complicated algorithm...
+    # figure out if we need the more complicated algorithm...
     sigmaMissing <- missing(sigma) # remember after it was set
-    if (sigmaMissing) { ## this triggers s version
-        if (missing(s)) stop('Fatal in q1dc: s is required when sigma is missing!')
-        if (missing(F)) stop('Fatal in q1dc: F is required when sigma is missing!')
-        if (missing(Fst)) stop('Fatal in q1dc: Fst is required when sigma is missing!')
+    if (sigmaMissing) { # this triggers s version
+        if (missing(s))
+            stop('s is required when sigma is missing!')
+        if (missing(F))
+            stop('F is required when sigma is missing!')
+        if (missing(Fst))
+            stop('Fst is required when sigma is missing!')
         sigma <- biasCoeffSolveParam(s, F, n, q1dc, interval, tol)
     }
     sigma2 <- sigma^2 # square once for loop below
     
-    ## the x-coordinates of the n individuals based on [a,b] limits
-    xs <- a + (0:(n-1))/n*(b-a)
-    ## and subpopulations (same deal, except fixed [0,2*pi] range)
-    mus <- (0:(k-1))/k*2*pi
+    # the x-coordinates of the n individuals based on [a,b] limits
+    xs <- a + (0:(n-1)) / n * (b - a)
+    # and subpopulations (same deal, except fixed [0,2*pi] range)
+    mus <- (0:(k-1)) / k * 2 * pi
     
-    ## construct the coefficients of each person now!
-    Q <- matrix(nrow=n, ncol=k) # dimensions match that of makeQ
+    # construct the coefficients of each person now!
+    Q <- matrix(nrow = n, ncol = k) # dimensions match that of makeQ
     for (i in 1:n) {
-        ## collect the density values for each intermediate subpopulation at individual i's position
-        ## line implements super fast Von Mises without constant factors (which only involve constant sigma)
+        # collect the density values for each intermediate subpopulation at individual i's position
+        # line implements super fast Von Mises without constant factors (which only involve constant sigma)
         Q[i,] <- exp( cos(xs[i] - mus) / sigma2 )
     }
-    ## normalize to have rows/coefficients sum to 1!
-    Q <- Q/rowSums(Q) # return!
+    # normalize to have rows/coefficients sum to 1!
+    Q <- Q / rowSums(Q)
 
-    if (sigmaMissing) { ## this triggers s version
+    if (sigmaMissing) { # this triggers s version
         F <- rescaleF(Q, F, Fst) # let's rescale F now!
-        return( list(Q=Q, F=F, sigma=sigma) ) # return all this additional data!
+        return( list(Q = Q, F = F, sigma = sigma) ) # return all this additional data!
     } else {
         return(Q) # in direct case, always return Q
     }

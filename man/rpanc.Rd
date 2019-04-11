@@ -20,6 +20,6 @@ A length-\eqn{m} vector of ancestral allele frequencies
 This is simply a wrapper around \code{\link[stats]{runif}} with different defaults and additional validations.
 }
 \examples{
-pAnc <- rpanc(m=10)
+pAnc <- rpanc(m = 10)
 
 }

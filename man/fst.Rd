@@ -4,14 +4,14 @@
 \alias{fst}
 \title{Calculate FST for the admixed individuals}
 \usage{
-fst(Q, F, w)
+fst(Q, F, weights = NULL)
 }
 \arguments{
 \item{Q}{The \eqn{n \times k}{n-by-k} admixture proportion matrix}
 
 \item{F}{The length-\eqn{k} vector of subpopulation inbreeding coefficients}
 
-\item{w}{The length-\eqn{n} vector of weights for individuals that define \eqn{F_{ST}}{FST} (default uniform weights)}
+\item{weights}{The length-\eqn{n} vector of weights for individuals that define \eqn{F_{ST}}{FST} (default uniform weights)}
 }
 \value{
 The \eqn{F_{ST}}{FST} of the admixed individuals
@@ -29,7 +29,7 @@ sigma <- 1 # for 1D admixture model
 # differentiation of intermediate subpopulations
 F <- (1:k)/k
 # construct final admixture proportions
-Q <- q1d(n=n, k=k, sigma=sigma)
+Q <- q1d(n = n, k = k, sigma = sigma)
 # lastly, calculate Fst!!! (uniform weights in this case)
 F <- fst(Q, F)
 

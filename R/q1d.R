@@ -1,5 +1,3 @@
-## TODO: add other q* scenarios (1D circular, 2D, etc)
-
 #' Construct admixture proportion matrix for 1D geography
 #'
 #' Assumes \eqn{k} intermediate subpopulations placed along a line at locations \eqn{1:k} spread by random walks, then \eqn{n} individuals sampled equally spaced in \eqn{[a,b]} (default \eqn{[0.5, k+0.5]}) draw their admixture proportions relative to the Normal density that models the random walks of each of these intermediate subpopulations.
@@ -27,50 +25,53 @@
 #' @return If \code{sigma} was provided, the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q}.  If \code{sigma} is missing, a named list is returned containing \code{Q}, the rescaled \code{F}, and the \code{sigma} that together give the desired \eqn{s} and final \eqn{F_{ST}}{FST} of the admixed individuals.
 #'
 #' @examples
-#' ## admixture matrix for 1000 individuals drawing alleles from 10 subpops
-#' ## and a spread of 2 standard deviations along the 1D geography
-#' Q <- q1d(n=1000, k=10, sigma=2)
+#' # admixture matrix for 1000 individuals drawing alleles from 10 subpops
+#' # and a spread of 2 standard deviations along the 1D geography
+#' Q <- q1d(n = 1000, k = 10, sigma = 2)
 #'
-#' ## a similar model but with a bias coefficient "s" of exactly 1/2
+#' # a similar model but with a bias coefficient "s" of exactly 1/2
 #' k <- 10
 #' F <- 1:k # Fst vector for intermediate subpops, up to a factor (will be rescaled below)
 #' Fst <- 0.1 # desired final Fst of admixed individuals
-#' obj <- q1d(n=1000, k=k, s=0.5, F=F, Fst=Fst)
-#' ## in this case return value is a named list with three items:
+#' obj <- q1d(n = 1000, k = k, s = 0.5, F = F, Fst = Fst)
+#' # in this case return value is a named list with three items:
 #' Q <- obj$Q # admixture proportions
 #' F <- obj$F # rescaled Fst vector for intermediate subpops
 #' sigma <- obj$sigma # and the sigma that gives the desired s and final Fst
 #'
 #' @export
-q1d <- function(n, k, sigma, a=0.5, b=k+0.5, s, F, Fst, interval=c(0.1,10), tol=.Machine$double.eps) {
-    ## figure out if we need the more complicated algorithm...
+q1d <- function(n, k, sigma, a = 0.5, b = k + 0.5, s, F, Fst, interval = c(0.1, 10), tol = .Machine$double.eps) {
+    # figure out if we need the more complicated algorithm...
     sigmaMissing <- missing(sigma) # remember after it was set
-    if (sigmaMissing) { ## this triggers s version
-        if (missing(s)) stop('Fatal in q1d: s is required when sigma is missing!')
-        if (missing(F)) stop('Fatal in q1d: F is required when sigma is missing!')
-        if (missing(Fst)) stop('Fatal in q1d: Fst is required when sigma is missing!')
+    if (sigmaMissing) { # this triggers s version
+        if (missing(s))
+            stop('s is required when sigma is missing!')
+        if (missing(F))
+            stop('F is required when sigma is missing!')
+        if (missing(Fst))
+            stop('Fst is required when sigma is missing!')
         sigma <- biasCoeffSolveParam(s, F, n, q1d, interval, tol)
     }
-    sigma2 <- -2*sigma^2 # square once for loop below (plus other Normal constants)
+    sigma2 <- - 2 * sigma^2 # square once for loop below (plus other Normal constants)
     
-    ## the x-coordinates of the n individuals based on [a,b] limits
-    xs <- a + (0:(n-1))/(n-1)*(b-a)
-    ## and subpopulations (same deal, except fixed [1,k] range)
+    # the x-coordinates of the n individuals based on [a,b] limits
+    xs <- a + (0:(n-1)) / (n - 1) * (b - a)
+    # and subpopulations (same deal, except fixed [1,k] range)
     mus <- 1:k
     
-    ## construct the coefficients of each person now!
-    Q <- matrix(nrow=n, ncol=k) # dimensions match that of makeQ
+    # construct the coefficients of each person now!
+    Q <- matrix(nrow = n, ncol = k) # dimensions match that of makeQ
     for (i in 1:n) {
-        ## collect the density values for each intermediate subpopulation at individual i's position
-        ## line implements super fast Normal without constant factors (which only involve constant sigma)
+        # collect the density values for each intermediate subpopulation at individual i's position
+        # line implements super fast Normal without constant factors (which only involve constant sigma)
         Q[i,] <- exp( (xs[i] - mus)^2 / sigma2 )
     }
-    ## normalize to have rows/coefficients sum to 1!
-    Q <- Q/rowSums(Q) # return!
+    # normalize to have rows/coefficients sum to 1!
+    Q <- Q / rowSums(Q)
 
-    if (sigmaMissing) { ## this triggers s version
+    if (sigmaMissing) { # this triggers s version
         F <- rescaleF(Q, F, Fst) # let's rescale F now!
-        return( list(Q=Q, F=F, sigma=sigma) ) # return all this additional data!
+        return( list(Q = Q, F = F, sigma = sigma) ) # return all this additional data!
     } else {
         return(Q) # in direct case, always return Q
     }

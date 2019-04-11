@@ -25,7 +25,7 @@ If an admixture proportion matrix \eqn{Q} is provided as the second argument, th
 If \eqn{Q} is missing, then \eqn{P} is treated as the IAF matrix.
 }
 \details{
-To reduce memory, set \code{lowMem=TRUE} to draw genotypes one locus at the time from \eqn{P} and \eqn{Q} (both must be present).
+To reduce memory, set \code{lowMem = TRUE} to draw genotypes one locus at the time from \eqn{P} and \eqn{Q} (both must be present).
 This low-memory algorithm prevents the construction of the entire IAF matrix, but is considerably slower than the standard algorithm.
 }
 \examples{
@@ -42,7 +42,7 @@ Q <- q1d(n, k, sigma) # non-trivial admixture proportions
 # draw alelle frequencies
 pAnc <- rpanc(m) # random vector of ancestral allele frequencies
 B <- rpint(pAnc, F) # matrix of intermediate subpop allele freqs
-P <- rpiaf(B,Q) # matrix of individual-specific allele frequencies
+P <- rpiaf(B, Q) # matrix of individual-specific allele frequencies
 
 # draw genotypes from intermediate subpops (one individual each)
 Xb <- rgeno(B)

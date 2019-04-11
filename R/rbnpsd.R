@@ -24,7 +24,7 @@
 #' k <- 2 # number of intermediate subpops
 #'
 #' # define population structure
-#' F <- c(0.1, 0.3) # FST values for k=2 subpopulations
+#' F <- c(0.1, 0.3) # FST values for k = 2 subpopulations
 #' sigma <- 1 # dispersion parameter of intermediate subpops
 #' Q <- q1d(n, k, sigma) # admixture proportions from 1D geography
 #'
@@ -36,34 +36,38 @@
 #' pAnc <- out$Pa # Ancestral AFs
 #' 
 #' @export
-rbnpsd <- function(Q, F, m, wantX=TRUE, wantP=TRUE, wantB=TRUE, wantPa=TRUE, lowMem=FALSE, verbose=FALSE, noFixed=FALSE) {
-    ## simulation of Pritchard-Stephens-Donnelly "admixture" model for allele frequencies/genotypes.
+rbnpsd <- function(Q, F, m, wantX = TRUE, wantP = TRUE, wantB = TRUE, wantPa = TRUE, lowMem = FALSE, verbose = FALSE, noFixed = FALSE) {
+    # simulation of Pritchard-Stephens-Donnelly "admixture" model for allele frequencies/genotypes.
     
-    ## always ask for an admixture matrix (no default)
-    if (missing(Q)) stop('Fatal: must provide Q (admixture proportion matrix)')
-    if (missing(F)) stop('Fatal: must provide F (intermediate subpopulation Fst vector)')
-    if (missing(m)) stop('Fatal: must provide m (number of loci to draw)')
+    # always ask for an admixture matrix (no default)
+    if (missing(Q))
+        stop('must provide Q (admixture proportion matrix)')
+    if (missing(F))
+        stop('must provide F (intermediate subpopulation Fst vector)')
+    if (missing(m))
+        stop('must provide m (number of loci to draw)')
     
-    ## get dimensions, test coherence
+    # get dimensions, test coherence
     n <- nrow(Q)
     k <- ncol(Q)
     k2 <- length(F) # don't allow scalar F here!
-    if (k != k2) stop('Fatal: Q and F are not compatible: ncol(Q) == ', k, ' != ', k2, ' == length(F)')
+    if (k != k2)
+        stop('Q and F are not compatible: ncol(Q) == ', k, ' != ', k2, ' == length(F)')
     
-    ## generate the random ancestral allele frequencies, in usual range and with minimum threshold for simplicity
-    ## don't do this if a Pa was already provided (a way to provide arbitrary distributions)
+    # generate the random ancestral allele frequencies, in usual range and with minimum threshold for simplicity
+    # don't do this if a Pa was already provided (a way to provide arbitrary distributions)
     if (verbose) message('rbnpsd: drawing Pa')
     Pa <- rpanc(m)
     
-    ## draw intermediate allele frequencies from Balding-Nichols
+    # draw intermediate allele frequencies from Balding-Nichols
     if (verbose) message('rbnpsd: drawing B')
     B <- rpint(Pa, F)
     
     if (lowMem) {
-        ## draw genotypes!
+        # draw genotypes!
         if (wantX) {
             if (verbose) message('rbnpsd: drawing X')
-            X <- rgeno(B, Q, lowMem=lowMem)
+            X <- rgeno(B, Q, lowMem = lowMem)
         }
     } else {
         if (wantP || wantX) {
@@ -71,7 +75,7 @@ rbnpsd <- function(Q, F, m, wantX=TRUE, wantP=TRUE, wantB=TRUE, wantPa=TRUE, low
             P <- rpiaf(B, Q)
         }
         
-        ## draw genotypes from P
+        # draw genotypes from P
         if (wantX) {
             if (verbose) message('rbnpsd: drawing X')
             X <- rgeno(P)
@@ -86,7 +90,7 @@ rbnpsd <- function(Q, F, m, wantX=TRUE, wantP=TRUE, wantB=TRUE, wantPa=TRUE, low
         if (m2 > 0) {
             # call self with desired number of loci, all the same parameters otherwise
             # note that since this is also called asking for no fixed loci, it will work recursively within itself and return when all loci desired are not fixed!
-            obj <- rbnpsd(Q, F, m2, wantX=wantX, wantP=wantP, wantB=wantB, wantPa=wantPa, lowMem=lowMem, verbose=verbose, noFixed=noFixed)
+            obj <- rbnpsd(Q, F, m2, wantX = wantX, wantP = wantP, wantB = wantB, wantPa = wantPa, lowMem = lowMem, verbose = verbose, noFixed = noFixed)
             # overwrite fixed loci with redrawn polymorphic data
             X[fixedLoci,] <- obj$X # guaranteed to be there
             if (wantP && !lowMem) P[fixedLoci,] <- obj$P
@@ -95,12 +99,16 @@ rbnpsd <- function(Q, F, m, wantX=TRUE, wantP=TRUE, wantB=TRUE, wantPa=TRUE, low
         }
     }
     
-    ## now prepare output list
+    # now prepare output list
     out <- list()
-    if (wantX) out$X <- X
-    if (wantP && !lowMem) out$P <- P # don't have when low-mem!
-    if (wantB) out$B <- B
-    if (wantPa) out$Pa <- Pa
+    if (wantX)
+        out$X <- X
+    if (wantP && !lowMem)
+        out$P <- P # don't have when low-mem!
+    if (wantB)
+        out$B <- B
+    if (wantPa)
+        out$Pa <- Pa
     return(out)
 }
 

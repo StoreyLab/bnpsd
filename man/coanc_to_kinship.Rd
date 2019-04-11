@@ -10,7 +10,7 @@ coanc_to_kinship(Theta)
 \item{Theta}{The \eqn{n \times n}{n-by-n} coancestry matrix}
 }
 \value{
-The \eqn{n \times n}{n-by-n} kinship matrix
+The \eqn{n \times n}{n-by-n} kinship matrix, preserving column and row names.
 }
 \description{
 Let
@@ -20,18 +20,13 @@ These matrices agree off-diagonal, but the diagonal gets transformed as
 \deqn{\phi_{jj} = \frac{1 + \theta_{jj}}{2}.}
 Below \eqn{n} is the number of individuals.
 }
-\details{
-This function starts by copying the input matrix, so it preserves column and row names.
-
-Note that this function is the inverse of popkin::inbrDiag
-}
 \examples{
 # a trivial case: unadmixed individuals from independent subpopulations
 n <- 5 # number of individuals/subpops
 Q <- diag(rep.int(1, n)) # unadmixed individuals
 F <- 0.2 # equal Fst for all subpops
 Theta <- coanc(Q, F) # diagonal coancestry matryx
-Phi <- coanc_to_kinship(Theta)
+kinship <- coanc_to_kinship(Theta)
 
 # a more complicated admixture model
 n <- 5 # number of individuals
@@ -40,6 +35,9 @@ sigma <- 1 # dispersion parameter of intermediate subpops
 Q <- q1d(n, k, sigma) # non-trivial admixture proportions
 F <- c(0.1, 0.3) # different Fst for each of the k subpops
 Theta <- coanc(Q, F) # non-trivial coancestry matrix
-Phi <- coanc_to_kinship(Theta)
+kinship <- coanc_to_kinship(Theta)
 
+}
+\seealso{
+The inverse function is given by \code{\link[popkin]{inbr_diag}}.
 }

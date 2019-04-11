@@ -12,14 +12,14 @@
 #' @examples
 #' # here's a toy matrix
 #' X <- matrix(
-#'        data=c(
+#'        data = c(
 #'               2, 2, NA, # fixed locus (with one missing element)
 #'               0, NA, 0, # another fixed locus, for opposite allele
 #'               1, 1, 1, # NOT fixed (heterozygotes are not considered fixed)
 #'               0, 1, 2, # a completely variable locus
 #'               NA, NA, NA # completely missing locus (will be treated as fixed)
 #'              ),
-#'        ncol=3, byrow=TRUE)
+#'        ncol = 3, byrow = TRUE)
 #' # test that we get the desired values
 #' stopifnot(
 #'   fixed_loci(X) == c(TRUE, TRUE, FALSE, FALSE, TRUE)
@@ -30,7 +30,7 @@ fixed_loci <- function(X) {
     # is this too slow? (what if we did it using Rcpp?)
     # main step is calculating allele frequencies per row, which automatically handles missingness
     # this returns NaN for completely missing rows
-    pHat <- rowMeans(X, na.rm=TRUE)/2
+    pHat <- rowMeans(X, na.rm = TRUE) / 2
     # this is the return value we want
     is.na(pHat) | pHat == 0 | pHat == 1
 }

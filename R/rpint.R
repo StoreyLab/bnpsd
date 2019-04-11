@@ -18,31 +18,29 @@
 #'
 #' @export
 rpint <- function(pAnc, F) {
-    ## generate at each locus random intermediate allele frequencies from BN model
-    ## inputs are
-    ## - pAnc: ancestral allele frequencies (must be defined here!). Vector of length m (number of loci)
-    ## - F: Fst vector (different for each intermediate subpopulation)
-
-    ## basic param checking
-    if (missing(pAnc)) stop('Fatal in rpint: ancestral allele frequencies missing!')
-    if (missing(F)) stop('Fatal in rpint: F=Fst scalar or vector missing!')
-    ## number of loci and subpopulations to simulate
+    # basic param checking
+    if (missing(pAnc))
+        stop('ancestral allele frequencies missing!')
+    if (missing(F))
+        stop('F (Fst) scalar or vector missing!')
+    
+    # number of loci and subpopulations to simulate
     m <- length(pAnc)
     k <- length(F)
     
-    ## let's translate parameters for Balding-Nichols case
-    nu <- 1/F-1 # nu is a vector or a scalar, same as F (whatever that is)
-    pAncM <- 1-pAnc # precompute vector of "minus" pAnc's shared by all subpopulations below
-    ## vectorization makes a lot of sense for each subpopulation... (doing all SNPs together)
-    B <- matrix(nrow=m, ncol=k) # matrix of intermediate allele frequencies we want...
+    # let's translate parameters for Balding-Nichols case
+    nu <- 1 / F - 1 # nu is a vector or a scalar, same as F (whatever that is)
+    pAncM <- 1 - pAnc # precompute vector of "minus" pAnc's shared by all subpopulations below
+    # vectorization makes a lot of sense for each subpopulation... (doing all SNPs together)
+    B <- matrix(nrow = m, ncol = k) # matrix of intermediate allele frequencies we want...
     for (j in 1:k) {
         nuj <- nu[j]
         if (is.infinite(nuj)) {
-            ## there is no drift from pAnc in this special case (F==0)
-            ## (coded separately because rbeta incorrectly returns 0.5 instead)
+            # there is no drift from pAnc in this special case (F==0)
+            # (coded separately because rbeta incorrectly returns 0.5 instead)
             B[,j] <- pAnc
         } else {
-            B[,j] <- stats::rbeta(m, nuj*pAnc, nuj*pAncM) # draw all SNPs for this population, store immediately
+            B[,j] <- stats::rbeta(m, nuj * pAnc, nuj * pAncM) # draw all SNPs for this population, store immediately
         }
     }
     

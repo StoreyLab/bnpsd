@@ -21,14 +21,14 @@ Below \eqn{m} is the number of loci, and \eqn{n} is the number of individuals.
 \examples{
 # here's a toy matrix
 X <- matrix(
-       data=c(
+       data = c(
               2, 2, NA, # fixed locus (with one missing element)
               0, NA, 0, # another fixed locus, for opposite allele
               1, 1, 1, # NOT fixed (heterozygotes are not considered fixed)
               0, 1, 2, # a completely variable locus
               NA, NA, NA # completely missing locus (will be treated as fixed)
              ),
-       ncol=3, byrow=TRUE)
+       ncol = 3, byrow = TRUE)
 # test that we get the desired values
 stopifnot(
   fixed_loci(X) == c(TRUE, TRUE, FALSE, FALSE, TRUE)

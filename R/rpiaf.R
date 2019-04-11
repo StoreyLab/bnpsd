@@ -21,21 +21,17 @@
 #' P <- rpiaf(B,Q)
 #'
 #' @export
-rpiaf <- function(B,Q) {
-    ## constructs the individual allele frequency matrix implied by PSD (given ancestral allele frequencies and admixture coefficients, both of which may be estimates)
-    ## it's a simple matrix product, but I always forget the matrix orientations, here I just get it right once and remember forever...
-    ## Q is (n,k), B is (m,k), P is (m,n)
-    ## so want P <- B %*% t(Q), below does this more efficiently
+rpiaf <- function(B, Q) {
+    # validate data dimensions
+    if (ncol(B) != ncol(Q))
+        stop('B and Q are not compatible: ncol(B) == ', ncol(B), ' != ', ncol(Q), ' == ncol(Q)')
 
-    ## validate data dimensions, to have more reasonable error messages
-    ## these values must match or we can't multiply B and Q
-    if (ncol(B) != ncol(Q)) stop('Fatal: B and Q are not compatible: ncol(B) == ', ncol(B), ' != ', ncol(Q), ' == ncol(Q)')
-
-    ## this is the main multiplication
+    # this is the main multiplication
     P <- tcrossprod(B, Q)
     
-    ## unfortunately, in very extreme cases, P may have values slighly outside of [0,1] simply due to machine precision errors, fix that here!
-    P[P<0] <- 0
-    P[P>1] <- 1
+    # sometimes P has values slighly outside of [0,1], simply due to machine precision errors
+    # fix that here!
+    P[P < 0] <- 0
+    P[P > 1] <- 1
     P # return!
 }

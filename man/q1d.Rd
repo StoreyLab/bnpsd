@@ -44,16 +44,16 @@ The scaling factor of the input \code{F} is irrelevant because it cancels out in
 However, the function stops with a fatal error if the rescaled \code{F} takes on any values greater than 1, which are not allowed since \code{F} are IBD probabilities.
 }
 \examples{
-## admixture matrix for 1000 individuals drawing alleles from 10 subpops
-## and a spread of 2 standard deviations along the 1D geography
-Q <- q1d(n=1000, k=10, sigma=2)
+# admixture matrix for 1000 individuals drawing alleles from 10 subpops
+# and a spread of 2 standard deviations along the 1D geography
+Q <- q1d(n = 1000, k = 10, sigma = 2)
 
-## a similar model but with a bias coefficient "s" of exactly 1/2
+# a similar model but with a bias coefficient "s" of exactly 1/2
 k <- 10
 F <- 1:k # Fst vector for intermediate subpops, up to a factor (will be rescaled below)
 Fst <- 0.1 # desired final Fst of admixed individuals
-obj <- q1d(n=1000, k=k, s=0.5, F=F, Fst=Fst)
-## in this case return value is a named list with three items:
+obj <- q1d(n = 1000, k = k, s = 0.5, F = F, Fst = Fst)
+# in this case return value is a named list with three items:
 Q <- obj$Q # admixture proportions
 F <- obj$F # rescaled Fst vector for intermediate subpops
 sigma <- obj$sigma # and the sigma that gives the desired s and final Fst

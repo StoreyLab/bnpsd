@@ -9,10 +9,12 @@ qis(labs, subpops)
 \arguments{
 \item{labs}{Length-\eqn{n} vector of subpopulation labels}
 
-\item{subpops}{Optional length-\eqn{k} vector of unique subpopulations in desired order.  Stops if \code{subpops} does not contain all unique labels in \code{labs} (no error if \code{subpops} contains additional labels).}
+\item{subpops}{Optional length-\eqn{k} vector of unique subpopulations in desired order.
+Stops if \code{subpops} does not contain all unique labels in \code{labs} (no error if \code{subpops} contains additional labels).}
 }
 \value{
-The \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q}.  The unique subpopulation labels are given in \code{colnames(Q)}.
+The \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q}.
+The unique subpopulation labels are given in \code{colnames(Q)}.
 }
 \description{
 This function constructs an admixture proportion matrix where every individuals is actually unadmixed (draws its full ancestry from a single intermediate subpopulation).
@@ -24,12 +26,12 @@ Treating the entries of \eqn{Q} as numerical, every individual has an admixture 
 }
 \examples{
 # vector of subpopulation memberships
-labs <- c(1,1,1,2,2,3,1)
+labs <- c(1, 1, 1, 2, 2, 3, 1)
 # admixture matrix with subpopulations (along columns) sorted
 Q <- qis(labs)
 
 # declare subpopulations in custom order
-subpops <- c(3,1,2)
+subpops <- c(3, 1, 2)
 # columns will be reordered to match subpops as provided
 Q <- qis(labs, subpops)
 
