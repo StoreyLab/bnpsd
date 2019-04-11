@@ -1,4 +1,4 @@
-bias_coeff <- function(admix_proportions, coanc_subpops, weights = NULL) {
+bias_coeff_admix <- function(admix_proportions, coanc_subpops, weights = NULL) {
     # die if things are missing
     if (missing(admix_proportions))
         stop('`admix_proportions` is required!')

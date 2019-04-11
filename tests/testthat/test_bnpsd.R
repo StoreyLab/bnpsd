@@ -109,7 +109,7 @@ test_that("fst works in toy cases", {
     expect_equal(fst1, fst2)
 })
 
-test_that("bias_coeff agrees with explicitly calculated bias coeff s", {
+test_that("bias_coeff_admix agrees with explicitly calculated bias coeff s", {
     # set up some simulated data
     n <- 5
     k <- 2
@@ -124,14 +124,14 @@ test_that("bias_coeff agrees with explicitly calculated bias coeff s", {
     
     Theta <- coanc(Q, F) # in wrong scale but meh
     sWant <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
-    s <- bias_coeff(Q, F) # calculation to compare to
+    s <- bias_coeff_admix(Q, F) # calculation to compare to
     expect_equal(s, sWant)
     expect_true(s > 0) # other obvious properties...
     expect_true(s <= 1)
 
     # repeat with matrix F, missing (uniform) weights
     F_mat <- diag(F)
-    s <- bias_coeff(Q, F_mat) # calculation to compare to
+    s <- bias_coeff_admix(Q, F_mat) # calculation to compare to
     expect_equal(s, sWant)
     expect_true(s > 0) # other obvious properties...
     expect_true(s <= 1)
@@ -140,13 +140,13 @@ test_that("bias_coeff agrees with explicitly calculated bias coeff s", {
     weights <- runif(n) # random weights for given number of individuals
     weights <- weights / sum(weights) # normalize to add up to 1! # NOTE: should check sum(weights)!= 0, meh...
     sWant <- drop(weights %*% Theta %*% weights) / drop( diag(Theta) %*% weights ) # this is the correct bias coeff, with uniform weights
-    s <- bias_coeff(Q, F, weights) # calculation to compare to
+    s <- bias_coeff_admix(Q, F, weights) # calculation to compare to
     expect_equal(s, sWant)
     expect_true(s > 0) # other obvious properties...
     expect_true(s <= 1)
 
     # repeat with matrix F and non-uniform weights
-    s <- bias_coeff(Q, F_mat, weights) # calculation to compare to
+    s <- bias_coeff_admix(Q, F_mat, weights) # calculation to compare to
     expect_equal(s, sWant)
     expect_true(s > 0) # other obvious properties...
     expect_true(s <= 1)
@@ -247,29 +247,29 @@ test_that("q1dc returns valid admixture coefficients", {
     expect_equal(rowSums(Q), rep.int(1, n)) # rows sum to 1, vector length n
 })
 
-test_that("biasCoeffSolveParam agrees with reverse func", {
+test_that("bias_coeff_admix_fit agrees with reverse func", {
     n <- 1000
-    F <- c(0.1, 0.2, 0.3)
-    k <- length(F)
-    sWant <- 0.5
+    inbr_subpops <- c(0.1, 0.2, 0.3)
+    k <- length(inbr_subpops)
+    s_want <- 0.5
 
     # test with q1d
-    sigma <- biasCoeffSolveParam(s = sWant, F = F, n = n, q1d) # get sigma
-    # construct everything and verify s == sWant
+    sigma <- bias_coeff_admix_fit(bias_coeff = s_want, inbr_subpops = inbr_subpops, n_ind = n, func = q1d) # get sigma
+    # construct everything and verify s == s_want
     Q <- q1d(n, k, sigma) # now get Q from there
-    Theta <- coanc(Q, F)
+    Theta <- coanc(Q, inbr_subpops)
     s <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
-    expect_equal(s, sWant)
-    # since we set 0 < sWant < 1, nothing else to test
+    expect_equal(s, s_want)
+    # since we set 0 < s_want < 1, nothing else to test
     
     # test with q1dc
-    sigma <- biasCoeffSolveParam(s = sWant, F = F, n = n, q1dc) # get sigma
-    # construct everything and verify s == sWant
+    sigma <- bias_coeff_admix_fit(bias_coeff = s_want, inbr_subpops = inbr_subpops, n_ind = n, func = q1dc) # get sigma
+    # construct everything and verify s == s_want
     Q <- q1dc(n, k, sigma) # now get Q from there
-    Theta <- coanc(Q, F)
+    Theta <- coanc(Q, inbr_subpops)
     s <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
-    expect_equal(s, sWant)
-    # since we set 0 < sWant < 1, nothing else to test
+    expect_equal(s, s_want)
+    # since we set 0 < s_want < 1, nothing else to test
 })
 
 test_that("rescaleF agrees with explicitly Fst calculation", {

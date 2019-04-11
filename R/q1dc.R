@@ -53,7 +53,7 @@ q1dc <- function(n, k, sigma, a = 0, b = 2 * pi, s, F, Fst, interval = c(0.1,10)
             stop('F is required when sigma is missing!')
         if (missing(Fst))
             stop('Fst is required when sigma is missing!')
-        sigma <- biasCoeffSolveParam(s, F, n, q1dc, interval, tol)
+        sigma <- bias_coeff_admix_fit(s, F, n, q1dc, interval, tol)
     }
     sigma2 <- sigma^2 # square once for loop below
     
