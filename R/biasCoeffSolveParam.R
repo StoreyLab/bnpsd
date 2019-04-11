@@ -34,7 +34,7 @@ biasCoeffSolveParam <- function(s, F, n, func, interval = c(0.1,10), tol = .Mach
         # first, construct the admixture coefficients, which critically depend on param
         Q <- func(n, k, param)
         # get bias coefficient, return difference from desired value!
-        biasCoeff(Q, F) - s
+        bias_coeff(Q, F) - s
     }
     
     # interval shouldn't matter since it gets extended automatically, though we probably want to stay away from param=0 because it leads to NaNs (in that limit we're supposed to approach the island model)

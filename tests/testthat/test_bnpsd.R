@@ -109,24 +109,44 @@ test_that("fst works in toy cases", {
     expect_equal(fst1, fst2)
 })
 
-test_that("biasCoeff agrees with explicitly calculated bias coeff s", {
+test_that("bias_coeff agrees with explicitly calculated bias coeff s", {
+    # set up some simulated data
     n <- 5
     k <- 2
     sigma <- 1
     Q <- q1d(n, k, sigma)
     F <- 1:k # scale doesn't matter right now...
+
+    # die when the important parameters are missing
+    expect_error( coanc() ) # all missing 
+    expect_error( coanc(Q) ) # coanc_subpops missing
+    expect_error( coanc(coanc_subpops = F) ) # admix_proportions missing
+    
     Theta <- coanc(Q, F) # in wrong scale but meh
     sWant <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
-    s <- biasCoeff(Q, F) # calculation to compare to
+    s <- bias_coeff(Q, F) # calculation to compare to
     expect_equal(s, sWant)
     expect_true(s > 0) # other obvious properties...
     expect_true(s <= 1)
 
+    # repeat with matrix F, missing (uniform) weights
+    F_mat <- diag(F)
+    s <- bias_coeff(Q, F_mat) # calculation to compare to
+    expect_equal(s, sWant)
+    expect_true(s > 0) # other obvious properties...
+    expect_true(s <= 1)
+    
     # repeat with non-uniform weights...
-    w <- runif(n) # random weights for given number of individuals
-    w <- w / sum(w) # normalize to add up to 1! # NOTE: should check sum(w)!= 0, meh...
-    sWant <- drop(w %*% Theta %*% w) / drop( diag(Theta) %*% w ) # this is the correct bias coeff, with uniform weights
-    s <- biasCoeff(Q, F, w) # calculation to compare to
+    weights <- runif(n) # random weights for given number of individuals
+    weights <- weights / sum(weights) # normalize to add up to 1! # NOTE: should check sum(weights)!= 0, meh...
+    sWant <- drop(weights %*% Theta %*% weights) / drop( diag(Theta) %*% weights ) # this is the correct bias coeff, with uniform weights
+    s <- bias_coeff(Q, F, weights) # calculation to compare to
+    expect_equal(s, sWant)
+    expect_true(s > 0) # other obvious properties...
+    expect_true(s <= 1)
+
+    # repeat with matrix F and non-uniform weights
+    s <- bias_coeff(Q, F_mat, weights) # calculation to compare to
     expect_equal(s, sWant)
     expect_true(s > 0) # other obvious properties...
     expect_true(s <= 1)
