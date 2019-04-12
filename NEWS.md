@@ -32,5 +32,5 @@ These loci are not polymorphic so they would normally not be considered in analy
 # 2019-04-11 - bnpsd 1.0.5.9000
 
 * `qis` now returns a numeric admixture proportions matrix (used to be logical).
-* `q1d` now handles `sigma == 0` special case.
+* `q1d` and `q1dc` now handle `sigma == 0` special case.
 * Updated coding style, renamed some internal functions and variables.

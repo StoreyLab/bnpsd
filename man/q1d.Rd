@@ -12,7 +12,8 @@ q1d(n, k, sigma, a = 0.5, b = k + 0.5, s, F, Fst, interval = c(0.1,
 
 \item{k}{Number of intermediate subpopulations}
 
-\item{sigma}{Spread of intermediate subpopulations (standard deviation of normal densities)}
+\item{sigma}{Spread of intermediate subpopulations (standard deviation of normal densities).
+The edge cases \code{sigma = 0} and \code{sigma = Inf} are handled appropriately!}
 
 \item{a}{Location of first individual}
 
@@ -47,6 +48,9 @@ However, the function stops with a fatal error if the rescaled \code{F} takes on
 # admixture matrix for 1000 individuals drawing alleles from 10 subpops
 # and a spread of 2 standard deviations along the 1D geography
 Q <- q1d(n = 1000, k = 10, sigma = 2)
+
+# as sigma approaches zero, Q approaches the independent subpopulations matrix
+q1d(n = 10, k = 2, sigma = 0)
 
 # a similar model but with a bias coefficient "s" of exactly 1/2
 k <- 10

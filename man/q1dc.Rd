@@ -12,7 +12,8 @@ q1dc(n, k, sigma, a = 0, b = 2 * pi, s, F, Fst, interval = c(0.1,
 
 \item{k}{Number of intermediate subpopulations}
 
-\item{sigma}{Spread of intermediate subpopulations (approximate standard deviation of Von Mises densities, see above)}
+\item{sigma}{Spread of intermediate subpopulations (approximate standard deviation of Von Mises densities, see above)
+The edge cases \code{sigma = 0} and \code{sigma = Inf} are handled appropriately!}
 
 \item{a}{Location of first individual}
 
