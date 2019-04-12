@@ -25,7 +25,7 @@ Below \eqn{n} is the number of individuals.
 n <- 5 # number of individuals/subpops
 Q <- diag(rep.int(1, n)) # unadmixed individuals
 F <- 0.2 # equal Fst for all subpops
-Theta <- coanc(Q, F) # diagonal coancestry matryx
+Theta <- coanc_admix(Q, F) # diagonal coancestry matryx
 kinship <- coanc_to_kinship(Theta)
 
 # a more complicated admixture model
@@ -34,7 +34,7 @@ k <- 2 # number of intermediate subpops
 sigma <- 1 # dispersion parameter of intermediate subpops
 Q <- q1d(n, k, sigma) # non-trivial admixture proportions
 F <- c(0.1, 0.3) # different Fst for each of the k subpops
-Theta <- coanc(Q, F) # non-trivial coancestry matrix
+Theta <- coanc_admix(Q, F) # non-trivial coancestry matrix
 kinship <- coanc_to_kinship(Theta)
 
 }

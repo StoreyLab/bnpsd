@@ -25,7 +25,7 @@ bias_coeff_admix <- function(admix_proportions, coanc_subpops, weights = NULL) {
         # but slower due to matrix products
 
         # construct coancestry matrix, needed for next steps
-        coancestry <- coanc(admix_proportions, coanc_subpops)
+        coancestry <- coanc_admix(admix_proportions, coanc_subpops)
 
         # now construct numerator and denominator of "s"
         # still have to handle the case of missing weights

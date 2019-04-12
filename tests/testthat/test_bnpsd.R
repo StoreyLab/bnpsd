@@ -21,30 +21,37 @@ test_that("fixed_loci works in toy cases", {
     )
 })
 
-test_that("coanc works in toy cases", {
-    Q <- diag(c(1, 1)) # an IS model with two subpops
+test_that("coanc_admix works in toy cases", {
+    # set up vars
+    Q <- diag(c(1, 1)) # an independent subpops model with two subpops
     F <- c(0.1, 0.3)
+    
+    # die when the important parameters are missing
+    expect_error( coanc_admix() ) # all missing 
+    expect_error( coanc_admix(Q) ) # coanc_subpops missing
+    expect_error( coanc_admix(coanc_subpops = F) ) # admix_proportions missing
+    
     ThetaExp <- diag(F) # the Theta we expect for this setup
-    Theta <- coanc(Q, F)
+    Theta <- coanc_admix(Q, F)
     expect_equal(Theta, ThetaExp)
 
     # same Q, scalar F
     F <- 0.2
     ThetaExp <- diag(c(F, F)) # the Theta we expect for this setup
-    Theta <- coanc(Q, F)
+    Theta <- coanc_admix(Q, F)
     expect_equal(Theta, ThetaExp)
 
     # same Q, matrix F
     Fv <- c(0.1, 0.4) # vector version
     F <- diag(Fv) # matrix version
-    Theta <- coanc(Q, F)
+    Theta <- coanc_admix(Q, F)
     expect_equal(Theta, F) # F is the theta we expect in this case
 
     # most complex case, just a general math check
     Q <- matrix(c(0.7, 0.3, 0.2, 0.8), nrow = 2, byrow = TRUE)
     F <- matrix(c(0.3, 0.1, 0.1, 0.3), nrow = 2, byrow = TRUE)
     ThetaExp <- Q %*% F %*% t(Q) # the Theta we expect for this setup (slower but more explicit version)
-    Theta <- coanc(Q, F)
+    Theta <- coanc_admix(Q, F)
     expect_equal(Theta, ThetaExp)
 }) 
 
@@ -52,7 +59,7 @@ test_that("coanc_to_kinship works in toy cases", {
     Q <- diag(c(1, 1)) # an IS model with two subpops
     F <- c(0.1, 0.3)
     PhiExp <- diag( (1+F) / 2 ) # the Phi we expect for this setup
-    Theta <- coanc(Q, F)
+    Theta <- coanc_admix(Q, F)
     Phi <- coanc_to_kinship(Theta)
     expect_equal(Phi, PhiExp)
 
@@ -60,7 +67,7 @@ test_that("coanc_to_kinship works in toy cases", {
     F <- 0.2
     K <- (1+F) / 2 # transform at this stage
     PhiExp <- diag(c(K, K)) # the Phi we expect for this setup
-    Theta <- coanc(Q, F)
+    Theta <- coanc_admix(Q, F)
     Phi <- coanc_to_kinship(Theta)
     expect_equal(Phi, PhiExp)
 
@@ -68,7 +75,7 @@ test_that("coanc_to_kinship works in toy cases", {
     Fv <- c(0.1, 0.4) # vector version
     F <- diag(Fv) # matrix version
     PhiExp <- diag((1+Fv) / 2)
-    Theta <- coanc(Q, F)
+    Theta <- coanc_admix(Q, F)
     Phi <- coanc_to_kinship(Theta)
     expect_equal(Phi, PhiExp)
 
@@ -77,7 +84,7 @@ test_that("coanc_to_kinship works in toy cases", {
     F <- matrix(c(0.3, 0.1, 0.1, 0.3), nrow = 2, byrow = TRUE)
     PhiExp <- Q %*% F %*% t(Q) # the Theta we expect for this setup (slower but more explicit version)
     diag(PhiExp) <- (1 + diag(PhiExp))/2 # explicit transformation to kinship
-    Theta <- coanc(Q, F)
+    Theta <- coanc_admix(Q, F)
     Phi <- coanc_to_kinship(Theta)
     expect_equal(Phi, PhiExp)
 }) 
@@ -117,12 +124,7 @@ test_that("bias_coeff_admix agrees with explicitly calculated bias coeff s", {
     Q <- q1d(n, k, sigma)
     F <- 1:k # scale doesn't matter right now...
 
-    # die when the important parameters are missing
-    expect_error( coanc() ) # all missing 
-    expect_error( coanc(Q) ) # coanc_subpops missing
-    expect_error( coanc(coanc_subpops = F) ) # admix_proportions missing
-    
-    Theta <- coanc(Q, F) # in wrong scale but meh
+    Theta <- coanc_admix(Q, F) # in wrong scale but meh
     sWant <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
     s <- bias_coeff_admix(Q, F) # calculation to compare to
     expect_equal(s, sWant)
@@ -271,7 +273,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     sigma <- bias_coeff_admix_fit(bias_coeff = s_want, inbr_subpops = inbr_subpops, n_ind = n, func = q1d) # get sigma
     # construct everything and verify s == s_want
     Q <- q1d(n, k, sigma) # now get Q from there
-    Theta <- coanc(Q, inbr_subpops)
+    Theta <- coanc_admix(Q, inbr_subpops)
     s <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
     expect_equal(s, s_want)
     # since we set 0 < s_want < 1, nothing else to test
@@ -280,7 +282,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     sigma <- bias_coeff_admix_fit(bias_coeff = s_want, inbr_subpops = inbr_subpops, n_ind = n, func = q1dc) # get sigma
     # construct everything and verify s == s_want
     Q <- q1dc(n, k, sigma) # now get Q from there
-    Theta <- coanc(Q, inbr_subpops)
+    Theta <- coanc_admix(Q, inbr_subpops)
     s <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
     expect_equal(s, s_want)
     # since we set 0 < s_want < 1, nothing else to test
@@ -293,7 +295,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     expect_true( is.infinite(sigma) ) # only `sigma = Inf` should achieve the max
     # construct everything and verify s == s_want
     Q <- q1d(n, k, sigma) # now get Q from there
-    Theta <- coanc(Q, inbr_subpops)
+    Theta <- coanc_admix(Q, inbr_subpops)
     s <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
     expect_equal(s, s_want)
     
@@ -302,7 +304,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     expect_true( is.infinite(sigma) ) # only `sigma = Inf` should achieve the max
     # construct everything and verify s == s_want
     Q <- q1dc(n, k, sigma) # now get Q from there
-    Theta <- coanc(Q, inbr_subpops)
+    Theta <- coanc_admix(Q, inbr_subpops)
     s <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
     expect_equal(s, s_want)
 
@@ -316,7 +318,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     expect_equal( sigma, 0 ) # only `sigma = 0` should achieve the min
     # construct everything and verify s == s_want
     Q <- q1d(n, k, sigma) # now get Q from there
-    Theta <- coanc(Q, inbr_subpops)
+    Theta <- coanc_admix(Q, inbr_subpops)
     s <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
     expect_equal(s, s_want)
     
@@ -329,7 +331,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     expect_equal( sigma, 0 ) # only `sigma = 0` should achieve the min
     # construct everything and verify s == s_want
     Q <- q1dc(n, k, sigma) # now get Q from there
-    Theta <- coanc(Q, inbr_subpops)
+    Theta <- coanc_admix(Q, inbr_subpops)
     s <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
     expect_equal(s, s_want)
 })
@@ -342,7 +344,7 @@ test_that("rescaleF agrees with explicitly Fst calculation", {
     Q <- q1d(n, k, sigma)
     F <- 1:k # scale doesn't matter right now...
     F2 <- rescaleF(Q, F, Fst) # calculation to compare to
-    Theta <- coanc(Q, F2) # in wrong scale but meh
+    Theta <- coanc_admix(Q, F2) # in wrong scale but meh
     Fst2 <- mean(diag(Theta)) # this is the actual Fst, with uniform weights
     expect_equal(Fst, Fst2)
     # since 0 < Fst=0.1 < 1, there's nothing else to test

@@ -18,7 +18,7 @@ The \eqn{F_{ST}}{FST} of the admixed individuals
 }
 \description{
 Given the admixture proportion matrix \eqn{Q} for \eqn{n} individuals and \eqn{k} intermediate subpopulations, the vector of intermediate inbreeding coefficients \eqn{F} (per-subpopulation \eqn{F_{ST}}{FST}'s), and weights for individuals, this function returns the \eqn{F_{ST}}{FST} of the admixed individuals.
-This \eqn{F_{ST}}{FST} equals the weighted mean of the diagonal of the coancestry matrix (see \code{\link{coanc}}).
+This \eqn{F_{ST}}{FST} equals the weighted mean of the diagonal of the coancestry matrix (see \code{\link{coanc_admix}}).
 }
 \examples{
 # set desired parameters

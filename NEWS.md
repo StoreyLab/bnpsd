@@ -37,3 +37,16 @@ These loci are not polymorphic so they would normally not be considered in analy
 * `sigma` root finding in `q1d` and `q1dc` (when `s` is provided) is now more robust, explicitly tested at boundaries (min `s > 0` achieved at `sigma = 0` and max `s = 1` achieved at `sigma = Inf`).
   * Removed arguments `interval` and `tol` from both `q1d` and `q1dc` (users would never need to set them now that procedure is more robust).
 * Updated coding style, renamed some internal functions and variables.
+
+# 2019-04-12 - bnpsd 1.0.6.9000
+
+* Renamed several functions for clarity:
+  * `coanc` -> `coanc_admix`
+  * Functions with old names remain for now as deprecated functions (to be removed in the future).
+* Renamed several argument names for clarity:
+  * `Q` -> `admix_proportions`
+  * `F` -> `coanc_subpops` (if general matrix is accepted), `inbr_subpops` (vector or scalar versions required)
+  * `s` -> `bias_coeff`
+  * `w` -> `weights`
+  * Deprecated functions still accept old argument names.
+* Added more input checks to functions, informative error messages.
