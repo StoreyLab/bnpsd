@@ -4,8 +4,7 @@
 \alias{q1dc}
 \title{Construct admixture proportion matrix for circular 1D geography}
 \usage{
-q1dc(n, k, sigma, a = 0, b = 2 * pi, s, F, Fst, interval = c(0.1,
-  10), tol = .Machine$double.eps)
+q1dc(n, k, sigma, a = 0, b = 2 * pi, s, F, Fst)
 }
 \arguments{
 \item{n}{Number of individuals}
@@ -26,10 +25,6 @@ OPTIONS FOR BIAS COEFFICIENT VERSION}
 \item{F}{The length-\eqn{k} vector of inbreeding coefficients (or \eqn{F_{ST}}{FST}'s) of the intermediate subpopulations, up to a scaling factor (which cancels out in calculations).  Required if \code{sigma} is missing}
 
 \item{Fst}{The desired final \eqn{F_{ST}}{FST} of the admixed individuals.  Required if \code{sigma} is missing}
-
-\item{interval}{Restrict the search space of \eqn{\sigma} to this interval}
-
-\item{tol}{The numerical tolerance used to declare the solution found}
 }
 \value{
 If \code{sigma} was provided, the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q}.  If \code{sigma} is missing, a named list is returned containing \code{Q}, the rescaled \code{F}, and the \code{sigma} that together give the desired \eqn{s} and final \eqn{F_{ST}}{FST} of the admixed individuals.

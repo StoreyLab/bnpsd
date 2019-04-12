@@ -284,6 +284,54 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     s <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
     expect_equal(s, s_want)
     # since we set 0 < s_want < 1, nothing else to test
+
+    # test extreme case s_want = 1
+    s_want <- 1
+
+    # test with q1d
+    sigma <- bias_coeff_admix_fit(bias_coeff = s_want, inbr_subpops = inbr_subpops, n_ind = n, func = q1d) # get sigma
+    expect_true( is.infinite(sigma) ) # only `sigma = Inf` should achieve the max
+    # construct everything and verify s == s_want
+    Q <- q1d(n, k, sigma) # now get Q from there
+    Theta <- coanc(Q, inbr_subpops)
+    s <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
+    expect_equal(s, s_want)
+    
+    # test with q1dc
+    sigma <- bias_coeff_admix_fit(bias_coeff = s_want, inbr_subpops = inbr_subpops, n_ind = n, func = q1dc) # get sigma
+    expect_true( is.infinite(sigma) ) # only `sigma = Inf` should achieve the max
+    # construct everything and verify s == s_want
+    Q <- q1dc(n, k, sigma) # now get Q from there
+    Theta <- coanc(Q, inbr_subpops)
+    s <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
+    expect_equal(s, s_want)
+
+    # test extreme case s_want = minimum
+    # test with q1d
+    # construct directly
+    admix_prop_bias_coeff_min <- q1d(n, k, sigma = 0)
+    # this is the mminimum s_want
+    s_want <- bias_coeff_admix(admix_prop_bias_coeff_min, inbr_subpops)
+    sigma <- bias_coeff_admix_fit(bias_coeff = s_want, inbr_subpops = inbr_subpops, n_ind = n, func = q1d) # get sigma
+    expect_equal( sigma, 0 ) # only `sigma = 0` should achieve the min
+    # construct everything and verify s == s_want
+    Q <- q1d(n, k, sigma) # now get Q from there
+    Theta <- coanc(Q, inbr_subpops)
+    s <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
+    expect_equal(s, s_want)
+    
+    # test with q1dc
+    # construct directly
+    admix_prop_bias_coeff_min <- q1dc(n, k, sigma = 0)
+    # this is the mminimum s_want
+    s_want <- bias_coeff_admix(admix_prop_bias_coeff_min, inbr_subpops)
+    sigma <- bias_coeff_admix_fit(bias_coeff = s_want, inbr_subpops = inbr_subpops, n_ind = n, func = q1dc) # get sigma
+    expect_equal( sigma, 0 ) # only `sigma = 0` should achieve the min
+    # construct everything and verify s == s_want
+    Q <- q1dc(n, k, sigma) # now get Q from there
+    Theta <- coanc(Q, inbr_subpops)
+    s <- mean(Theta) / mean(diag(Theta)) # this is the correct bias coeff, with uniform weights
+    expect_equal(s, s_want)
 })
 
 test_that("rescaleF agrees with explicitly Fst calculation", {

@@ -22,8 +22,6 @@
 #' @param s The desired bias coefficient, which specifies \eqn{\sigma} indirectly.  Required if \code{sigma} is missing
 #' @param F The length-\eqn{k} vector of inbreeding coefficients (or \eqn{F_{ST}}{FST}'s) of the intermediate subpopulations, up to a scaling factor (which cancels out in calculations).  Required if \code{sigma} is missing
 #' @param Fst The desired final \eqn{F_{ST}}{FST} of the admixed individuals.  Required if \code{sigma} is missing
-#' @param interval Restrict the search space of \eqn{\sigma} to this interval
-#' @param tol The numerical tolerance used to declare the solution found
 #'
 #' @return If \code{sigma} was provided, the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q}.  If \code{sigma} is missing, a named list is returned containing \code{Q}, the rescaled \code{F}, and the \code{sigma} that together give the desired \eqn{s} and final \eqn{F_{ST}}{FST} of the admixed individuals.
 #'
@@ -43,7 +41,7 @@
 #' sigma <- obj$sigma # and the sigma that gives the desired s and final Fst
 #'
 #' @export
-q1dc <- function(n, k, sigma, a = 0, b = 2 * pi, s, F, Fst, interval = c(0.1,10), tol = .Machine$double.eps) {
+q1dc <- function(n, k, sigma, a = 0, b = 2 * pi, s, F, Fst) {
     
     # figure out if we need the more complicated algorithm...
     sigmaMissing <- missing(sigma) # remember after it was set
@@ -54,7 +52,7 @@ q1dc <- function(n, k, sigma, a = 0, b = 2 * pi, s, F, Fst, interval = c(0.1,10)
             stop('F is required when sigma is missing!')
         if (missing(Fst))
             stop('Fst is required when sigma is missing!')
-        sigma <- bias_coeff_admix_fit(s, F, n, q1dc, interval, tol)
+        sigma <- bias_coeff_admix_fit(s, F, n, q1dc)
     } else {
         # validate input sigma here (bias_coeff_admix_fit ought to return valid numbers)
         if ( sigma < 0 )
