@@ -10,7 +10,8 @@
 #'
 #' @param n Number of individuals
 #' @param k Number of intermediate subpopulations
-#' @param sigma Spread of intermediate subpopulations (standard deviation of normal densities)
+#' @param sigma Spread of intermediate subpopulations (standard deviation of normal densities).
+#' The edge cases \code{sigma = 0} and \code{sigma = Inf} are handled appropriately!
 #' @param a Location of first individual
 #' @param b Location of last individual
 #'
@@ -28,6 +29,9 @@
 #' # admixture matrix for 1000 individuals drawing alleles from 10 subpops
 #' # and a spread of 2 standard deviations along the 1D geography
 #' Q <- q1d(n = 1000, k = 10, sigma = 2)
+#'
+#' # as sigma approaches zero, Q approaches the independent subpopulations matrix
+#' q1d(n = 10, k = 2, sigma = 0)
 #'
 #' # a similar model but with a bias coefficient "s" of exactly 1/2
 #' k <- 10
@@ -51,6 +55,10 @@ q1d <- function(n, k, sigma, a = 0.5, b = k + 0.5, s, F, Fst, interval = c(0.1, 
         if (missing(Fst))
             stop('Fst is required when sigma is missing!')
         sigma <- bias_coeff_admix_fit(s, F, n, q1d, interval, tol)
+    } else {
+        # validate input sigma here (bias_coeff_admix_fit ought to return valid numbers)
+        if ( sigma < 0 )
+            stop('sigma must be non-negative!')
     }
     sigma2 <- - 2 * sigma^2 # square once for loop below (plus other Normal constants)
     
@@ -75,6 +83,7 @@ q1d <- function(n, k, sigma, a = 0.5, b = k + 0.5, s, F, Fst, interval = c(0.1, 
         } else {
             # collect the density values for each intermediate subpopulation at individual i's position
             # line implements super fast Normal without constant factors (which only involve constant sigma)
+            # NOTE: sigma = Inf is correctly handled here (gives all Q == 1 before normalizing)
             Q[i,] <- exp( (xs[i] - mus)^2 / sigma2 )
         }
     } 
@@ -88,4 +97,3 @@ q1d <- function(n, k, sigma, a = 0.5, b = k + 0.5, s, F, Fst, interval = c(0.1, 
         return(Q) # in direct case, always return Q
     }
 }
-

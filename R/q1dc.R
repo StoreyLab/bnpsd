@@ -13,6 +13,7 @@
 #' @param n Number of individuals
 #' @param k Number of intermediate subpopulations
 #' @param sigma Spread of intermediate subpopulations (approximate standard deviation of Von Mises densities, see above)
+#' The edge cases \code{sigma = 0} and \code{sigma = Inf} are handled appropriately!
 #' @param a Location of first individual
 #' @param b Location of last individual
 #'
@@ -54,6 +55,10 @@ q1dc <- function(n, k, sigma, a = 0, b = 2 * pi, s, F, Fst, interval = c(0.1,10)
         if (missing(Fst))
             stop('Fst is required when sigma is missing!')
         sigma <- bias_coeff_admix_fit(s, F, n, q1dc, interval, tol)
+    } else {
+        # validate input sigma here (bias_coeff_admix_fit ought to return valid numbers)
+        if ( sigma < 0 )
+            stop('sigma must be non-negative!')
     }
     sigma2 <- sigma^2 # square once for loop below
     
@@ -65,9 +70,22 @@ q1dc <- function(n, k, sigma, a = 0, b = 2 * pi, s, F, Fst, interval = c(0.1,10)
     # construct the coefficients of each person now!
     Q <- matrix(nrow = n, ncol = k) # dimensions match that of makeQ
     for (i in 1:n) {
-        # collect the density values for each intermediate subpopulation at individual i's position
-        # line implements super fast Von Mises without constant factors (which only involve constant sigma)
-        Q[i,] <- exp( cos(xs[i] - mus) / sigma2 )
+        if (sigma == 0) {
+            # let's handle this special case, the limit of which is the island model
+            # compute distances to the subpopulations
+            distances <- cos(xs[i] - mus)
+            # find the minimum distance
+            min_distance <- min( distances )
+            # ok to set to booleans (normalization will turn numeric)
+            # the minima will be TRUE (1), the rest FALSE (0)
+            # this ensures ties get admix_proportions split evenly (after normalizing at the end)
+            Q[i,] <- distances == min_distance
+        } else {
+            # collect the density values for each intermediate subpopulation at individual i's position
+            # line implements super fast Von Mises without constant factors (which only involve constant sigma)
+            # NOTE: sigma = Inf is correctly handled here (gives all Q == 1 before normalizing)
+            Q[i,] <- exp( cos(xs[i] - mus) / sigma2 )
+        }
     }
     # normalize to have rows/coefficients sum to 1!
     Q <- Q / rowSums(Q)
