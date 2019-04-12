@@ -202,19 +202,28 @@ test_that("qis returns valid admixture coefficients", {
 test_that("q1d returns valid admixture coefficients", {
     n <- 10
     k <- 2
-    sigma <- 1
-    Q <- q1d(n, k, sigma)
+    Q <- q1d(n, k, sigma = 1)
     expect_equal(nrow(Q), n) # n rows
     expect_equal(ncol(Q), k) # k columns
     expect_true(all(Q >= 0)) # all are non-negative
     expect_true(all(Q <= 1)) # all are smaller or equal than 1
     expect_equal(rowSums(Q), rep.int(1, n)) # rows sum to 1, vector length n
 
+    # test with sigma == 0 (special case that makes usual formula break)
+    Q <- q1d(n, k, sigma = 0)
+    expect_equal(nrow(Q), n) # n rows
+    expect_equal(ncol(Q), k) # k columns
+    expect_true(all(Q >= 0)) # all are non-negative
+    expect_true(all(Q <= 1)) # all are smaller or equal than 1
+    expect_equal(rowSums(Q), rep.int(1, n)) # rows sum to 1, vector length n
+    # in this case it should equal independent subpopulations
+    labs <- c( rep.int(1, 5), rep.int(2, 5) ) # two subpops
+    Q2 <- qis(labs)
+    dimnames(Q2) <- NULL # before comparing, must toss column names
+    expect_equal(Q, Q2)
+
     # test s version
-    s <- 0.5
-    F <- 1:k # scale doesn't matter right now...
-    Fst <- 0.1
-    obj <- q1d(n, k, s = s, F = F, Fst = Fst)
+    obj <- q1d(n, k, s = 0.5, F = 1:k, Fst = 0.1)
     Q <- obj$Q # returns many things in this case, get Q here
     expect_equal(nrow(Q), n) # n rows
     expect_equal(ncol(Q), k) # k columns

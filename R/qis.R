@@ -41,7 +41,7 @@ qis <- function(labs, subpops) {
     }
     n <- length(labs) # number of individuals
     k <- length(subpops) # number of subpopulations
-    Q <- matrix(nrow = n, ncol = k) # initialize the desired admixture matrix
+    Q <- matrix(0, nrow = n, ncol = k) # initialize the desired admixture matrix
     colnames(Q) <- subpops # return subpopulation names in admixture matrix column names
     # fill in Q, navigating each subpopulation
     for (i in 1:k) {

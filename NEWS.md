@@ -29,3 +29,7 @@ These loci are not polymorphic so they would normally not be considered in analy
 
 * Converted the vignette from PDF to HTML
 
+# 2019-04-11 - bnpsd 1.0.5.9000
+
+* `qis` now returns a numeric admixture proportions matrix (used to be logical)
+* Updated coding style, renamed some internal functions and variables

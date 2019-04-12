@@ -42,8 +42,8 @@
 #' @export
 q1d <- function(n, k, sigma, a = 0.5, b = k + 0.5, s, F, Fst, interval = c(0.1, 10), tol = .Machine$double.eps) {
     # figure out if we need the more complicated algorithm...
-    sigmaMissing <- missing(sigma) # remember after it was set
-    if (sigmaMissing) { # this triggers s version
+    sigma_missing <- missing(sigma) # remember after it was set
+    if (sigma_missing) { # this triggers s version
         if (missing(s))
             stop('s is required when sigma is missing!')
         if (missing(F))
@@ -62,14 +62,26 @@ q1d <- function(n, k, sigma, a = 0.5, b = k + 0.5, s, F, Fst, interval = c(0.1, 
     # construct the coefficients of each person now!
     Q <- matrix(nrow = n, ncol = k) # dimensions match that of makeQ
     for (i in 1:n) {
-        # collect the density values for each intermediate subpopulation at individual i's position
-        # line implements super fast Normal without constant factors (which only involve constant sigma)
-        Q[i,] <- exp( (xs[i] - mus)^2 / sigma2 )
-    }
+        if (sigma == 0) {
+            # let's handle this special case, the limit of which is the island model
+            # compute distances to the subpopulations
+            distances <- (xs[i] - mus)^2
+            # find the minimum distance
+            min_distance <- min( distances )
+            # ok to set to booleans (normalization will turn numeric)
+            # the minima will be TRUE (1), the rest FALSE (0)
+            # this ensures ties get admix_proportions split evenly (after normalizing at the end)
+            Q[i,] <- distances == min_distance
+        } else {
+            # collect the density values for each intermediate subpopulation at individual i's position
+            # line implements super fast Normal without constant factors (which only involve constant sigma)
+            Q[i,] <- exp( (xs[i] - mus)^2 / sigma2 )
+        }
+    } 
     # normalize to have rows/coefficients sum to 1!
     Q <- Q / rowSums(Q)
 
-    if (sigmaMissing) { # this triggers s version
+    if (sigma_missing) { # this triggers s version
         F <- rescaleF(Q, F, Fst) # let's rescale F now!
         return( list(Q = Q, F = F, sigma = sigma) ) # return all this additional data!
     } else {
