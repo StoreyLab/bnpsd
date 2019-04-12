@@ -89,7 +89,7 @@ q1dc <- function(n, k, sigma, a = 0, b = 2 * pi, s, F, Fst) {
     Q <- Q / rowSums(Q)
 
     if (sigmaMissing) { # this triggers s version
-        F <- rescaleF(Q, F, Fst) # let's rescale F now!
+        F <- rescale_coanc_subpops(Q, F, Fst) # let's rescale F now!
         return( list(Q = Q, F = F, sigma = sigma) ) # return all this additional data!
     } else {
         return(Q) # in direct case, always return Q

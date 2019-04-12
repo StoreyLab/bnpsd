@@ -336,14 +336,14 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     expect_equal(s, s_want)
 })
 
-test_that("rescaleF agrees with explicitly Fst calculation", {
+test_that("rescale_coanc_subpops agrees with explicitly Fst calculation", {
     n <- 5
     k <- 2
     sigma <- 1
     Fst <- 0.1
     Q <- q1d(n, k, sigma)
     F <- 1:k # scale doesn't matter right now...
-    F2 <- rescaleF(Q, F, Fst) # calculation to compare to
+    F2 <- rescale_coanc_subpops(Q, F, Fst) # calculation to compare to
     Theta <- coanc_admix(Q, F2) # in wrong scale but meh
     Fst2 <- mean(diag(Theta)) # this is the actual Fst, with uniform weights
     expect_equal(Fst, Fst2)
