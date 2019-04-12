@@ -42,8 +42,9 @@ These loci are not polymorphic so they would normally not be considered in analy
 
 * Renamed several functions for clarity:
   * `coanc` -> `coanc_admix`
+  * `fst` -> `fst_admix` (no deprecated version available in this case, to eliminate conflict with `popkin::fst`)
   * Functions with old names remain for now as deprecated functions (to be removed in the future).
-* Renamed several argument names for clarity:
+* Renamed several recurrent argument names for clarity:
   * `Q` -> `admix_proportions`
   * `F` -> `coanc_subpops` (if general matrix is accepted), `inbr_subpops` (vector or scalar versions required)
   * `s` -> `bias_coeff`

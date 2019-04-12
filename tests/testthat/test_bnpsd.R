@@ -89,30 +89,30 @@ test_that("coanc_to_kinship works in toy cases", {
     expect_equal(Phi, PhiExp)
 }) 
 
-test_that("fst works in toy cases", {
+test_that("fst_admix works in toy cases", {
     Q <- diag(c(1, 1)) # an IS model with two subpops
     F <- c(0.1, 0.3)
     fst1 <- mean(F) # the Theta we expect for this setup
-    fst2 <- fst(Q, F)
+    fst2 <- fst_admix(Q, F)
     expect_equal(fst1, fst2)
 
     # same Q, scalar F
     F <- 0.2
-    fst2 <- fst(Q, F)
+    fst2 <- fst_admix(Q, F)
     expect_equal(F, fst2)
 
     # same Q, matrix F
     Fv <- c(0.1, 0.4) # vector version
     F <- diag(Fv) # matrix version
     fst1 <- mean(Fv)
-    fst2 <- fst(Q, F)
+    fst2 <- fst_admix(Q, F)
     expect_equal(fst1, fst2) # F is the theta we expect in this case
 
     # most complex case, just a general math check
     Q <- matrix(c(0.7, 0.3, 0.2, 0.8), nrow = 2, byrow = TRUE)
     F <- matrix(c(0.3, 0.1, 0.1, 0.3), nrow = 2, byrow = TRUE)
     fst1 <- mean(diag(Q %*% F %*% t(Q))) # the Fst we expect for this setup (slower but more explicit version)
-    fst2 <- fst(Q, F)
+    fst2 <- fst_admix(Q, F)
     expect_equal(fst1, fst2)
 })
 

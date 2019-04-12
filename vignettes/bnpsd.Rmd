@@ -89,8 +89,6 @@ $$
 Let's generate the same population structure used in the simulation of [@Ochoa083923].
 ```{r}
 library(RColorBrewer) # for nice colors
-# load this package (bnpsd) and a related popgen package (popkin)
-# since both packages have an "fst" function, load "bnpsd" last so its function isn't masked
 library(popkin) # for visualizing coancestry matrix with plot_popkin
 library(bnpsd)
 
@@ -109,11 +107,11 @@ inbr_subpops <- obj$F
 # get pop structure parameters of the admixed individuals
 coancestry <- coanc_admix(admix_proportions, inbr_subpops) # the coancestry matrix
 # verify that we got the desired Fst!
-Fst2 <- fst(admix_proportions, inbr_subpops)
+Fst2 <- fst_admix(admix_proportions, inbr_subpops)
 Fst2
 # this should also equal Fst
 inbr <- diag(coancestry)
-popkin::fst(inbr)
+fst(inbr) # popkin version
 # verify that we got the desired s too!
 s2 <- mean(coancestry) / Fst
 s2
@@ -298,7 +296,7 @@ inbr_subpops <- obj$F
 # get pop structure parameters of the admixed individuals
 coancestry <- coanc_admix(admix_proportions, inbr_subpops) # the coancestry matrix
 # verify that we got the desired Fst!
-fst(admix_proportions, inbr_subpops)
+fst_admix(admix_proportions, inbr_subpops)
 
 # verify that we got the desired s too!
 mean(coancestry) / Fst
@@ -354,17 +352,18 @@ admix_proportions <- qis(labs)
 head(admix_proportions, 2)
 
 # construct the intermediate subpopulation FST vector
+# NOTE fst is a popkin function
 Fst <- 0.2 # the desired final FST
 inbr_subpops <- 1:k # subpopulation FST vector, unnormalized so far
-inbr_subpops <- inbr_subpops / popkin::fst(inbr_subpops) * Fst # normalized to have the desired Fst
-popkin::fst(inbr_subpops) # verify FST for the intermediate subpopulations
+inbr_subpops <- inbr_subpops / fst(inbr_subpops) * Fst # normalized to have the desired Fst
+fst(inbr_subpops) # verify FST for the intermediate subpopulations
 
 # get coancestry of the admixed individuals
 coancestry <- coanc_admix(admix_proportions, inbr_subpops) # the coancestry matrix
 # before getting FST for individuals, weigh then inversely proportional to subpop sizes
 weights <- weights_subpops(labs) # function from `popkin` package
 # verify Fst for individuals (same as for intermediate subpops for this pop structure)
-fst(admix_proportions, inbr_subpops, weights)
+fst_admix(admix_proportions, inbr_subpops, weights)
 ```
 
 ```{r, fig.width = 4, fig.height = 1.2, fig.align = 'center'}

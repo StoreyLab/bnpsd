@@ -35,7 +35,7 @@ rescaleF <- function(Q, F, Fst, weights = NULL) {
     
     # calculate necessary intermediates
     # could probably be more efficient skipping un-needed matrix products, but such efficiency is not needed here because this function is usually called once only and n is big but not huge
-    fst_0 <- fst(Q, F, weights) # get Fst under this model (wrong scale, yields adjustment!)
+    fst_0 <- fst_admix(Q, F, weights) # get Fst under this model (wrong scale, yields adjustment!)
     F <- F * Fst / fst_0 # this fixes scale
     # unfortunately, some F (particularly very non-uniform vectors) may be rescaled to values greater than 1, which would be disallowed under the probabilistic inbreeding framework.  Check and stop if needed!
     if (max(F) > 1)

@@ -14,7 +14,7 @@
 #' n <- 5 # number of individuals and subpops
 #' admix_proportions <- diag(rep.int(1, n)) # unadmixed individuals
 #' coanc_subpops <- 0.2 # equal Fst for all subpops
-#' coancestry <- coanc(admix_proportions, coanc_subpops) # diagonal coancestry matryx
+#' coancestry <- coanc_admix(admix_proportions, coanc_subpops) # diagonal coancestry matryx
 #'
 #' # a more complicated admixture model
 #' n <- 5 # number of individuals
@@ -22,7 +22,7 @@
 #' sigma <- 1 # dispersion parameter of intermediate subpops
 #' admix_proportions <- q1d(n, k, sigma) # non-trivial admixture proportions
 #' coanc_subpops <- c(0.1, 0.3) # different Fst for each of the k subpops
-#' coancestry <- coanc(admix_proportions, coanc_subpops) # non-trivial coancestry matrix
+#' coancestry <- coanc_admix(admix_proportions, coanc_subpops) # non-trivial coancestry matrix
 #' 
 #' @export 
 coanc_admix <- function(admix_proportions, coanc_subpops) {

@@ -17,7 +17,7 @@
 #'
 #' # get pop structure parameters of the admixed individuals
 #' coancestry <- coanc_admix(admix_proportions, inbr_subpops) # the coancestry matrix
-#' Fst <- fst(admix_proportions, inbr_subpops) # FST of admixed individuals
+#' Fst <- fst_admix(admix_proportions, inbr_subpops) # FST of admixed individuals
 #'
 #' # draw all random allele freqs and genotypes
 #' out <- rbnpsd(admix_proportions, inbr_subpops, m)
