@@ -49,5 +49,6 @@ These loci are not polymorphic so they would normally not be considered in analy
   * `F` -> `coanc_subpops` (if general matrix is accepted), `inbr_subpops` (vector or scalar versions required)
   * `s` -> `bias_coeff`
   * `w` -> `weights`
+  * `Theta` -> `coancestry`
   * Deprecated functions still accept old argument names.
 * Added more input checks to functions, informative error messages.

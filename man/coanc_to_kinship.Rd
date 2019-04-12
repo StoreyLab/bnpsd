@@ -4,10 +4,10 @@
 \alias{coanc_to_kinship}
 \title{Transform coancestry matrix to kinship matrix}
 \usage{
-coanc_to_kinship(Theta)
+coanc_to_kinship(coancestry)
 }
 \arguments{
-\item{Theta}{The \eqn{n \times n}{n-by-n} coancestry matrix}
+\item{coancestry}{The \eqn{n \times n}{n-by-n} coancestry matrix}
 }
 \value{
 The \eqn{n \times n}{n-by-n} kinship matrix, preserving column and row names.
@@ -23,19 +23,19 @@ Below \eqn{n} is the number of individuals.
 \examples{
 # a trivial case: unadmixed individuals from independent subpopulations
 n <- 5 # number of individuals/subpops
-Q <- diag(rep.int(1, n)) # unadmixed individuals
-F <- 0.2 # equal Fst for all subpops
-Theta <- coanc_admix(Q, F) # diagonal coancestry matryx
-kinship <- coanc_to_kinship(Theta)
+admix_proportions <- diag(rep.int(1, n)) # unadmixed individuals
+inbr_subpops <- 0.2 # equal Fst for all subpops
+coancestry <- coanc_admix(admix_proportions, inbr_subpops) # diagonal coancestry matryx
+kinship <- coanc_to_kinship(coancestry)
 
 # a more complicated admixture model
 n <- 5 # number of individuals
 k <- 2 # number of intermediate subpops
 sigma <- 1 # dispersion parameter of intermediate subpops
-Q <- q1d(n, k, sigma) # non-trivial admixture proportions
-F <- c(0.1, 0.3) # different Fst for each of the k subpops
-Theta <- coanc_admix(Q, F) # non-trivial coancestry matrix
-kinship <- coanc_to_kinship(Theta)
+admix_proportions <- q1d(n, k, sigma) # non-trivial admixture proportions
+inbr_subpops <- c(0.1, 0.3) # different Fst for each of the k subpops
+coancestry <- coanc_admix(admix_proportions, inbr_subpops) # non-trivial coancestry matrix
+kinship <- coanc_to_kinship( coancestry )
 
 }
 \seealso{
