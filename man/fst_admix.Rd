@@ -28,8 +28,8 @@ s <- 0.5 # desired bias coefficient
 sigma <- 1 # for 1D admixture model
 # differentiation of intermediate subpopulations
 coanc_subpops <- (1:k)/k
-# construct final admixture proportions
-admix_proportions <- q1d(n = n, k = k, sigma = sigma)
+# construct admixture proportions
+admix_proportions <- admix_prop_1d_linear(n, k, sigma)
 # lastly, calculate Fst!!! (uniform weights in this case)
 fst_admix(admix_proportions, coanc_subpops)
 

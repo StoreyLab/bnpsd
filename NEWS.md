@@ -42,6 +42,8 @@ These loci are not polymorphic so they would normally not be considered in analy
 
 * Renamed several functions for clarity:
   * `coanc` -> `coanc_admix`
+  * `q1d` -> `admix_prop_1d_linear`
+  * `q1dc` -> `admix_prop_1d_circular`
   * `fst` -> `fst_admix` (no deprecated version available in this case, to eliminate conflict with `popkin::fst`)
   * Functions with old names remain for now as deprecated functions (to be removed in the future).
 * Renamed several recurrent argument names for clarity:
@@ -51,4 +53,6 @@ These loci are not polymorphic so they would normally not be considered in analy
   * `w` -> `weights`
   * `Theta` -> `coancestry`
   * Deprecated functions still accept old argument names.
+* Fixed a `sigma = 0` bug in `admix_prop_1d_circular`.
 * Added more input checks to functions, informative error messages.
+* Updated documentation, particularly on whether intermediate subpopulation coancestries are accepted generally (`coanc_subpops`) or if the diagonal matrix case is required (specified as vector or scalar `inbr_subpops`).

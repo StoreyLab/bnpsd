@@ -39,7 +39,8 @@ k <- 2 # number of intermediate subpops
 # define population structure
 inbr_subpops <- c(0.1, 0.3) # FST values for k=2 subpopulations
 sigma <- 1 # dispersion parameter of intermediate subpops
-admix_proportions <- q1d(n, k, sigma) # admixture proportions from 1D geography
+# admixture proportions from 1D geography
+admix_proportions <- admix_prop_1d_linear(n, k, sigma)
 
 # get pop structure parameters of the admixed individuals
 coancestry <- coanc_admix(admix_proportions, inbr_subpops) # the coancestry matrix

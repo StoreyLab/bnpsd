@@ -17,7 +17,7 @@
 #' F <- c(0.1, 0.3) # FST values for k=2 subpops
 #' B <- rpint(pAnc, F) # matrix of intermediate subpop allele freqs
 #' sigma <- 1 # dispersion parameter of intermediate subpops
-#' Q <- q1d(n, k, sigma) # non-trivial admixture proportions
+#' Q <- admix_prop_1d_linear(n, k, sigma) # non-trivial admixture proportions
 #' P <- rpiaf(B,Q)
 #'
 #' @export

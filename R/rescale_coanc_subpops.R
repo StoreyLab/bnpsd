@@ -21,8 +21,8 @@
 # # differentiation of subpops (relative (wrong) scale)
 # coanc_subpops <- (1:k) / k
 # # construct admixture proportions
-# admix_proportions <- q1d(n = n, k = k, sigma = sigma)
-# # lastly, rescale coanc_subpops to give desired Fst!!!
+# admix_proportions <- admix_prop_1d_linear(n, k, sigma)
+# # lastly, rescale coanc_subpops to give desired FST!!!
 # coanc_subpops <- rescale_coanc_subpops(admix_proportions, coanc_subpops, Fst)
 rescale_coanc_subpops <- function(admix_proportions, coanc_subpops, fst, weights = NULL) {
     # die informatively...
