@@ -44,6 +44,7 @@ These loci are not polymorphic so they would normally not be considered in analy
   * `coanc` -> `coanc_admix`
   * `q1d` -> `admix_prop_1d_linear`
   * `q1dc` -> `admix_prop_1d_circular`
+  * `qis` -> `admix_prop_indep_subpops`
   * `fst` -> `fst_admix` (no deprecated version available in this case, to eliminate conflict with `popkin::fst`)
   * Functions with old names remain for now as deprecated functions (to be removed in the future).
 * Renamed several recurrent argument names for clarity:

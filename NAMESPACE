@@ -2,6 +2,7 @@
 
 export(admix_prop_1d_circular)
 export(admix_prop_1d_linear)
+export(admix_prop_indep_subpops)
 export(coanc)
 export(coanc_admix)
 export(coanc_to_kinship)

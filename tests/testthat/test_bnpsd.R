@@ -154,51 +154,51 @@ test_that("bias_coeff_admix agrees with explicitly calculated bias_coeff", {
     expect_true(s <= 1)
 })
 
-test_that("qis returns valid admixture coefficients", {
+test_that("admix_prop_indep_subpops returns valid admixture coefficients", {
     labs <- c(1, 2, 2, 3, 3, 3, 4, 4, 4, 4)
     n <- length(labs)
     k <- length(unique(labs))
-    admix_proportions <- qis(labs)
+    admix_proportions <- admix_prop_indep_subpops(labs)
     # general tests for admixture matrices
     expect_equal(nrow(admix_proportions), n) # n rows
     expect_equal(ncol(admix_proportions), k) # k columns
     expect_true(all(admix_proportions >= 0)) # all are non-negative
     expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
     expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
-    # specific tests for qis
+    # specific tests for admix_prop_indep_subpops
     expect_true(all(admix_proportions %in% c(TRUE, FALSE)))
     expect_true(all(colnames(admix_proportions) == sort(unique(labs))))
     
     # test with provided subpops
     subpops <- 4:1
-    admix_proportions <- qis(labs, subpops)
+    admix_proportions <- admix_prop_indep_subpops(labs, subpops)
     # general tests for admixture matrices
     expect_equal(nrow(admix_proportions), n) # n rows
     expect_equal(ncol(admix_proportions), k) # k columns
     expect_true(all(admix_proportions >= 0)) # all are non-negative
     expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
     expect_equal(rowSums(admix_proportions), rep.int(1,n)) # rows sum to 1, vector length n
-    # specific tests for qis
+    # specific tests for admix_prop_indep_subpops
     expect_true(all(admix_proportions %in% c(TRUE, FALSE)))
     expect_true(all(colnames(admix_proportions) == subpops))
     
     # test with provided subpops (additional labels)
     k <- 10
     subpops <- 1:k
-    admix_proportions <- qis(labs, subpops)
+    admix_proportions <- admix_prop_indep_subpops(labs, subpops)
     # general tests for admixture matrices
     expect_equal(nrow(admix_proportions), n) # n rows
     expect_equal(ncol(admix_proportions), k) # k columns
     expect_true(all(admix_proportions >= 0)) # all are non-negative
     expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
     expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
-    # specific tests for qis
+    # specific tests for admix_prop_indep_subpops
     expect_true(all(admix_proportions %in% c(TRUE, FALSE)))
     expect_true(all(colnames(admix_proportions) == subpops))
 
     # test with provided subpops (missing labels, must die!)
     subpops <- 1:3 # missing 4!
-    expect_error( qis(labs, subpops) )
+    expect_error( admix_prop_indep_subpops(labs, subpops) )
 })
 
 test_that("admix_prop_1d_linear returns valid admixture coefficients", {
@@ -220,7 +220,7 @@ test_that("admix_prop_1d_linear returns valid admixture coefficients", {
     expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
     # in this case it should equal independent subpopulations
     labs <- c( rep.int(1, 5), rep.int(2, 5) ) # two subpops
-    admix_proportions2 <- qis(labs)
+    admix_proportions2 <- admix_prop_indep_subpops(labs)
     dimnames(admix_proportions2) <- NULL # before comparing, must toss column names
     expect_equal(admix_proportions, admix_proportions2)
 
