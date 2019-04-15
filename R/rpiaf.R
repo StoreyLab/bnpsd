@@ -15,7 +15,7 @@
 #' k_subpops <- 2 # number of intermediate subpops
 #' p_anc <- draw_p_anc(m_loci) # random vector of ancestral allele frequencies
 #' inbr_subpops <- c(0.1, 0.3) # FST values for k=2 subpops
-#' p_subpops <- rpint(p_anc, inbr_subpops) # matrix of intermediate subpop allele freqs
+#' p_subpops <- draw_p_subpops(p_anc, inbr_subpops) # matrix of intermediate subpop allele freqs
 #' sigma <- 1 # dispersion parameter of intermediate subpops
 #' # non-trivial admixture proportions
 #' admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma)

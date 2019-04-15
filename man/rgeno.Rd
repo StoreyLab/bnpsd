@@ -30,23 +30,24 @@ This low-memory algorithm prevents the construction of the entire IAF matrix, bu
 }
 \examples{
 # dimensions
-m <- 10 # number of loci
-n <- 5 # number of individuals
-k <- 2 # number of intermediate subpops
+m_loci <- 10 # number of loci
+n_ind <- 5 # number of individuals
+k_subpops <- 2 # number of intermediate subpops
 
 # define population structure
-F <- c(0.1, 0.3) # FST values for k=2 subpops
+inbr_subpops <- c(0.1, 0.3) # FST values for k=2 subpops
 sigma <- 1 # dispersion parameter of intermediate subpops
-Q <- admix_prop_1d_linear(n, k, sigma) # non-trivial admixture proportions
+# non-trivial admixture proportions
+admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma)
 
 # draw alelle frequencies
-p_anc <- draw_p_anc(m) # random vector of ancestral allele frequencies
-B <- rpint(p_anc, F) # matrix of intermediate subpop allele freqs
-P <- rpiaf(B, Q) # matrix of individual-specific allele frequencies
+p_anc <- draw_p_anc(m_loci) # random vector of ancestral allele frequencies
+p_subpops <- draw_p_subpops(p_anc, inbr_subpops) # matrix of intermediate subpop allele freqs
+p_ind <- rpiaf(p_subpops, admix_proportions) # matrix of individual-specific allele frequencies
 
 # draw genotypes from intermediate subpops (one individual each)
-Xb <- rgeno(B)
+X_subpops <- rgeno(p_subpops)
 # and genotypes for admixed individuals
-Xp <- rgeno(P)
+X_ind <- rgeno(p_ind)
 
 }

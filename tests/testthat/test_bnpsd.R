@@ -515,12 +515,12 @@ test_that("draw_p_anc is in range", {
     expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
 })
 
-test_that("rpint is in range", {
+test_that("draw_p_subpops is in range", {
     m <- 1000
     F <- c(0.1, 0.2, 0.3)
     k <- length(F)
     p_anc <- draw_p_anc(m)
-    B <- rpint(p_anc, F)
+    B <- draw_p_subpops(p_anc, F)
     expect_equal(nrow(B), m)
     expect_equal(ncol(B), k)
     expect_true(all(B >= 0)) # all are non-negative
@@ -535,7 +535,7 @@ test_that("rpiaf is in range", {
     admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions) # repeat so we have multiple people per island
     n <- nrow(admix_proportions) # number of individuals (3 * k)
     p_anc <- draw_p_anc(m)
-    B <- rpint(p_anc, F)
+    B <- draw_p_subpops(p_anc, F)
     P <- rpiaf(B, admix_proportions)
     expect_equal(nrow(P), m)
     expect_equal(ncol(P), n)
@@ -551,7 +551,7 @@ test_that("rgeno is in range", {
     admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions) # repeat so we have multiple people per island
     n <- nrow(admix_proportions) # number of individuals (3 * k)
     p_anc <- draw_p_anc(m)
-    B <- rpint(p_anc, F)
+    B <- draw_p_subpops(p_anc, F)
     P <- rpiaf(B, admix_proportions)
     X <- rgeno(P) # direct test
     expect_equal(nrow(X), m)

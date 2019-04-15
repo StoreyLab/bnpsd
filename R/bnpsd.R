@@ -24,13 +24,13 @@
 #' out <- rbnpsd(admix_proportions, inbr_subpops, m_loci)
 #' X <- out$X # genotypes
 #' p_ind <- out$P # IAFs (individual-specific AFs)
-#' p_subops <- out$B # intermediate AFs
+#' p_subops <- out$B # independent subpops (intermediate) AFs
 #' p_anc <- out$Pa # ancestral AFs
 #'
 #' # OR... draw each vector or matrix separately
 #' # provided for additional flexibility
 #' p_anc <- draw_p_anc(m_loci) # ancestral AFs
-#' p_subpops <- rpint(p_anc, inbr_subpops) # "int"ermediate AFs
+#' p_subpops <- draw_p_subpops(p_anc, inbr_subpops) # independent subpops (intermediate) AFs
 #' p_ind <- rpiaf(p_subpops, admix_proportions) # "IAF"s (individual-specific AFs)
 #' X <- rgeno(p_ind) # "geno"types
 #' 
