@@ -11,10 +11,10 @@
 #' @return The \eqn{m \times k}{m-by-k} matrix of intermediate subpopulation allele frequencies
 #'
 #' @examples
-#' m <- 10 # number of loci
-#' pAnc <- rpanc(m) # random vector of ancestral allele frequencies
-#' F <- c(0.1, 0.3) # FST values for two subpops
-#' B <- rpint(pAnc, F) # matrix of intermediate subpop allele freqs
+#' m_loci <- 10 # number of loci
+#' p_anc <- draw_p_anc(m_loci) # random vector of ancestral allele frequencies
+#' inbr_subpops <- c(0.1, 0.3) # FST values for two subpops
+#' p_subpops <- rpint(p_anc, inbr_subpops) # matrix of intermediate subpop allele freqs
 #'
 #' @export
 rpint <- function(pAnc, F) {

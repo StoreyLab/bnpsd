@@ -507,20 +507,20 @@ test_that("rescale_coanc_subpops agrees with explicitly FST calculation", {
     # since 0 < Fst=0.1 < 1, there's nothing else to test
 })
 
-test_that("rpanc is in range", {
+test_that("draw_p_anc is in range", {
     m <- 1000
-    pAnc <- rpanc(m)
-    expect_equal(length(pAnc), m)
-    expect_true(all(pAnc >= 0)) # all are non-negative
-    expect_true(all(pAnc <= 1)) # all are smaller or equal than 1
+    p_anc <- draw_p_anc(m)
+    expect_equal(length(p_anc), m)
+    expect_true(all(p_anc >= 0)) # all are non-negative
+    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
 })
 
 test_that("rpint is in range", {
     m <- 1000
     F <- c(0.1, 0.2, 0.3)
     k <- length(F)
-    pAnc <- rpanc(m)
-    B <- rpint(pAnc, F)
+    p_anc <- draw_p_anc(m)
+    B <- rpint(p_anc, F)
     expect_equal(nrow(B), m)
     expect_equal(ncol(B), k)
     expect_true(all(B >= 0)) # all are non-negative
@@ -534,8 +534,8 @@ test_that("rpiaf is in range", {
     admix_proportions <- diag(rep.int(1, k)) # island model for test...
     admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions) # repeat so we have multiple people per island
     n <- nrow(admix_proportions) # number of individuals (3 * k)
-    pAnc <- rpanc(m)
-    B <- rpint(pAnc, F)
+    p_anc <- draw_p_anc(m)
+    B <- rpint(p_anc, F)
     P <- rpiaf(B, admix_proportions)
     expect_equal(nrow(P), m)
     expect_equal(ncol(P), n)
@@ -550,8 +550,8 @@ test_that("rgeno is in range", {
     admix_proportions <- diag(rep.int(1, k)) # island model for test...
     admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions) # repeat so we have multiple people per island
     n <- nrow(admix_proportions) # number of individuals (3 * k)
-    pAnc <- rpanc(m)
-    B <- rpint(pAnc, F)
+    p_anc <- draw_p_anc(m)
+    B <- rpint(p_anc, F)
     P <- rpiaf(B, admix_proportions)
     X <- rgeno(P) # direct test
     expect_equal(nrow(X), m)
@@ -579,7 +579,7 @@ test_that("rbnpsd works well", {
     X <- out$X # genotypes
     P <- out$P # IAFs
     B <- out$B # Intermediate AFs
-    pAnc <- out$Pa # Ancestral AFs
+    p_anc <- out$Pa # Ancestral AFs
     # test X
     expect_equal(nrow(X), m)
     expect_equal(ncol(X), n)
@@ -594,10 +594,10 @@ test_that("rbnpsd works well", {
     expect_equal(ncol(B), k)
     expect_true(all(B >= 0)) # all are non-negative
     expect_true(all(B <= 1)) # all are smaller or equal than 1
-    # test pAnc
-    expect_equal(length(pAnc), m)
-    expect_true(all(pAnc >= 0)) # all are non-negative
-    expect_true(all(pAnc <= 1)) # all are smaller or equal than 1
+    # test p_anc
+    expect_equal(length(p_anc), m)
+    expect_true(all(p_anc >= 0)) # all are non-negative
+    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
 })
 
 test_that("rbnpsd `noFixed = TRUE` works well", {
@@ -612,7 +612,7 @@ test_that("rbnpsd `noFixed = TRUE` works well", {
     X <- out$X # genotypes
     P <- out$P # IAFs
     B <- out$B # Intermediate AFs
-    pAnc <- out$Pa # Ancestral AFs
+    p_anc <- out$Pa # Ancestral AFs
     # test X
     expect_equal(nrow(X), m)
     expect_equal(ncol(X), n)
@@ -628,10 +628,10 @@ test_that("rbnpsd `noFixed = TRUE` works well", {
     expect_equal(ncol(B), k)
     expect_true(all(B >= 0)) # all are non-negative
     expect_true(all(B <= 1)) # all are smaller or equal than 1
-    # test pAnc
-    expect_equal(length(pAnc), m)
-    expect_true(all(pAnc >= 0)) # all are non-negative
-    expect_true(all(pAnc <= 1)) # all are smaller or equal than 1
+    # test p_anc
+    expect_equal(length(p_anc), m)
+    expect_true(all(p_anc >= 0)) # all are non-negative
+    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
 })
 
 test_that("rbnpsd `lowMem = TRUE` works well", {
@@ -645,7 +645,7 @@ test_that("rbnpsd `lowMem = TRUE` works well", {
     out <- rbnpsd(admix_proportions, F, m, lowMem = TRUE)
     X <- out$X # genotypes
     B <- out$B # Intermediate AFs
-    pAnc <- out$Pa # Ancestral AFs
+    p_anc <- out$Pa # Ancestral AFs
     # test X
     expect_equal(nrow(X), m)
     expect_equal(ncol(X), n)
@@ -655,8 +655,8 @@ test_that("rbnpsd `lowMem = TRUE` works well", {
     expect_equal(ncol(B), k)
     expect_true(all(B >= 0)) # all are non-negative
     expect_true(all(B <= 1)) # all are smaller or equal than 1
-    # test pAnc
-    expect_equal(length(pAnc), m)
-    expect_true(all(pAnc >= 0)) # all are non-negative
-    expect_true(all(pAnc <= 1)) # all are smaller or equal than 1
+    # test p_anc
+    expect_equal(length(p_anc), m)
+    expect_true(all(p_anc >= 0)) # all are non-negative
+    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
 })

@@ -28,8 +28,8 @@
 #' Q <- admix_prop_1d_linear(n, k, sigma) # non-trivial admixture proportions
 #'
 #' # draw alelle frequencies
-#' pAnc <- rpanc(m) # random vector of ancestral allele frequencies
-#' B <- rpint(pAnc, F) # matrix of intermediate subpop allele freqs
+#' p_anc <- draw_p_anc(m) # random vector of ancestral allele frequencies
+#' B <- rpint(p_anc, F) # matrix of intermediate subpop allele freqs
 #' P <- rpiaf(B, Q) # matrix of individual-specific allele frequencies
 #'
 #' # draw genotypes from intermediate subpops (one individual each)

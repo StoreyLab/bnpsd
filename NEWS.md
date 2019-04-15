@@ -45,6 +45,7 @@ These loci are not polymorphic so they would normally not be considered in analy
   * `q1d` -> `admix_prop_1d_linear`
   * `q1dc` -> `admix_prop_1d_circular`
   * `qis` -> `admix_prop_indep_subpops`
+  * `rpanc` -> `draw_p_anc`
   * `fst` -> `fst_admix` (no deprecated version available in this case, to eliminate conflict with `popkin::fst`)
   * Functions with old names remain for now as deprecated functions (to be removed in the future).
 * Renamed several recurrent argument names for clarity:
@@ -53,6 +54,9 @@ These loci are not polymorphic so they would normally not be considered in analy
   * `s` -> `bias_coeff`
   * `w` -> `weights`
   * `Theta` -> `coancestry`
+  * `m` -> `m_loci`
+  * `n` -> `n_ind`
+  * `k` -> `k_subpops`
   * Deprecated functions still accept old argument names.
 * Fixed a `sigma = 0` bug in `admix_prop_1d_circular`.
 * Added more input checks to functions, informative error messages.

@@ -10,15 +10,16 @@
 #' @return The \eqn{m \times n}{m-by-n} IAF matrix \eqn{P}
 #'
 #' @examples
-#' m <- 10 # number of loci
-#' n <- 5 # number of individuals
-#' k <- 2 # number of intermediate subpops
-#' pAnc <- rpanc(m) # random vector of ancestral allele frequencies
-#' F <- c(0.1, 0.3) # FST values for k=2 subpops
-#' B <- rpint(pAnc, F) # matrix of intermediate subpop allele freqs
+#' m_loci <- 10 # number of loci
+#' n_ind <- 5 # number of individuals
+#' k_subpops <- 2 # number of intermediate subpops
+#' p_anc <- draw_p_anc(m_loci) # random vector of ancestral allele frequencies
+#' inbr_subpops <- c(0.1, 0.3) # FST values for k=2 subpops
+#' p_subpops <- rpint(p_anc, inbr_subpops) # matrix of intermediate subpop allele freqs
 #' sigma <- 1 # dispersion parameter of intermediate subpops
-#' Q <- admix_prop_1d_linear(n, k, sigma) # non-trivial admixture proportions
-#' P <- rpiaf(B,Q)
+#' # non-trivial admixture proportions
+#' admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma)
+#' p_ind <- rpiaf(p_subpops, admix_proportions)
 #'
 #' @export
 rpiaf <- function(B, Q) {
