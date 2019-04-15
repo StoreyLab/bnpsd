@@ -33,7 +33,7 @@ A named list that includes the following random matrices: X=genotypes, P=IAFs, B
 }
 \description{
 This function returns simulated ancestral, intermediate, and individual-specific allele frequencies and genotypes given the admixture structure, as determined by the admixture proportions and the vector of intermediate subpopulation \eqn{F_{ST}}{FST} values.
-The function is a wrapper around \code{\link{draw_p_anc}}, \code{\link{draw_p_subpops}}, \code{\link{rpiaf}}, and \code{\link{rgeno}}.
+The function is a wrapper around \code{\link{draw_p_anc}}, \code{\link{draw_p_subpops}}, \code{\link{make_p_ind_admix}}, and \code{\link{rgeno}}.
 Below \eqn{m} is the number of loci, \eqn{n} is the number of individuals, and \eqn{k} is the number of intermediate subpopulations.
 }
 \examples{
@@ -43,16 +43,16 @@ n_ind <- 5 # number of individuals
 k_subpops <- 2 # number of intermediate subpops
 
 # define population structure
-inbr_subpops <- c(0.1, 0.3) # FST values for k = 2 subpopulations
-sigma <- 1 # dispersion parameter of intermediate subpops
+# FST values for k = 2 subpopulations
+inbr_subpops <- c(0.1, 0.3)
 # admixture proportions from 1D geography
-admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma)
+admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma = 1)
 
 # draw all random allele freqs and genotypes
 out <- rbnpsd(admix_proportions, inbr_subpops, m_loci)
 X <- out$X # genotypes
-p_ind <- out$P # IAFs
-p_subpops <- out$B # Intermediate AFs
-p_anc <- out$Pa # Ancestral AFs
+p_ind <- out$P # individual-specific AFs
+p_subpops <- out$B # intermediate subpopulation AFs
+p_anc <- out$Pa # ancestral AFs
 
 }

@@ -17,22 +17,28 @@
 #' admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma)
 #'
 #' # get pop structure parameters of the admixed individuals
-#' coancestry <- coanc_admix(admix_proportions, inbr_subpops) # the coancestry matrix
-#' Fst <- fst_admix(admix_proportions, inbr_subpops) # FST of admixed individuals
+#' # the coancestry matrix
+#' coancestry <- coanc_admix(admix_proportions, inbr_subpops)
+#' # FST of admixed individuals
+#' Fst <- fst_admix(admix_proportions, inbr_subpops)
 #'
 #' # draw all random allele freqs and genotypes
 #' out <- rbnpsd(admix_proportions, inbr_subpops, m_loci)
 #' X <- out$X # genotypes
-#' p_ind <- out$P # IAFs (individual-specific AFs)
+#' p_ind <- out$P # individual-specific AFs
 #' p_subops <- out$B # independent subpops (intermediate) AFs
 #' p_anc <- out$Pa # ancestral AFs
 #'
 #' # OR... draw each vector or matrix separately
 #' # provided for additional flexibility
-#' p_anc <- draw_p_anc(m_loci) # ancestral AFs
-#' p_subpops <- draw_p_subpops(p_anc, inbr_subpops) # independent subpops (intermediate) AFs
-#' p_ind <- rpiaf(p_subpops, admix_proportions) # "IAF"s (individual-specific AFs)
-#' X <- rgeno(p_ind) # "geno"types
+#' # ancestral AFs
+#' p_anc <- draw_p_anc(m_loci)
+#' # independent subpops (intermediate) AFs
+#' p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
+#' # individual-specific AFs
+#' p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
+#' # genotypes
+#' X <- rgeno(p_ind)
 #' 
 #' @docType package
 #' @name bnpsd

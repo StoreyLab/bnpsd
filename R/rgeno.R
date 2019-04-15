@@ -23,15 +23,18 @@
 #' k_subpops <- 2 # number of intermediate subpops
 #'
 #' # define population structure
-#' inbr_subpops <- c(0.1, 0.3) # FST values for k=2 subpops
-#' sigma <- 1 # dispersion parameter of intermediate subpops
+#' # FST values for k = 2 subpops
+#' inbr_subpops <- c(0.1, 0.3)
 #' # non-trivial admixture proportions
-#' admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma)
+#' admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma = 1)
 #'
 #' # draw alelle frequencies
-#' p_anc <- draw_p_anc(m_loci) # random vector of ancestral allele frequencies
-#' p_subpops <- draw_p_subpops(p_anc, inbr_subpops) # matrix of intermediate subpop allele freqs
-#' p_ind <- rpiaf(p_subpops, admix_proportions) # matrix of individual-specific allele frequencies
+#' # vector of ancestral allele frequencies
+#' p_anc <- draw_p_anc(m_loci)
+#' # matrix of intermediate subpop allele freqs
+#' p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
+#' # matrix of individual-specific allele frequencies
+#' p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
 #'
 #' # draw genotypes from intermediate subpops (one individual each)
 #' X_subpops <- rgeno(p_subpops)
@@ -70,7 +73,7 @@ rgeno <- function(P, Q = NULL, lowMem = FALSE) {
     } else {
         if (!is.null(Q)) {
             # in this case we multiply P and Q to get the IAF matrix we want
-            P <- rpiaf(P, Q) # overwrite P in this case
+            P <- make_p_ind_admix(P, Q) # overwrite P in this case
         }
         # now P is the IAF matrix (either way), draw binomially from it!
         # it appears that rbinom reads P by column, and output is turned back into matrix also by column, therefore retaining consistency!

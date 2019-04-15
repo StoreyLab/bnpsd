@@ -47,6 +47,7 @@ These loci are not polymorphic so they would normally not be considered in analy
   * `qis` -> `admix_prop_indep_subpops`
   * `rpanc` -> `draw_p_anc`
   * `rpint` -> `draw_p_subpops`
+  * `rpiaf` -> `make_p_ind_admix`
   * `fst` -> `fst_admix` (no deprecated version available in this case, to eliminate conflict with `popkin::fst`)
   * Functions with old names remain for now as deprecated functions (to be removed in the future).
 * Renamed several recurrent argument names for clarity:

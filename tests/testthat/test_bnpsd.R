@@ -520,27 +520,28 @@ test_that("draw_p_subpops is in range", {
     F <- c(0.1, 0.2, 0.3)
     k <- length(F)
     p_anc <- draw_p_anc(m)
-    B <- draw_p_subpops(p_anc, F)
-    expect_equal(nrow(B), m)
-    expect_equal(ncol(B), k)
-    expect_true(all(B >= 0)) # all are non-negative
-    expect_true(all(B <= 1)) # all are smaller or equal than 1
+    p_subpops <- draw_p_subpops(p_anc, F)
+    expect_equal(nrow(p_subpops), m)
+    expect_equal(ncol(p_subpops), k)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
 })
 
-test_that("rpiaf is in range", {
+test_that("make_p_ind_admix is in range", {
     m <- 1000
     F <- c(0.1, 0.2, 0.3)
     k <- length(F)
     admix_proportions <- diag(rep.int(1, k)) # island model for test...
-    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions) # repeat so we have multiple people per island
+    # repeat so we have multiple people per island
+    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
     n <- nrow(admix_proportions) # number of individuals (3 * k)
     p_anc <- draw_p_anc(m)
-    B <- draw_p_subpops(p_anc, F)
-    P <- rpiaf(B, admix_proportions)
-    expect_equal(nrow(P), m)
-    expect_equal(ncol(P), n)
-    expect_true(all(P >= 0)) # all are non-negative
-    expect_true(all(P <= 1)) # all are smaller or equal than 1
+    p_subpops <- draw_p_subpops(p_anc, F)
+    p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
+    expect_equal(nrow(p_ind), m)
+    expect_equal(ncol(p_ind), n)
+    expect_true(all(p_ind >= 0)) # all are non-negative
+    expect_true(all(p_ind <= 1)) # all are smaller or equal than 1
 })
 
 test_that("rgeno is in range", {
@@ -548,20 +549,21 @@ test_that("rgeno is in range", {
     F <- c(0.1, 0.2, 0.3)
     k <- length(F)
     admix_proportions <- diag(rep.int(1, k)) # island model for test...
-    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions) # repeat so we have multiple people per island
+    # repeat so we have multiple people per island
+    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
     n <- nrow(admix_proportions) # number of individuals (3 * k)
     p_anc <- draw_p_anc(m)
-    B <- draw_p_subpops(p_anc, F)
-    P <- rpiaf(B, admix_proportions)
-    X <- rgeno(P) # direct test
+    p_subpops <- draw_p_subpops(p_anc, F)
+    p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
+    X <- rgeno(p_ind) # direct test
     expect_equal(nrow(X), m)
     expect_equal(ncol(X), n)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    X <- rgeno(B, admix_proportions) # indirect draw test
+    X <- rgeno(p_subpops, admix_proportions) # indirect draw test
     expect_equal(nrow(X), m)
     expect_equal(ncol(X), n)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    X <- rgeno(B, admix_proportions, lowMem = TRUE) # indirect draw test with low-mem algo
+    X <- rgeno(p_subpops, admix_proportions, lowMem = TRUE) # indirect draw test with low-mem algo
     expect_equal(nrow(X), m)
     expect_equal(ncol(X), n)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
@@ -572,28 +574,29 @@ test_that("rbnpsd works well", {
     F <- c(0.1, 0.2, 0.3)
     k <- length(F)
     admix_proportions <- diag(rep.int(1, k)) # island model for test...
-    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions) # repeat so we have multiple people per island
+    # repeat so we have multiple people per island
+    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
     n <- nrow(admix_proportions) # number of individuals (3*k)
     # run rbnpsd
     out <- rbnpsd(admix_proportions, F, m)
     X <- out$X # genotypes
-    P <- out$P # IAFs
-    B <- out$B # Intermediate AFs
+    p_ind <- out$P # IAFs
+    p_subpops <- out$B # Intermediate AFs
     p_anc <- out$Pa # Ancestral AFs
     # test X
     expect_equal(nrow(X), m)
     expect_equal(ncol(X), n)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    # test P
-    expect_equal(nrow(P), m)
-    expect_equal(ncol(P), n)
-    expect_true(all(P >= 0)) # all are non-negative
-    expect_true(all(P <= 1)) # all are smaller or equal than 1
-    # test B
-    expect_equal(nrow(B), m)
-    expect_equal(ncol(B), k)
-    expect_true(all(B >= 0)) # all are non-negative
-    expect_true(all(B <= 1)) # all are smaller or equal than 1
+    # test p_ind
+    expect_equal(nrow(p_ind), m)
+    expect_equal(ncol(p_ind), n)
+    expect_true(all(p_ind >= 0)) # all are non-negative
+    expect_true(all(p_ind <= 1)) # all are smaller or equal than 1
+    # test p_subpops
+    expect_equal(nrow(p_subpops), m)
+    expect_equal(ncol(p_subpops), k)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
     # test p_anc
     expect_equal(length(p_anc), m)
     expect_true(all(p_anc >= 0)) # all are non-negative
@@ -605,29 +608,30 @@ test_that("rbnpsd `noFixed = TRUE` works well", {
     F <- c(0.1, 0.2, 0.3)
     k <- length(F)
     admix_proportions <- diag(rep.int(1, k)) # island model for test...
-    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions) # repeat so we have multiple people per island
+    # repeat so we have multiple people per island
+    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
     n <- nrow(admix_proportions) # number of individuals (3*k)
     # run rbnpsd
     out <- rbnpsd(admix_proportions, F, m, noFixed = TRUE)
     X <- out$X # genotypes
-    P <- out$P # IAFs
-    B <- out$B # Intermediate AFs
+    p_ind <- out$P # IAFs
+    p_subpops <- out$B # Intermediate AFs
     p_anc <- out$Pa # Ancestral AFs
     # test X
     expect_equal(nrow(X), m)
     expect_equal(ncol(X), n)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
     expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
-    # test P
-    expect_equal(nrow(P), m)
-    expect_equal(ncol(P), n)
-    expect_true(all(P >= 0)) # all are non-negative
-    expect_true(all(P <= 1)) # all are smaller or equal than 1
-    # test B
-    expect_equal(nrow(B), m)
-    expect_equal(ncol(B), k)
-    expect_true(all(B >= 0)) # all are non-negative
-    expect_true(all(B <= 1)) # all are smaller or equal than 1
+    # test p_ind
+    expect_equal(nrow(p_ind), m)
+    expect_equal(ncol(p_ind), n)
+    expect_true(all(p_ind >= 0)) # all are non-negative
+    expect_true(all(p_ind <= 1)) # all are smaller or equal than 1
+    # test p_subpops
+    expect_equal(nrow(p_subpops), m)
+    expect_equal(ncol(p_subpops), k)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
     # test p_anc
     expect_equal(length(p_anc), m)
     expect_true(all(p_anc >= 0)) # all are non-negative
@@ -639,22 +643,23 @@ test_that("rbnpsd `lowMem = TRUE` works well", {
     F <- c(0.1, 0.2, 0.3)
     k <- length(F)
     admix_proportions <- diag(rep.int(1, k)) # island model for test...
-    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions) # repeat so we have multiple people per island
+    # repeat so we have multiple people per island
+    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
     n <- nrow(admix_proportions) # number of individuals (3*k)
     # run rbnpsd
     out <- rbnpsd(admix_proportions, F, m, lowMem = TRUE)
     X <- out$X # genotypes
-    B <- out$B # Intermediate AFs
+    p_subpops <- out$B # Intermediate AFs
     p_anc <- out$Pa # Ancestral AFs
     # test X
     expect_equal(nrow(X), m)
     expect_equal(ncol(X), n)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    # test B
-    expect_equal(nrow(B), m)
-    expect_equal(ncol(B), k)
-    expect_true(all(B >= 0)) # all are non-negative
-    expect_true(all(B <= 1)) # all are smaller or equal than 1
+    # test p_subpops
+    expect_equal(nrow(p_subpops), m)
+    expect_equal(ncol(p_subpops), k)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
     # test p_anc
     expect_equal(length(p_anc), m)
     expect_true(all(p_anc >= 0)) # all are non-negative
