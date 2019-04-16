@@ -38,7 +38,7 @@
 #' # individual-specific AFs
 #' p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
 #' # genotypes
-#' X <- rgeno(p_ind)
+#' X <- draw_genotypes_admix(p_ind)
 #' 
 #' @docType package
 #' @name bnpsd

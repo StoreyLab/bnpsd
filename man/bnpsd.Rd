@@ -44,7 +44,7 @@ p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
 # individual-specific AFs
 p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
 # genotypes
-X <- rgeno(p_ind)
+X <- draw_genotypes_admix(p_ind)
 
 }
 \seealso{

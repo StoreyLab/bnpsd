@@ -1,7 +1,7 @@
 #' Simulate random allele frequencies and genotypes from the BN-PSD admixture model
 #'
 #' This function returns simulated ancestral, intermediate, and individual-specific allele frequencies and genotypes given the admixture structure, as determined by the admixture proportions and the vector of intermediate subpopulation \eqn{F_{ST}}{FST} values.
-#' The function is a wrapper around \code{\link{draw_p_anc}}, \code{\link{draw_p_subpops}}, \code{\link{make_p_ind_admix}}, and \code{\link{rgeno}}.
+#' The function is a wrapper around \code{\link{draw_p_anc}}, \code{\link{draw_p_subpops}}, \code{\link{make_p_ind_admix}}, and \code{\link{draw_genotypes_admix}}.
 #' Below \eqn{m} is the number of loci, \eqn{n} is the number of individuals, and \eqn{k} is the number of intermediate subpopulations.
 #'
 #' @param Q The \eqn{n \times k}{n-by-k} matrix of admixture proportions
@@ -68,7 +68,7 @@ rbnpsd <- function(Q, F, m, wantX = TRUE, wantP = TRUE, wantB = TRUE, wantPa = T
         # draw genotypes!
         if (wantX) {
             if (verbose) message('rbnpsd: drawing X')
-            X <- rgeno(B, Q, lowMem = lowMem)
+            X <- draw_genotypes_admix(B, Q, low_mem = lowMem)
         }
     } else {
         if (wantP || wantX) {
@@ -79,7 +79,7 @@ rbnpsd <- function(Q, F, m, wantX = TRUE, wantP = TRUE, wantB = TRUE, wantPa = T
         # draw genotypes from P
         if (wantX) {
             if (verbose) message('rbnpsd: drawing X')
-            X <- rgeno(P)
+            X <- draw_genotypes_admix(P)
         }
     }
     

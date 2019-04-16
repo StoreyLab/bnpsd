@@ -544,7 +544,7 @@ test_that("make_p_ind_admix is in range", {
     expect_true(all(p_ind <= 1)) # all are smaller or equal than 1
 })
 
-test_that("rgeno is in range", {
+test_that("draw_genotypes_admix is in range", {
     m <- 1000
     F <- c(0.1, 0.2, 0.3)
     k <- length(F)
@@ -555,15 +555,18 @@ test_that("rgeno is in range", {
     p_anc <- draw_p_anc(m)
     p_subpops <- draw_p_subpops(p_anc, F)
     p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
-    X <- rgeno(p_ind) # direct test
+    # direct test
+    X <- draw_genotypes_admix(p_ind)
     expect_equal(nrow(X), m)
     expect_equal(ncol(X), n)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    X <- rgeno(p_subpops, admix_proportions) # indirect draw test
+    # indirect draw test
+    X <- draw_genotypes_admix(p_subpops, admix_proportions)
     expect_equal(nrow(X), m)
     expect_equal(ncol(X), n)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    X <- rgeno(p_subpops, admix_proportions, lowMem = TRUE) # indirect draw test with low-mem algo
+    # indirect draw test with low-mem algo
+    X <- draw_genotypes_admix(p_subpops, admix_proportions, low_mem = TRUE)
     expect_equal(nrow(X), m)
     expect_equal(ncol(X), n)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!

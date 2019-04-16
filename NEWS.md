@@ -38,9 +38,9 @@ These loci are not polymorphic so they would normally not be considered in analy
   * Removed arguments `interval` and `tol` from both `q1d` and `q1dc` (users would never need to set them now that procedure is more robust).
 * Updated coding style, renamed some internal functions and variables.
 
-# 2019-04-15 - bnpsd 1.0.6.9000
+# 2019-04-15 - bnpsd 1.1.0.9000
 
-* Renamed several functions for clarity:
+* Renamed most functions for clarity:
   * `coanc` -> `coanc_admix`
   * `q1d` -> `admix_prop_1d_linear`
   * `q1dc` -> `admix_prop_1d_circular`
@@ -48,6 +48,7 @@ These loci are not polymorphic so they would normally not be considered in analy
   * `rpanc` -> `draw_p_anc`
   * `rpint` -> `draw_p_subpops`
   * `rpiaf` -> `make_p_ind_admix`
+  * `rgeno` -> `draw_genotypes_admix`
   * `fst` -> `fst_admix` (no deprecated version available in this case, to eliminate conflict with `popkin::fst`)
   * Functions with old names remain for now as deprecated functions (to be removed in the future).
 * Renamed several recurrent argument names for clarity:

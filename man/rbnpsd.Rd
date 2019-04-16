@@ -33,7 +33,7 @@ A named list that includes the following random matrices: X=genotypes, P=IAFs, B
 }
 \description{
 This function returns simulated ancestral, intermediate, and individual-specific allele frequencies and genotypes given the admixture structure, as determined by the admixture proportions and the vector of intermediate subpopulation \eqn{F_{ST}}{FST} values.
-The function is a wrapper around \code{\link{draw_p_anc}}, \code{\link{draw_p_subpops}}, \code{\link{make_p_ind_admix}}, and \code{\link{rgeno}}.
+The function is a wrapper around \code{\link{draw_p_anc}}, \code{\link{draw_p_subpops}}, \code{\link{make_p_ind_admix}}, and \code{\link{draw_genotypes_admix}}.
 Below \eqn{m} is the number of loci, \eqn{n} is the number of individuals, and \eqn{k} is the number of intermediate subpopulations.
 }
 \examples{
