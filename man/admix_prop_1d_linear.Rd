@@ -54,21 +54,24 @@ admix_proportions <- admix_prop_1d_linear(n_ind = 1000, k_subpops = 10, sigma = 
 admix_prop_1d_linear(n_ind = 10, k_subpops = 2, sigma = 0)
 
 # a similar model but with a bias coefficient of exactly 1/2
-k <- 10
+k_subpops <- 10
 # FST vector for intermediate independent subpops, up to a factor (will be rescaled below)
-coanc_subpops <- 1:k
+coanc_subpops <- 1 : k_subpops
 obj <- admix_prop_1d_linear(
     n_ind = 1000,
-    k_subpops = k,
+    k_subpops = k_subpops,
     bias_coeff = 0.5,
     coanc_subpops = coanc_subpops,
     fst = 0.1 # desired final FST of admixed individuals
 )
+
 # in this case return value is a named list with three items:
 # admixture proportions
 admix_proportions <- obj$admix_proportions
+
 # rescaled coancestry data (matrix or vector) for intermediate subpops
 coanc_subpops <- obj$coanc_subpops
+
 # and the sigma that gives the desired bias_coeff and final FST
 sigma <- obj$sigma
 

@@ -21,16 +21,26 @@ The \eqn{m \times n}{m-by-n} Individual-specific Allele Frequency (IAF) matrix \
 This function is a wrapper around \code{\link{tcrossprod}}, but also ensures the output allele frequencies are in [0, 1], as this is not guaranteed by \code{\link{tcrossprod}} due to limited machine precision.
 }
 \examples{
-m_loci <- 10 # number of loci
-n_ind <- 5 # number of individuals
-k_subpops <- 2 # number of intermediate subpops
-inbr_subpops <- c(0.1, 0.3) # FST values for k = 2 subpops
+# data dimensions
+# number of loci
+m_loci <- 10
+# number of individuals
+n_ind <- 5
+# number of intermediate subpops
+k_subpops <- 2
+
+# FST values for k = 2 subpops
+inbr_subpops <- c(0.1, 0.3)
+
 # non-trivial admixture proportions
 admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma = 1)
+
 # random vector of ancestral allele frequencies
-p_anc <- draw_p_anc(m_loci) 
+p_anc <- draw_p_anc(m_loci)
+
 # matrix of intermediate subpop allele freqs
 p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
+
 # matrix of individual-specific allele frequencies
 p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
 

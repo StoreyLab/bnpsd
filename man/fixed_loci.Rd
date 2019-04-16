@@ -19,7 +19,7 @@ A locus with only missing elements (NA) will also be marked as fixed (TRUE).
 Below \eqn{m} is the number of loci, and \eqn{n} is the number of individuals.
 }
 \examples{
-# here's a toy matrix
+# here's a toy genotype matrix
 X <- matrix(
        data = c(
               2, 2, NA, # fixed locus (with one missing element)
@@ -29,6 +29,7 @@ X <- matrix(
               NA, NA, NA # completely missing locus (will be treated as fixed)
              ),
        ncol = 3, byrow = TRUE)
+
 # test that we get the desired values
 stopifnot(
   fixed_loci(X) == c(TRUE, TRUE, FALSE, FALSE, TRUE)

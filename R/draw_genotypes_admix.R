@@ -18,9 +18,12 @@
 #'
 #' @examples
 #' # dimensions
-#' m_loci <- 10 # number of loci
-#' n_ind <- 5 # number of individuals
-#' k_subpops <- 2 # number of intermediate subpops
+#' # number of loci
+#' m_loci <- 10
+#' # number of individuals
+#' n_ind <- 5
+#' # number of intermediate subpops
+#' k_subpops <- 2
 #'
 #' # define population structure
 #' # FST values for k = 2 subpops
@@ -31,18 +34,23 @@
 #' # draw alelle frequencies
 #' # vector of ancestral allele frequencies
 #' p_anc <- draw_p_anc(m_loci)
+#' 
 #' # matrix of intermediate subpop allele freqs
 #' p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
+#' 
 #' # matrix of individual-specific allele frequencies
 #' p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
 #'
 #' # draw genotypes from intermediate subpops (one individual each)
 #' X_subpops <- draw_genotypes_admix(p_subpops)
+#' 
 #' # and genotypes for admixed individuals
 #' X_ind <- draw_genotypes_admix(p_ind)
+#' 
 #' # draw genotypes for admixed individuals without p_ind intermediate
 #' # (p_ind is computer internally and discarded when done)
 #' X_ind <- draw_genotypes_admix(p_subpops, admix_proportions)
+#' 
 #' # use low-memory version (p_ind is computed by row, never fully in memory)
 #' X_ind <- draw_genotypes_admix(p_subpops, admix_proportions, low_mem = TRUE)
 #'
@@ -51,12 +59,20 @@ draw_genotypes_admix <- function(p_ind, admix_proportions = NULL, low_mem = FALS
     # die if this is missing
     if (missing(p_ind))
         stop('`p_ind` is required!')
-    
+
+    # ensure that things that should be matrices are so
+    if (!is.matrix(p_ind))
+        stop('`p_ind` must be a matrix!')
+
     # let's determine the data dimensions, validate inputs
     m <- nrow(p_ind) # number of SNPs in all cases!
     if (is.null(admix_proportions)) {
         n <- ncol(p_ind) # easy case, it's just p_ind and nothing is really validated
     } else {
+        # ensure that things that should be matrices are so
+        if (!is.matrix(admix_proportions))
+            stop('`admix_proportions` must be a matrix!')
+        
         n <- nrow(admix_proportions)
         # these values must match or we can't multiply p_ind and admix_proportions
         if (ncol(p_ind) != ncol(admix_proportions))

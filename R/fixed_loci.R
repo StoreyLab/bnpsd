@@ -10,7 +10,7 @@
 #' @return A length-\eqn{m} boolean vector where the \eqn{i}th element is TRUE if locus \eqn{i} is fixed or completely missing, FALSE otherwise.
 #'
 #' @examples
-#' # here's a toy matrix
+#' # here's a toy genotype matrix
 #' X <- matrix(
 #'        data = c(
 #'               2, 2, NA, # fixed locus (with one missing element)
@@ -20,6 +20,7 @@
 #'               NA, NA, NA # completely missing locus (will be treated as fixed)
 #'              ),
 #'        ncol = 3, byrow = TRUE)
+#' 
 #' # test that we get the desired values
 #' stopifnot(
 #'   fixed_loci(X) == c(TRUE, TRUE, FALSE, FALSE, TRUE)
@@ -27,10 +28,18 @@
 #'
 #' @export
 fixed_loci <- function(X) {
+    # stop if required parameters are missing
+    if (missing(X))
+        stop('`X` is required!')
+    # ensure that things that should be matrices are so
+    if (!is.matrix(X))
+        stop('`X` must be a matrix!')
+    
     # is this too slow? (what if we did it using Rcpp?)
     # main step is calculating allele frequencies per row, which automatically handles missingness
     # this returns NaN for completely missing rows
-    pHat <- rowMeans(X, na.rm = TRUE) / 2
+    p_anc_hat <- rowMeans(X, na.rm = TRUE) / 2
+    
     # this is the return value we want
-    is.na(pHat) | pHat == 0 | pHat == 1
+    is.na(p_anc_hat) | p_anc_hat == 0 | p_anc_hat == 1
 }

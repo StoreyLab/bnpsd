@@ -14,16 +14,22 @@
 #
 # @examples
 # # set desired parameters
-# n <- 1000 # number of individuals
-# k <- 10 # number of intermediate subpops
-# sigma <- 1 # ...
-# Fst <- 0.1 # desired FST
+# # number of individuals
+# n_ind <- 1000
+# # number of intermediate subpops
+# k_subpops <- 10
+# # desired FST
+# Fst <- 0.1
+# 
 # # differentiation of subpops (relative (wrong) scale)
-# coanc_subpops <- (1:k) / k
+# coanc_subpops <- ( 1 : k_subpops ) / k_subpops
+#
 # # construct admixture proportions
-# admix_proportions <- admix_prop_1d_linear(n, k, sigma)
+# admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma = 1)
+#
 # # lastly, rescale coanc_subpops to give desired FST!!!
 # coanc_subpops <- rescale_coanc_subpops(admix_proportions, coanc_subpops, Fst)
+#
 rescale_coanc_subpops <- function(admix_proportions, coanc_subpops, fst, weights = NULL) {
     # die informatively...
     if (missing(admix_proportions))
@@ -32,15 +38,23 @@ rescale_coanc_subpops <- function(admix_proportions, coanc_subpops, fst, weights
         stop('`coanc_subpops` is required!')
     if (missing(fst))
         stop('`fst` is required!')
+
+    # NOTE: we let fst_admix further validate inputs
     
     # calculate necessary intermediates
     # could probably be more efficient skipping un-needed matrix products, but such efficiency is not needed here because this function is usually called once only and n is big but not huge
-    fst_0 <- fst_admix( admix_proportions, coanc_subpops, weights) # get fst under this model (wrong scale, yields adjustment!)
-    coanc_subpops <- coanc_subpops * fst / fst_0 # this fixes scale
+
+    # get fst under this model (wrong scale, yields adjustment!)
+    fst_0 <- fst_admix( admix_proportions, coanc_subpops, weights)
+    # this fixes scale
+    coanc_subpops <- coanc_subpops * fst / fst_0
+    
     # unfortunately, some coanc_subpops may be rescaled to values greater than 1, which would be disallowed under the probabilistic inbreeding framework.
     # Check and stop if needed!
     if (max(coanc_subpops) > 1)
         stop('Rescaling for `fst = ', fst, '` resulted in max(coanc_subpops) = ', max(coanc_subpops), ' > 1')
-    coanc_subpops # return rescaled version if things were good!
+
+    # return rescaled version if things were good!
+    return( coanc_subpops )
 }
 

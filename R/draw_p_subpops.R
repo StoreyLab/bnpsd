@@ -18,10 +18,14 @@
 #'
 #' @examples
 #' # a typical, non-trivial example
-#' m_loci <- 10 # number of loci
-#' p_anc <- draw_p_anc(m_loci) # random vector of ancestral allele frequencies
-#' inbr_subpops <- c(0.1, 0.3) # FST values for two subpops
-#' p_subpops <- draw_p_subpops(p_anc, inbr_subpops) # matrix of intermediate subpop allele freqs
+#' # number of loci
+#' m_loci <- 10
+#' # random vector of ancestral allele frequencies
+#' p_anc <- draw_p_anc(m_loci)
+#' # FST values for two subpops
+#' inbr_subpops <- c(0.1, 0.3)
+#' # matrix of intermediate subpop allele freqs
+#' p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
 #'
 #' # special case of scalar p_anc
 #' p_subpops <- draw_p_subpops(p_anc = 0.5, inbr_subpops, m_loci = m_loci)

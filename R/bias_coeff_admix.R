@@ -5,6 +5,10 @@ bias_coeff_admix <- function(admix_proportions, coanc_subpops, weights = NULL) {
     if (missing(coanc_subpops))
         stop('`coanc_subpops` is required!')
 
+    # ensure that things that should be matrices are so
+    if (!is.matrix(admix_proportions))
+        stop('`admix_proportions` must be a matrix!')
+    
     # in the interest of speed, does not validate matrix dimensions
     # (this is an internal function, so validations ought to happen earlier)
     

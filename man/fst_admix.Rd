@@ -22,14 +22,17 @@ This \eqn{F_{ST}}{FST} equals the weighted mean of the diagonal of the coancestr
 }
 \examples{
 # set desired parameters
-n <- 1000 # number of individuals
-k <- 10 # number of intermediate subpopulations
-s <- 0.5 # desired bias coefficient
-sigma <- 1 # for 1D admixture model
+# number of individuals
+n_ind <- 1000
+# number of intermediate subpopulations
+k_subpops <- 10
+
 # differentiation of intermediate subpopulations
-coanc_subpops <- (1:k)/k
+coanc_subpops <- ( 1 : k_subpops ) / k_subpops
+
 # construct admixture proportions
-admix_proportions <- admix_prop_1d_linear(n, k, sigma)
+admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma = 1)
+
 # lastly, calculate Fst!!! (uniform weights in this case)
 fst_admix(admix_proportions, coanc_subpops)
 

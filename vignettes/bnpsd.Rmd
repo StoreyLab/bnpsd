@@ -29,15 +29,22 @@ The `bnpsd` package simulates the genotypes of an admixed population.
 In the PSD model [@pritchard_inference_2000], admixed individuals draw their alleles with individual-specific probabilities (admixture proportions) from $K$ intermediate subpopulations.
 We impose the BN model [@balding_method_1995] to the intermediate subpopulation allele frequency, which thus evolve independently with subpopulation-specific inbreeding coefficients ($\Fst$ values) from a common ancestral population $T$.
 The kinship coefficients and generalized $\Fst$ of the admixed individuals were derived in recent work [@Ochoa083915].
-A simulated admixed population was used to benchmark kinship and $\Fst$ estimators in the accompanying paper [@Ochoa083923].
+A simulated admixed population generated using this package was used to benchmark kinship and $\Fst$ estimators in the accompanying paper [@Ochoa083923].
 Here we briefly summarize the notation and intuition behind the key parameters (see [@Ochoa083915] for precise definitions).
+
+There are conceptually two parts of the BN-PSD model, one that defines relatedness between individuals (under the admixture framework), while the other simulates allele frequencies and genotypes conditional on the specified parameters of relatedness/admixture.
 
 ## The BN-PSD population structure
 
 The population structure determines how individuals are related to each other.
-The key parameters are the inbreeding coefficients of the intermediate subpopulations ($\ft[S_u]$ below) and the admixture proportions of each individual for each subpopulation ($q_{ju}$), which are treated as fixed variables.
+The key parameters are the coancestry coefficients of the intermediate subpopulations and the admixture proportions of each individual for each subpopulation ($q_{ju}$), which are treated as fixed variables.
+
+The `bnpsd` functions that model population structure (not drawing allele frequencies or genotypes) admit arbitrary coancestry matrices for the intermediate subpopulations.
+However, the code that draws allele frequencies and genotypes requires these subpopulations to be _independent_, which means that the coancestry matrix must have zero values off-diagonal.
+In this setting---the only case we'll considered in this vignette---the diagonal values of the coancestry matrix of the intermediate subpopulations are inbreeding coefficients ($\ft[S_u]$ below), which correspond to subpopulation-specific $\Fst$ values.
 
 Each intermediate subpopulation $S_u$ ($u \in \{1, ..., K\}$) evolved independently from a shared ancestral population $T$ with an inbreeding coefficient denoted by $\ft[S_u]$.
+Note that $T$ is a superscript, and does not stand for exponentiation or matrix transposition.
 Each admixed individual $j \in \{1, ..., n\}$ draws each allele from $S_u$ with probability given by the admixture proportion $q_{ju}$ ($\sum_{u=1}^K q_{ju} = 1 \forall j$).
 In this case the coancestry coefficients $\theta^T_{jk}$ between individuals $j,k$ (including $j=k$ case) and the $\Fst$ of the admixed individuals are given by:
 $$
@@ -62,7 +69,7 @@ This section details the distributions of the allele frequencies and genotypes o
 Every biallelic locus $i$ in the ancestral population $T$ has an ancestral reference allele frequency denoted by $p_i^T$.
 By default the `bnpsd` code draws
 $$
-p_i^T \sim \text{Uniform}(a,b)
+p_i^T \sim \text{Uniform}(a, b)
 $$
 with $a=0.01, b=0.5$, but the code accepts $p_i^T$ from arbitrary distributions (see below).
 
@@ -73,7 +80,7 @@ $$
 where $\nu_s = \frac{1}{\ft[S_u]}-1$.
 Allele frequencies for different loci and different subpopulations ($S_u,S_v, u \ne v$) are drawn independently.
 
-Each admixed individual $j$ at each locus $i$ draws alleles from a mixture of Bernoulli distributions from each intermediate subpopulation, which is mathematically equivalent to assigning what we call "individual-specific allele frequencies" (IAFs) $\pi_{ij}$ constructed as:
+Each admixed individual $j$ at each locus $i$ draws alleles from a mixture of Bernoulli distributions from each intermediate subpopulation, which is mathematically equivalent to assigning what we call individual-specific allele frequencies $\pi_{ij}$ constructed as:
 $$
 \pi_{ij} = \sum_{u=1}^K p_i^{S_u} q_{ju}.
 $$
@@ -88,22 +95,30 @@ $$
 
 Let's generate the same population structure used in the simulation of [@Ochoa083923].
 ```{r}
-library(RColorBrewer) # for nice colors
-library(popkin) # for visualizing coancestry matrix with plot_popkin
+# this package
 library(bnpsd)
+# for nice colors
+library(RColorBrewer)
+# for visualizing coancestry matrix with plot_popkin, and other handy functions
+library(popkin)
 
 # dimensions of data/model
-n <- 100 # number of individuals (NOTE this is 10x less than in publication!)
-k <- 10 # number of intermediate subpops
+# number of individuals (NOTE this is 10x less than in publication!)
+n_ind <- 100
+# number of intermediate subpops
+k_subpops <- 10
 
 # define population structure
-inbr_subpops <- 1:k # subpopulation FST vector, up to a scalar
-bias_coeff <- 0.5 # desired bias coefficient
-Fst <- 0.1 # desired FST for the admixed individuals
+# subpopulation FST vector, up to a scalar
+inbr_subpops <- 1 : k_subpops
+# desired bias coefficient
+bias_coeff <- 0.5
+# desired FST for the admixed individuals
+Fst <- 0.1
 # admixture proportions from 1D geography
 obj <- admix_prop_1d_linear(
-    n_ind = n,
-    k_subpops = k,
+    n_ind = n_ind,
+    k_subpops = k_subpops,
     bias_coeff = bias_coeff,
     coanc_subpops = inbr_subpops,
     fst = Fst
@@ -113,29 +128,34 @@ admix_proportions <- obj$admix_proportions
 inbr_subpops <- obj$coanc_subpops
 
 # get pop structure parameters of the admixed individuals
-coancestry <- coanc_admix(admix_proportions, inbr_subpops) # the coancestry matrix
+coancestry <- coanc_admix(admix_proportions, inbr_subpops)
+
 # verify that we got the desired FST!
-Fst2 <- fst_admix(admix_proportions, inbr_subpops)
-Fst2
-# this should also equal FST
+fst_admix(admix_proportions, inbr_subpops)
+
+# the mean of the diagonal of the coancestry matrix also equals FST
 inbr <- diag(coancestry)
-fst(inbr) # popkin version
-# verify that we got the desired bias_coeff too!
-bias_coeff2 <- mean(coancestry) / Fst
-bias_coeff2
+fst(inbr) # `fst` is a function in the popkin package
+
+# verify that we got the desired `bias_coeff` too!
+mean(coancestry) / Fst
 ```
 
 ```{r, fig.width = 4, fig.height = 2, fig.align = 'center'}
 # visualize the per-subpopulation inbreeding coefficients (FSTs)
-par(mar = c(4, 4, 0, 0) + 0.2) # shrink default margins
-col_subpops <- brewer.pal(k, "Paired") # indep. subpop. colors
-barplot(inbr_subpops, col = col_subpops, names.arg = 1:k, ylim = c(0,1),
+# shrink default margins
+par(mar = c(4, 4, 0, 0) + 0.2)
+# colors for independent subpopulations
+col_subpops <- brewer.pal(k_subpops, "Paired")
+
+barplot(inbr_subpops, col = col_subpops, names.arg = 1 : k_subpops, ylim = c(0, 1),
 	xlab = 'Subpopulation', ylab = 'Inbreeding coeff.')
 ```
 
 ```{r, fig.width = 6, fig.height = 1.5, fig.align = 'center'}
 # visualize the admixture proportions
-par(mar = c(1, 4, 0, 0) + 0.2) # shrink default margins
+# shrink default margins
+par(mar = c(1, 4, 0, 0) + 0.2)
 barplot(t(admix_proportions), col = col_subpops, border = NA, space = 0, ylab = 'Admixture prop.')
 mtext('Individuals', 1)
 ```
@@ -153,30 +173,46 @@ plot_popkin(coancestry)
 ## Draw random allele frequencies and genotypes
 
 Now let's draw all the random allele frequencies and genotypes from the population structure.
-The easiest way is to use `rbnpsd` (the initial `r` is for drawing "random" samples in this and the following functions, in analogy to the `runif`, `rnorm`, `rbeta`, etc. functions from the `stats` R package).
+The easiest way is to use `draw_all_admix`:
 
 ```{r}
-m <- 10000 # number of loci in simulation (NOTE this is 30x less than in publication!)
+# number of loci in simulation (NOTE this is 30x less than in publication!)
+m_loci <- 10000
 # draw all random Allele Freqs (AFs) and genotypes
 # reuse the previous inbr_subpops, admix_proportions
-out <- rbnpsd(admix_proportions, inbr_subpops, m)
-X <- out$X # genotypes
-p_ind <- out$P # IAFs (individual-specific AFs)
-p_subpops <- out$B # intermediate AFs
-p_anc <- out$Pa # ancestral AFs
+out <- draw_all_admix(
+    admix_proportions = admix_proportions,
+    inbr_subpops = inbr_subpops,
+    m_loci = m_loci,
+    # NOTE by default p_subpops and p_ind are not returned, but here we will ask for them
+    want_p_subpops = TRUE,
+    want_p_ind = TRUE
+)
+# genotypes
+X <- out$X
+# ancestral AFs
+p_anc <- out$p_anc
+# intermediate independent subpopulation AFs
+p_subpops <- out$p_subpops
+# individual-specific AFs
+p_ind <- out$p_ind
 ```
 
 ```{r, fig.width = 4, fig.height = 2, fig.align = 'center'}
 # inspect distribution of ancestral AFs (~ Uniform(0.01, 0.5))
-par(mar = c(4, 4, 0, 0) + 0.2) # shrink default margins for these figures
+# shrink default margins for these figures
+par(mar = c(4, 4, 0, 0) + 0.2)
 hist(p_anc, xlab = 'Ancestral AF', main = '', xlim = c(0, 1))
+
 # distribution of intermediate population AFs
 # (all subpopulations combined)
 # (will be more dispersed toward 0 and 1 than ancestral AFs)
 hist(p_subpops, xlab = 'Intermediate Subpopulation AF', main = '', xlim = c(0, 1))
-# distribution of IAFs (admixed individuals)
+
+# distribution of individual-specific AFs (admixed individuals)
 # (admixture reduces differentiation, so these resemble ancestral AFs a bit more)
 hist(p_ind, xlab = 'Individual-specific AF', main = '', xlim = c(0, 1))
+
 # genotype distribution of admixed individuals
 barplot(table(X), xlab = 'Genotypes', ylab = 'Frequency', col = 'white')
 ```
@@ -187,8 +223,8 @@ For this we use the `popkin` function of the package with the same name.
 ```{r, fig.width = 6, fig.height = 2.8, fig.align = 'center'}
 # for best estimates, group individuals into subpopulations using the geography
 # this averages more individuals in estimating the minimum kinship
-subpops <- ceiling( (1:n) / n * k )
-table(subpops) # got k=10 subpops with 100 individuals each
+subpops <- ceiling( ( 1 : n_ind ) / n_ind * k_subpops )
+table(subpops) # got k_subpops = 10 with 100 individuals each
 # now estimate kinship using popkin
 kinship_estimate <- popkin(X, subpops)
 # replace diagonal with inbreeding coeffs. to match coancestry matrix
@@ -208,19 +244,22 @@ plot_popkin(coancestries, titles)
 
 ## Customizing the allele frequency and genotype pipeline
 
-The random variables generated by `rbnpsd` above can also be generated separately using the following functions (where $p$ is the usual variable symbol for allele frequencies):
+The random variables generated by `draw_all_admix` above can also be generated separately using the following functions (where $p$ is the usual variable symbol for allele frequencies):
 
 * `draw_p_anc` (drawn ancestral allele frequencies)
 * `draw_p_subpops` (draw independent subpopulation allele frequencies)
 * `make_p_ind_admix` (construct individual-specific allele frequencies under the admixture model)
 * `draw_genotypes_admix` (draw genotypes under the admixture model)
 
-Here is the step-by-step procedure for drawing AFs and genotypes in `rbnpsd`:
+These functions are provided for greater flexibility (examples follow further below).
+However, the joint function `draw_all_admix` has the advantage of removing fixed loci (loci that were randomly set to 0 or 2 for all individuals, despite non-zero allele frequencies), which are re-drawn from scratch (starting from the ancestral allele frequencies).
+
+Here is the step-by-step procedure for drawing AFs and genotypes in the default `draw_all_admix` (except for the re-drawing of fixed loci):
 
 ```{r}
-# reuse the previous m, inbr_subpops, admix_proportions
+# reuse the previous m_loci, inbr_subpops, admix_proportions
 # draw ancestral AFs
-p_anc <- draw_p_anc(m)
+p_anc <- draw_p_anc(m_loci)
 # draw intermediate independent subpopulations AFs
 p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
 # draw individual-specific AFs
@@ -230,12 +269,14 @@ X <- draw_genotypes_admix(p_ind)
 ```
 
 We provide functions for these separate steps to allow for more flexibility.
-For example, the ancestral allele frequencies could be drawn from a Symmetric Beta:
+For example, the ancestral allele frequencies could be drawn from a Symmetric Beta instead of using `draw_p_anc`:
 
 ```{r, fig.width = 4, fig.height = 2, fig.align = 'center'}
-alpha <- 1/2 # this increases rare alleles
-p_anc <- rbeta(m, alpha, alpha)
-par(mar = c(4, 4, 0, 0) + 0.2) # shrink default margins for these figures
+# this increases the proportion of rare alleles
+alpha <- 1/2
+p_anc <- rbeta(m_loci, alpha, alpha)
+# shrink default margins for these figures
+par(mar = c(4, 4, 0, 0) + 0.2)
 hist(p_anc, xlab = 'Ancestral AF', main = '', xlim = c(0, 1))
 ```
 
@@ -243,10 +284,12 @@ You could also draw genotypes from the ancestral population or the intermediate 
 
 ```{r}
 # draw genotypes for one individual from the ancestral population
-# use "cbind" to turn the vector p_anc into the column matrix "draw_genotypes_admix" expects
-X_anc <- draw_genotypes_admix(cbind(p_anc))
+# use "cbind" to turn the vector p_anc into a column matrix
+# ("draw_genotypes_admix" expects a matrix)
+X_anc <- draw_genotypes_admix( cbind(p_anc) )
 # returns a column matrix:
 dim(X_anc)
+
 # draw genotypes from intermediate populations
 # draws one individual per intermediate population
 X_subpops <- draw_genotypes_admix(p_subpops)
@@ -254,19 +297,21 @@ X_subpops <- draw_genotypes_admix(p_subpops)
 
 ## Low-memory genotype simulation algorithm
 
-If you desire to simulate a very large number of individuals ($n$) and loci ($m$), you might run out of memory while running `rbnpsd`.
-Memory consumption is reduced by passing the `lowMem = TRUE` option to `rbnpsd`, which draws the genotypes `X` directly from the subpopulation AF matrix `p_subpops` and `admix_proportions`, without storing the whole IAF matrix `p_ind` at any given time.
-However, this algorithm is much slower than the default one (`lowMem = FALSE`).
+If you desire to simulate a very large number of individuals ($n$) and loci ($m$), you might run out of memory while running `draw_all_admix`.
+Memory consumption is reduced by passing the `low_mem = TRUE` option to `draw_all_admix`, which draws the genotypes `X` directly from `p_subpops` and `admix_proportions`, without storing the entire intermediate matrix `p_ind` in memory at once.
+However, this algorithm can be much slower than the default one (`low_mem = FALSE`).
 
 ```{r}
-out <- rbnpsd(admix_proportions, inbr_subpops, m, lowMem = TRUE)
-X <- out$X # genotypes
-p_subpops <- out$B # intermediate AFs
-p_anc <- out$Pa # ancestral AFs
-# NOTE: out$P is not computed in this mode!
+out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, low_mem = TRUE)
+# genotypes
+X <- out$X
+# ancestral AFs
+p_anc <- out$p_anc
+# out$p_subpops missing (`want_p_subpops = FALSE` by default)
+# out$p_ind is not computed when `low_mem = TRUE`!
 ```
 
-The same option exists for `draw_genotypes_admix`, which instead of accepting the IAF matrix `p_ind` as input requires both `p_subpops` and `admix_proportions` as above:
+The same option exists for `draw_genotypes_admix`, which instead of accepting the `p_ind` matrix as input requires both `p_subpops` and `admix_proportions` as above:
 
 ```{r}
 X <- draw_genotypes_admix(p_subpops, admix_proportions, low_mem = TRUE)
@@ -284,7 +329,7 @@ The admixture scenarios implemented in `bnpsd` are generated by these functions:
 * `admix_prop_1d_circular`: Circular 1D geography
 * `admix_prop_indep_subpops`: Independent Subpopulations
 
-The first example (above) was `admix_prop_1d_linear`, the rest follow.
+The main example (above) was for `admix_prop_1d_linear`, the rest follow.
 
 
 ## Circular 1D geography
@@ -293,18 +338,24 @@ This is a twist on the earlier 1D geography where subpopulations and individuals
 
 Let's generate an analogous population structure to the original "linear" example.
 ```{r}
-# reuse earlier (n,k) dimensions
-n <- 100 # number of individuals
-k <- 10 # number of intermediate subpops
+# data dimensions
+# number of individuals
+n_ind <- 100
+# number of intermediate subpops
+k_subpops <- 10
 
 # define population structure
-inbr_subpops <- 1:k # subpopulation FST vector, up to a scalar
-bias_coeff <- 0.5 # desired bias coefficient
-Fst <- 0.1 # desired FST for the admixed individuals
+# subpopulation FST vector, up to a scalar
+inbr_subpops <- 1 : k_subpops
+# desired bias coefficient
+bias_coeff <- 0.5
+# desired FST for the admixed individuals
+Fst <- 0.1
+
 # admixture proportions from *circular* 1D geography
 obj <- admix_prop_1d_circular(
-    n_ind = n,
-    k_subpops = k,
+    n_ind = n_ind,
+    k_subpops = k_subpops,
     bias_coeff = bias_coeff,
     coanc_subpops = inbr_subpops,
     fst = Fst
@@ -313,7 +364,8 @@ admix_proportions <- obj$admix_proportions
 inbr_subpops <- obj$coanc_subpops
 
 # get pop structure parameters of the admixed individuals
-coancestry <- coanc_admix(admix_proportions, inbr_subpops) # the coancestry matrix
+coancestry <- coanc_admix(admix_proportions, inbr_subpops)
+
 # verify that we got the desired FST!
 fst_admix(admix_proportions, inbr_subpops)
 
@@ -323,21 +375,25 @@ mean(coancestry) / Fst
 
 ```{r, fig.width = 4, fig.height = 1.2, fig.align = 'center'}
 # visualize the per-subpopulation inbreeding coefficients (FSTs)
-par(mar = c(2.5, 2.5, 0.3, 0) + 0.2, lab = c(2, 1, 7), mgp = c(1.5, 0.5, 0)) # tweak margins/etc
-col_subpops <- brewer.pal(k, "Paired") # indep. subpop. colors
+# tweak margins/etc
+par(mar = c(2.5, 2.5, 0.3, 0) + 0.2, lab = c(2, 1, 7), mgp = c(1.5, 0.5, 0))
+# colors for independent subpopulations
+col_subpops <- brewer.pal(k_subpops, "Paired")
 barplot(inbr_subpops, col = col_subpops, names.arg = colnames(admix_proportions), xlab = 'Subpopulation', ylab = 'Inbr')
 ```
 
 ```{r, fig.width = 4, fig.height = 1, fig.align = 'center'}
 # visualize the admixture proportions
-par(mar = c(1, 4, 0.4, 0) + 0.2, lab = c(2, 2, 7)) # tweak margins/etc
+# tweak margins/etc
+par(mar = c(1, 4, 0.4, 0) + 0.2, lab = c(2, 2, 7))
 barplot(t(admix_proportions), col = col_subpops, border = NA, space = 0, ylab = 'Admix prop')
 mtext('Individuals', 1)
 ```
 
 ```{r, fig.width = 3.1, fig.height = 2, fig.align = 'center'}
 # Visualize the coancestry matrix using "popkin"!
-par(oma = c(0, 1.5, 0, 3), mar = c(0, 0, 0.4, 0) + 0.2) # tweak margins/etc
+# tweak margins/etc
+par(oma = c(0, 1.5, 0, 3), mar = c(0, 0, 0.4, 0) + 0.2)
 plot_popkin(coancestry, leg_n = 3)
 ```
 
@@ -349,11 +405,11 @@ The independent subpopulations model, where individuals are actually unadmixed, 
 
 ```{r}
 # define population structure
-# we'll have k=3 subpopulations, each with these sizes:
-k <- 3
+# we'll have k_subpops = 3, each subpopulation with these sizes:
 n1 <- 100
 n2 <- 50
 n3 <- 20
+
 # here's the labels (for simplicity, list all individuals of S1 first, then S2, then S3)
 labs <- c(
     rep.int('S1', n1),
@@ -361,24 +417,34 @@ labs <- c(
     rep.int('S3', n3)
 )
 # data dimensions infered from labs:
-length(labs) # number of individuals "n"
-length(unique(labs)) # number of subpopulations "k"
+
+# number of individuals "n_ind"
+length(labs)
+
+# number of subpopulations "k_subpops"
+k_subpops <- length(unique(labs))
+k_subpops
 
 # desired admixture matrix
 admix_proportions <- admix_prop_indep_subpops(labs)
+
 # got a numeric matrix with a single 1 value per row
 # (denoting the sole subpopulation from which each individual draws its ancestry)
 head(admix_proportions, 2)
 
 # construct the intermediate subpopulation FST vector
+# the desired final FST
+Fst <- 0.2
+# subpopulation FST vector, unnormalized so far
+inbr_subpops <- 1 : k_subpops
+# normalized to have the desired FST
 # NOTE fst is a function in the `popkin` package
-Fst <- 0.2 # the desired final FST
-inbr_subpops <- 1:k # subpopulation FST vector, unnormalized so far
-inbr_subpops <- inbr_subpops / fst(inbr_subpops) * Fst # normalized to have the desired FST
-fst(inbr_subpops) # verify FST for the intermediate subpopulations
+inbr_subpops <- inbr_subpops / fst(inbr_subpops) * Fst
+# verify FST for the intermediate subpopulations
+fst(inbr_subpops)
 
 # get coancestry of the admixed individuals
-coancestry <- coanc_admix(admix_proportions, inbr_subpops) # the coancestry matrix
+coancestry <- coanc_admix(admix_proportions, inbr_subpops)
 # before getting FST for individuals, weigh then inversely proportional to subpop sizes
 weights <- weights_subpops(labs) # function from `popkin` package
 # verify FST for individuals (same as for intermediate subpops for this pop structure)
@@ -387,21 +453,25 @@ fst_admix(admix_proportions, inbr_subpops, weights)
 
 ```{r, fig.width = 4, fig.height = 1.2, fig.align = 'center'}
 # visualize the per-subpopulation inbreeding coefficients (FSTs)
-par(mar = c(2.5, 2.5, 0, 0) + 0.2, lab = c(2, 1, 7), mgp = c(1.5, 0.5, 0)) # tweak margins/etc
-col_subpops <- brewer.pal(k, "Paired") # indep. subpop. colors
+# tweak margins/etc
+par(mar = c(2.5, 2.5, 0, 0) + 0.2, lab = c(2, 1, 7), mgp = c(1.5, 0.5, 0))
+# colors for independent subpopulations
+col_subpops <- brewer.pal(k_subpops, "Paired")
 barplot(inbr_subpops, col = col_subpops, names.arg = colnames(admix_proportions), xlab = 'Subpopulation', ylab = 'Inbr')
 ```
 
 ```{r, fig.width = 4, fig.height = 1, fig.align = 'center'}
 # visualize the admixture proportions
-par(mar = c(1, 4, 0.4, 0) + 0.2, lab = c(2, 2, 7)) # tweak margins/etc
+# tweak margins/etc
+par(mar = c(1, 4, 0.4, 0) + 0.2, lab = c(2, 2, 7))
 barplot(t(admix_proportions), col = col_subpops, border = NA, space = 0, ylab = 'Admix prop')
 mtext('Individuals', 1)
 ```
 
 ```{r, fig.width = 3.1, fig.height = 2, fig.align = 'center'}
 # Visualize the coancestry matrix using "popkin"!
-par(oma = c(0, 1.5, 0, 3), mar = c(0, 0, 0.4, 0) + 0.2) # tweak margins/etc
+# tweak margins/etc
+par(oma = c(0, 1.5, 0, 3), mar = c(0, 0, 0.4, 0) + 0.2)
 plot_popkin(coancestry, leg_n = 3)
 ```
 

@@ -11,16 +11,26 @@
 #' @return The \eqn{m \times n}{m-by-n} matrix of individual-specific allele frequencies.
 #'
 #' @examples
-#' m_loci <- 10 # number of loci
-#' n_ind <- 5 # number of individuals
-#' k_subpops <- 2 # number of intermediate subpops
-#' inbr_subpops <- c(0.1, 0.3) # FST values for k = 2 subpops
+#' # data dimensions
+#' # number of loci
+#' m_loci <- 10
+#' # number of individuals
+#' n_ind <- 5
+#' # number of intermediate subpops
+#' k_subpops <- 2
+#'
+#' # FST values for k = 2 subpops
+#' inbr_subpops <- c(0.1, 0.3)
+#' 
 #' # non-trivial admixture proportions
 #' admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma = 1)
+#' 
 #' # random vector of ancestral allele frequencies
-#' p_anc <- draw_p_anc(m_loci) 
+#' p_anc <- draw_p_anc(m_loci)
+#' 
 #' # matrix of intermediate subpop allele freqs
 #' p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
+#' 
 #' # matrix of individual-specific allele frequencies
 #' p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
 #'
@@ -31,6 +41,12 @@ make_p_ind_admix <- function(p_subpops, admix_proportions) {
         stop('`p_subpops` is required!')
     if (missing(admix_proportions))
         stop('`admix_proportions` is required!')
+    
+    # ensure that things that should be matrices are so
+    if (!is.matrix(p_subpops))
+        stop('`p_subpops` must be a matrix!')
+    if (!is.matrix(admix_proportions))
+        stop('`admix_proportions` must be a matrix!')
     
     # validate data dimensions
     if (ncol(p_subpops) != ncol(admix_proportions))

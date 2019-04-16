@@ -11,18 +11,26 @@
 #'
 #' @examples
 #' # a trivial case: unadmixed individuals from independent subpopulations
-#' n <- 5 # number of individuals and subpops
-#' admix_proportions <- diag(rep.int(1, n)) # unadmixed individuals
-#' coanc_subpops <- 0.2 # equal Fst for all subpops
-#' coancestry <- coanc_admix(admix_proportions, coanc_subpops) # diagonal coancestry matryx
+#' # number of individuals and subpops
+#' n_ind <- 5
+#' # unadmixed individuals
+#' admix_proportions <- diag(rep.int(1, n_ind))
+#' # equal Fst for all subpops
+#' coanc_subpops <- 0.2
+#' # diagonal coancestry matryx
+#' coancestry <- coanc_admix(admix_proportions, coanc_subpops)
 #'
 #' # a more complicated admixture model
-#' n <- 5 # number of individuals
-#' k <- 2 # number of intermediate subpops
-#' sigma <- 1 # dispersion parameter of intermediate subpops
-#' admix_proportions <- admix_prop_1d_linear(n, k, sigma) # non-trivial admixture proportions
-#' coanc_subpops <- c(0.1, 0.3) # different Fst for each of the k subpops
-#' coancestry <- coanc_admix(admix_proportions, coanc_subpops) # non-trivial coancestry matrix
+#' # number of individuals
+#' n_ind <- 5
+#' # number of intermediate subpops
+#' k_subpops <- 2
+#' # non-trivial admixture proportions
+#' admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma = 1)
+#' # different Fst for each of the k_subpops
+#' coanc_subpops <- c(0.1, 0.3)
+#' # non-trivial coancestry matrix
+#' coancestry <- coanc_admix(admix_proportions, coanc_subpops)
 #' 
 #' @export 
 coanc_admix <- function(admix_proportions, coanc_subpops) {
@@ -32,6 +40,10 @@ coanc_admix <- function(admix_proportions, coanc_subpops) {
     if (missing( coanc_subpops ))
         stop('`coanc_subpops` is required!')
 
+    # ensure that things that should be matrices are so
+    if (!is.matrix(admix_proportions))
+        stop('`admix_proportions` must be a matrix!')
+    
     # behavior depends on dimensions of coanc_subpops:
     k <- ncol(admix_proportions) # dimension that matters the most
     if (is.matrix(coanc_subpops)) {

@@ -8,19 +8,25 @@
 \description{
 The underlying model is called the BN-PSD admixture model, which combines the Balding-Nichols (BN) allele frequency model for the intermediate subpopulations with the Pritchard-Stephens-Donnelly (PSD) model of individual-specific admixture proportions.
 The BN-PSD model enables the simulation of complex population structures, ideal for illustrating challenges in kinship coefficient and \eqn{F_{ST}}{FST} estimation.
-Note that simulated loci are drawn independently (in linkage equilibrium).
+Simulated loci are drawn independently (in linkage equilibrium).
 }
 \examples{
 # dimensions of data/model
-m_loci <- 10 # number of loci
-n_ind <- 5 # number of individuals
-k_subpops <- 2 # number of intermediate subpops
+# number of loci
+m_loci <- 10
+# number of individuals
+n_ind <- 5
+# number of intermediate subpops
+k_subpops <- 2
 
 # define population structure
-inbr_subpops <- c(0.1, 0.3) # FST values for k=2 subpopulations
-sigma <- 1 # dispersion parameter of intermediate subpops
+# FST values for k = 2 subpopulations
+inbr_subpops <- c(0.1, 0.3)
 # admixture proportions from 1D geography
-admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma)
+admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma = 1)
+# also available:
+# - admix_prop_1d_circular
+# - admix_prop_indep_subpops
 
 # get pop structure parameters of the admixed individuals
 # the coancestry matrix
@@ -29,11 +35,11 @@ coancestry <- coanc_admix(admix_proportions, inbr_subpops)
 Fst <- fst_admix(admix_proportions, inbr_subpops)
 
 # draw all random allele freqs and genotypes
-out <- rbnpsd(admix_proportions, inbr_subpops, m_loci)
-X <- out$X # genotypes
-p_ind <- out$P # individual-specific AFs
-p_subops <- out$B # independent subpops (intermediate) AFs
-p_anc <- out$Pa # ancestral AFs
+out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci)
+# genotypes
+X <- out$X
+# ancestral allele frequencies (AFs)
+p_anc <- out$p_anc
 
 # OR... draw each vector or matrix separately
 # provided for additional flexibility

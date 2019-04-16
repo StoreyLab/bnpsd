@@ -119,10 +119,10 @@ test_that("fst_admix works in toy cases", {
 test_that("bias_coeff_admix agrees with explicitly calculated bias_coeff", {
     # set up some simulated data
     n <- 5
-    k <- 2
+    k_subpops <- 2
     sigma <- 1
-    admix_proportions <- admix_prop_1d_linear(n, k, sigma)
-    F <- 1:k # scale doesn't matter right now...
+    admix_proportions <- admix_prop_1d_linear(n, k_subpops, sigma)
+    F <- 1:k_subpops # scale doesn't matter right now...
 
     coancestry <- coanc_admix(admix_proportions, F) # in wrong scale but meh
     sWant <- mean(coancestry) / mean(diag(coancestry)) # this is the correct bias coeff, with uniform weights
@@ -157,11 +157,11 @@ test_that("bias_coeff_admix agrees with explicitly calculated bias_coeff", {
 test_that("admix_prop_indep_subpops returns valid admixture coefficients", {
     labs <- c(1, 2, 2, 3, 3, 3, 4, 4, 4, 4)
     n <- length(labs)
-    k <- length(unique(labs))
+    k_subpops <- length(unique(labs))
     admix_proportions <- admix_prop_indep_subpops(labs)
     # general tests for admixture matrices
     expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k) # k columns
+    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
     expect_true(all(admix_proportions >= 0)) # all are non-negative
     expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
     expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
@@ -174,7 +174,7 @@ test_that("admix_prop_indep_subpops returns valid admixture coefficients", {
     admix_proportions <- admix_prop_indep_subpops(labs, subpops)
     # general tests for admixture matrices
     expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k) # k columns
+    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
     expect_true(all(admix_proportions >= 0)) # all are non-negative
     expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
     expect_equal(rowSums(admix_proportions), rep.int(1,n)) # rows sum to 1, vector length n
@@ -183,12 +183,12 @@ test_that("admix_prop_indep_subpops returns valid admixture coefficients", {
     expect_true(all(colnames(admix_proportions) == subpops))
     
     # test with provided subpops (additional labels)
-    k <- 10
-    subpops <- 1:k
+    k_subpops <- 10
+    subpops <- 1:k_subpops
     admix_proportions <- admix_prop_indep_subpops(labs, subpops)
     # general tests for admixture matrices
     expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k) # k columns
+    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
     expect_true(all(admix_proportions >= 0)) # all are non-negative
     expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
     expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
@@ -203,18 +203,18 @@ test_that("admix_prop_indep_subpops returns valid admixture coefficients", {
 
 test_that("admix_prop_1d_linear returns valid admixture coefficients", {
     n <- 10
-    k <- 2
-    admix_proportions <- admix_prop_1d_linear(n, k, sigma = 1)
+    k_subpops <- 2
+    admix_proportions <- admix_prop_1d_linear(n, k_subpops, sigma = 1)
     expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k) # k columns
+    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
     expect_true(all(admix_proportions >= 0)) # all are non-negative
     expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
     expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
 
     # test with sigma == 0 (special case that makes usual formula break)
-    admix_proportions <- admix_prop_1d_linear(n, k, sigma = 0)
+    admix_proportions <- admix_prop_1d_linear(n, k_subpops, sigma = 0)
     expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k) # k columns
+    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
     expect_true(all(admix_proportions >= 0)) # all are non-negative
     expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
     expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
@@ -225,10 +225,10 @@ test_that("admix_prop_1d_linear returns valid admixture coefficients", {
     expect_equal(admix_proportions, admix_proportions2)
 
     # test bias_coeff version
-    obj <- admix_prop_1d_linear(n, k, bias_coeff = 0.5, coanc_subpops = 1:k, fst = 0.1)
+    obj <- admix_prop_1d_linear(n, k_subpops, bias_coeff = 0.5, coanc_subpops = 1:k_subpops, fst = 0.1)
     admix_proportions <- obj$admix_proportions # returns many things in this case, get admix_proportions here
     expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k) # k columns
+    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
     expect_true(all(admix_proportions >= 0)) # all are non-negative
     expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
     expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
@@ -236,28 +236,28 @@ test_that("admix_prop_1d_linear returns valid admixture coefficients", {
 
 test_that("admix_prop_1d_circular returns valid admixture coefficients", {
     n <- 10
-    k <- 2
-    admix_proportions <- admix_prop_1d_circular(n, k, sigma = 1)
+    k_subpops <- 2
+    admix_proportions <- admix_prop_1d_circular(n, k_subpops, sigma = 1)
     expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k) # k columns
+    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
     expect_true(all(admix_proportions >= 0)) # all are non-negative
     expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
     expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
 
     # test with sigma == 0 (special case that makes usual formula break)
-    admix_proportions <- admix_prop_1d_circular(n, k, sigma = 0)
+    admix_proportions <- admix_prop_1d_circular(n, k_subpops, sigma = 0)
     expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k) # k columns
+    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
     expect_true(all(admix_proportions >= 0)) # all are non-negative
     expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
     expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
     # though the result is nearly island-like, there is an annoying shift I'd rather not try to figure out for this test...
 
     # test bias_coeff version
-    obj <- admix_prop_1d_circular(n, k, bias_coeff = 0.5, coanc_subpops = 1:k, fst = 0.1)
+    obj <- admix_prop_1d_circular(n, k_subpops, bias_coeff = 0.5, coanc_subpops = 1:k_subpops, fst = 0.1)
     admix_proportions <- obj$admix_proportions # returns many things in this case, get admix_proportions here
     expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k) # k columns
+    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
     expect_true(all(admix_proportions >= 0)) # all are non-negative
     expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
     expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
@@ -266,10 +266,10 @@ test_that("admix_prop_1d_circular returns valid admixture coefficients", {
 test_that("bias_coeff_admix_fit agrees with reverse func", {
     n <- 1000
     inbr_subpops <- c(0.1, 0.2, 0.3)
-    k <- length(inbr_subpops)
+    k_subpops <- length(inbr_subpops)
     s_want <- 0.5
     coord_ind_first_linear <- 0.5
-    coord_ind_last_linear <- k + 0.5
+    coord_ind_last_linear <- k_subpops + 0.5
     coord_ind_first_circular <- 0
     coord_ind_last_circular <- 2 * pi
 
@@ -279,7 +279,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
         bias_coeff = s_want,
         coanc_subpops = inbr_subpops,
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         func = admix_prop_1d_linear,
         coord_ind_first = coord_ind_first_linear,
         coord_ind_last = coord_ind_last_linear
@@ -287,7 +287,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     # construct everything and verify s == s_want
     admix_proportions <- admix_prop_1d_linear(
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         sigma = sigma,
         coord_ind_first = coord_ind_first_linear,
         coord_ind_last = coord_ind_last_linear
@@ -303,7 +303,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
         bias_coeff = s_want,
         coanc_subpops = inbr_subpops,
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         func = admix_prop_1d_circular,
         coord_ind_first = coord_ind_first_circular,
         coord_ind_last = coord_ind_last_circular
@@ -311,7 +311,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     # construct everything and verify s == s_want
     admix_proportions <- admix_prop_1d_circular(
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         sigma = sigma,
         coord_ind_first = coord_ind_first_circular,
         coord_ind_last = coord_ind_last_circular
@@ -330,7 +330,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
         bias_coeff = s_want,
         coanc_subpops = inbr_subpops,
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         func = admix_prop_1d_linear,
         coord_ind_first = coord_ind_first_linear,
         coord_ind_last = coord_ind_last_linear
@@ -339,7 +339,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     # construct everything and verify s == s_want
     admix_proportions <- admix_prop_1d_linear(
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         sigma = sigma,
         coord_ind_first = coord_ind_first_linear,
         coord_ind_last = coord_ind_last_linear
@@ -354,7 +354,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
         bias_coeff = s_want,
         coanc_subpops = inbr_subpops,
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         func = admix_prop_1d_circular,
         coord_ind_first = coord_ind_first_circular,
         coord_ind_last = coord_ind_last_circular
@@ -363,7 +363,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     # construct everything and verify s == s_want
     admix_proportions <- admix_prop_1d_circular(
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         sigma = sigma,
         coord_ind_first = coord_ind_first_circular,
         coord_ind_last = coord_ind_last_circular
@@ -375,7 +375,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     # test extreme case s_want = minimum
     # test with admix_prop_1d_linear
     # construct directly
-    admix_prop_bias_coeff_min <- admix_prop_1d_linear(n, k, sigma = 0)
+    admix_prop_bias_coeff_min <- admix_prop_1d_linear(n, k_subpops, sigma = 0)
     # this is the mminimum s_want
     s_want <- bias_coeff_admix(admix_prop_bias_coeff_min, inbr_subpops)
     # get sigma
@@ -383,7 +383,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
         bias_coeff = s_want,
         coanc_subpops = inbr_subpops,
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         func = admix_prop_1d_linear,
         coord_ind_first = coord_ind_first_linear,
         coord_ind_last = coord_ind_last_linear
@@ -392,7 +392,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     # construct everything and verify s == s_want
     admix_proportions <- admix_prop_1d_linear(
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         sigma = sigma,
         coord_ind_first = coord_ind_first_linear,
         coord_ind_last = coord_ind_last_linear
@@ -403,7 +403,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     
     # test with admix_prop_1d_circular
     # construct directly
-    admix_prop_bias_coeff_min <- admix_prop_1d_circular(n, k, sigma = 0)
+    admix_prop_bias_coeff_min <- admix_prop_1d_circular(n, k_subpops, sigma = 0)
     # this is the mminimum s_want
     s_want <- bias_coeff_admix(admix_prop_bias_coeff_min, inbr_subpops)
     # get sigma
@@ -411,7 +411,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
         bias_coeff = s_want,
         coanc_subpops = inbr_subpops,
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         func = admix_prop_1d_circular,
         coord_ind_first = coord_ind_first_circular,
         coord_ind_last = coord_ind_last_circular
@@ -420,7 +420,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     # construct everything and verify s == s_want
     admix_proportions <- admix_prop_1d_circular(
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         sigma = sigma,
         coord_ind_first = coord_ind_first_circular,
         coord_ind_last = coord_ind_last_circular
@@ -432,7 +432,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     # test s_want with matrix coanc_subpops (all previous tests were vectors)
     # set up population structure
     n <- 1000
-    k <- 3
+    k_subpops <- 3
     # non-trivial coancestry matrix for intermediate subpopulations!
     coanc_subpops <- matrix(
         c(
@@ -440,7 +440,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
             0.05, 0.2 , 0.05,
             0   , 0.05, 0.3
         ),
-        nrow = k
+        nrow = k_subpops
     )
     s_want <- 0.5
 
@@ -450,7 +450,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
         bias_coeff = s_want,
         coanc_subpops = coanc_subpops,
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         func = admix_prop_1d_linear,
         coord_ind_first = coord_ind_first_linear,
         coord_ind_last = coord_ind_last_linear
@@ -458,7 +458,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     # construct everything and verify s == s_want
     admix_proportions <- admix_prop_1d_linear(
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         sigma = sigma,
         coord_ind_first = coord_ind_first_linear,
         coord_ind_last = coord_ind_last_linear
@@ -474,7 +474,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
         bias_coeff = s_want,
         coanc_subpops = coanc_subpops,
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         func = admix_prop_1d_circular,
         coord_ind_first = coord_ind_first_circular,
         coord_ind_last = coord_ind_last_circular
@@ -482,7 +482,7 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     # construct everything and verify s == s_want
     admix_proportions <- admix_prop_1d_circular(
         n_ind = n,
-        k_subpops = k,
+        k_subpops = k_subpops,
         sigma = sigma,
         coord_ind_first = coord_ind_first_circular,
         coord_ind_last = coord_ind_last_circular
@@ -495,11 +495,11 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
 
 test_that("rescale_coanc_subpops agrees with explicitly FST calculation", {
     n <- 5
-    k <- 2
+    k_subpops <- 2
     sigma <- 1
     Fst <- 0.1
-    admix_proportions <- admix_prop_1d_linear(n, k, sigma)
-    F <- 1:k # scale doesn't matter right now...
+    admix_proportions <- admix_prop_1d_linear(n, k_subpops, sigma)
+    F <- 1:k_subpops # scale doesn't matter right now...
     F2 <- rescale_coanc_subpops(admix_proportions, F, Fst) # calculation to compare to
     coancestry <- coanc_admix(admix_proportions, F2) # in wrong scale but meh
     Fst2 <- mean(diag(coancestry)) # this is the actual FST, with uniform weights
@@ -508,9 +508,9 @@ test_that("rescale_coanc_subpops agrees with explicitly FST calculation", {
 })
 
 test_that("draw_p_anc is in range", {
-    m <- 1000
-    p_anc <- draw_p_anc(m)
-    expect_equal(length(p_anc), m)
+    m_loci <- 1000
+    p_anc <- draw_p_anc(m_loci)
+    expect_equal(length(p_anc), m_loci)
     expect_true(all(p_anc >= 0)) # all are non-negative
     expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
 })
@@ -571,143 +571,189 @@ test_that("draw_p_subpops is in range", {
 })
 
 test_that("make_p_ind_admix is in range", {
-    m <- 10
-    F <- c(0.1, 0.2, 0.3)
-    k <- length(F)
-    admix_proportions <- diag(rep.int(1, k)) # island model for test...
+    m_loci <- 10
+    inbr_subpops <- c(0.1, 0.2, 0.3)
+    k_subpops <- length(inbr_subpops)
+    admix_proportions <- diag(rep.int(1, k_subpops)) # island model for test...
     # repeat so we have multiple people per island
     admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
-    n <- nrow(admix_proportions) # number of individuals (3 * k)
-    p_anc <- draw_p_anc(m)
-    p_subpops <- draw_p_subpops(p_anc, F)
+    n <- nrow(admix_proportions) # number of individuals (3 * k_subpops)
+    p_anc <- draw_p_anc(m_loci)
+    p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
     p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
-    expect_equal(nrow(p_ind), m)
+    expect_equal(nrow(p_ind), m_loci)
     expect_equal(ncol(p_ind), n)
     expect_true(all(p_ind >= 0)) # all are non-negative
     expect_true(all(p_ind <= 1)) # all are smaller or equal than 1
 })
 
 test_that("draw_genotypes_admix is in range", {
-    m <- 10
-    F <- c(0.1, 0.2, 0.3)
-    k <- length(F)
-    admix_proportions <- diag(rep.int(1, k)) # island model for test...
+    m_loci <- 10
+    inbr_subpops <- c(0.1, 0.2, 0.3)
+    k_subpops <- length(inbr_subpops)
+    admix_proportions <- diag(rep.int(1, k_subpops)) # island model for test...
     # repeat so we have multiple people per island
     admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
-    n <- nrow(admix_proportions) # number of individuals (3 * k)
-    p_anc <- draw_p_anc(m)
-    p_subpops <- draw_p_subpops(p_anc, F)
+    n <- nrow(admix_proportions) # number of individuals (3 * k_subpops)
+    p_anc <- draw_p_anc(m_loci)
+    p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
     p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
+    
     # direct test
     X <- draw_genotypes_admix(p_ind)
-    expect_equal(nrow(X), m)
+    expect_equal(nrow(X), m_loci)
     expect_equal(ncol(X), n)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
+    
     # indirect draw test
     X <- draw_genotypes_admix(p_subpops, admix_proportions)
-    expect_equal(nrow(X), m)
+    expect_equal(nrow(X), m_loci)
     expect_equal(ncol(X), n)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
+    
     # indirect draw test with low-mem algo
     X <- draw_genotypes_admix(p_subpops, admix_proportions, low_mem = TRUE)
-    expect_equal(nrow(X), m)
+    expect_equal(nrow(X), m_loci)
     expect_equal(ncol(X), n)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
 })
 
-test_that("rbnpsd works well", {
-    m <- 10
-    F <- c(0.1, 0.2, 0.3)
-    k <- length(F)
-    admix_proportions <- diag(rep.int(1, k)) # island model for test...
-    # repeat so we have multiple people per island
-    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
-    n <- nrow(admix_proportions) # number of individuals (3*k)
-    # run rbnpsd
-    out <- rbnpsd(admix_proportions, F, m)
-    X <- out$X # genotypes
-    p_ind <- out$P # IAFs
-    p_subpops <- out$B # Intermediate AFs
-    p_anc <- out$Pa # Ancestral AFs
-    # test X
-    expect_equal(nrow(X), m)
-    expect_equal(ncol(X), n)
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    # test p_ind
-    expect_equal(nrow(p_ind), m)
-    expect_equal(ncol(p_ind), n)
-    expect_true(all(p_ind >= 0)) # all are non-negative
-    expect_true(all(p_ind <= 1)) # all are smaller or equal than 1
-    # test p_subpops
-    expect_equal(nrow(p_subpops), m)
-    expect_equal(ncol(p_subpops), k)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # test p_anc
-    expect_equal(length(p_anc), m)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
-})
+# for recurring tests
+draw_all_admix_names_ret_default <- c('X', 'p_anc')
+draw_all_admix_names_ret_full <- c('X', 'p_anc', 'p_subpops', 'p_ind')
+draw_all_admix_names_ret_low_mem <- c('X', 'p_anc', 'p_subpops') # excludes p_ind
 
-test_that("rbnpsd `noFixed = TRUE` works well", {
-    m <- 1000
-    F <- c(0.1, 0.2, 0.3)
-    k <- length(F)
-    admix_proportions <- diag(rep.int(1, k)) # island model for test...
+test_that("draw_all_admix works well", {
+    m_loci <- 10
+    inbr_subpops <- c(0.1, 0.2, 0.3)
+    k_subpops <- length(inbr_subpops)
+    admix_proportions <- diag(rep.int(1, k_subpops)) # island model for test...
     # repeat so we have multiple people per island
     admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
-    n <- nrow(admix_proportions) # number of individuals (3*k)
-    # run rbnpsd
-    out <- rbnpsd(admix_proportions, F, m, noFixed = TRUE)
+    n_ind <- nrow(admix_proportions) # number of individuals (3*k_subpops)
+
+    # make sure things die when important parameters are missing
+    # all missing
+    expect_error( draw_all_admix() )
+    # two missing
+    expect_error( draw_all_admix(admix_proportions = admix_proportions) )
+    expect_error( draw_all_admix(inbr_subpops = inbr_subpops) )
+    expect_error( draw_all_admix(m_loci = m_loci) )
+    # one missing
+    expect_error( draw_all_admix(inbr_subpops = inbr_subpops, m_loci = m_loci) )
+    expect_error( draw_all_admix(admix_proportions = admix_proportions, m_loci = m_loci) )
+    expect_error( draw_all_admix(admix_proportions = admix_proportions, inbr_subpops = inbr_subpops) )
+    
+    # run draw_all_admix
+    # first test default (p_ind and p_subpops not returned)
+    out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci)
+    expect_equal( names(out), draw_all_admix_names_ret_default )
+
+    # now rerun with all outpts, so we can test them all
+    out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, want_p_ind = TRUE, want_p_subpops = TRUE)
+    expect_equal( names(out), draw_all_admix_names_ret_full )
     X <- out$X # genotypes
-    p_ind <- out$P # IAFs
-    p_subpops <- out$B # Intermediate AFs
-    p_anc <- out$Pa # Ancestral AFs
+    p_ind <- out$p_ind # IAFs
+    p_subpops <- out$p_subpops # Intermediate AFs
+    p_anc <- out$p_anc # Ancestral AFs
+    
     # test X
-    expect_equal(nrow(X), m)
-    expect_equal(ncol(X), n)
+    expect_equal(nrow(X), m_loci)
+    expect_equal(ncol(X), n_ind)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
     expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
+    
     # test p_ind
-    expect_equal(nrow(p_ind), m)
-    expect_equal(ncol(p_ind), n)
+    expect_equal(nrow(p_ind), m_loci)
+    expect_equal(ncol(p_ind), n_ind)
     expect_true(all(p_ind >= 0)) # all are non-negative
     expect_true(all(p_ind <= 1)) # all are smaller or equal than 1
+    
     # test p_subpops
-    expect_equal(nrow(p_subpops), m)
-    expect_equal(ncol(p_subpops), k)
+    expect_equal(nrow(p_subpops), m_loci)
+    expect_equal(ncol(p_subpops), k_subpops)
     expect_true(all(p_subpops >= 0)) # all are non-negative
     expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+    
     # test p_anc
-    expect_equal(length(p_anc), m)
+    expect_equal(length(p_anc), m_loci)
     expect_true(all(p_anc >= 0)) # all are non-negative
     expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
 })
 
-test_that("rbnpsd `lowMem = TRUE` works well", {
-    m <- 1000
-    F <- c(0.1, 0.2, 0.3)
-    k <- length(F)
-    admix_proportions <- diag(rep.int(1, k)) # island model for test...
+test_that("draw_all_admix `require_polymorphic_loci = FALSE` works well", {
+    # testing FALSE here since TRUE is default
+    
+    m_loci <- 1000
+    inbr_subpops <- c(0.1, 0.2, 0.3)
+    k_subpops <- length(inbr_subpops)
+    admix_proportions <- diag(rep.int(1, k_subpops)) # island model for test...
     # repeat so we have multiple people per island
     admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
-    n <- nrow(admix_proportions) # number of individuals (3*k)
-    # run rbnpsd
-    out <- rbnpsd(admix_proportions, F, m, lowMem = TRUE)
+    n_ind <- nrow(admix_proportions) # number of individuals (3*k_subpops)
+    
+    # run draw_all_admix
+    out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, want_p_ind = TRUE, want_p_subpops = TRUE, require_polymorphic_loci = FALSE)
+    expect_equal( names(out), draw_all_admix_names_ret_full )
     X <- out$X # genotypes
-    p_subpops <- out$B # Intermediate AFs
-    p_anc <- out$Pa # Ancestral AFs
+    p_ind <- out$p_ind # IAFs
+    p_subpops <- out$p_subpops # Intermediate AFs
+    p_anc <- out$p_anc # Ancestral AFs
+    
     # test X
-    expect_equal(nrow(X), m)
-    expect_equal(ncol(X), n)
+    expect_equal(nrow(X), m_loci)
+    expect_equal(ncol(X), n_ind)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
+    # here loci may be fixed, don't require otherwise
+
+    # test p_ind
+    expect_equal(nrow(p_ind), m_loci)
+    expect_equal(ncol(p_ind), n_ind)
+    expect_true(all(p_ind >= 0)) # all are non-negative
+    expect_true(all(p_ind <= 1)) # all are smaller or equal than 1
+
     # test p_subpops
-    expect_equal(nrow(p_subpops), m)
-    expect_equal(ncol(p_subpops), k)
+    expect_equal(nrow(p_subpops), m_loci)
+    expect_equal(ncol(p_subpops), k_subpops)
     expect_true(all(p_subpops >= 0)) # all are non-negative
     expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+
     # test p_anc
-    expect_equal(length(p_anc), m)
+    expect_equal(length(p_anc), m_loci)
+    expect_true(all(p_anc >= 0)) # all are non-negative
+    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
+})
+
+test_that("draw_all_admix `low_mem = TRUE` works well", {
+    m_loci <- 1000
+    inbr_subpops <- c(0.1, 0.2, 0.3)
+    k_subpops <- length(inbr_subpops)
+    admix_proportions <- diag(rep.int(1, k_subpops)) # island model for test...
+    # repeat so we have multiple people per island
+    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
+    n_ind <- nrow(admix_proportions) # number of individuals (3*k_subpops)
+    
+    # run draw_all_admix
+    out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, want_p_subpops = TRUE, low_mem = TRUE)
+    expect_equal( names(out), draw_all_admix_names_ret_low_mem )
+    X <- out$X # genotypes
+    p_subpops <- out$p_subpops # Intermediate AFs
+    p_anc <- out$p_anc # Ancestral AFs
+    
+    # test X
+    expect_equal(nrow(X), m_loci)
+    expect_equal(ncol(X), n_ind)
+    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
+    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
+    
+    # test p_subpops
+    expect_equal(nrow(p_subpops), m_loci)
+    expect_equal(ncol(p_subpops), k_subpops)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+    
+    # test p_anc
+    expect_equal(length(p_anc), m_loci)
     expect_true(all(p_anc >= 0)) # all are non-negative
     expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
 })
