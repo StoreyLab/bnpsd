@@ -516,19 +516,62 @@ test_that("draw_p_anc is in range", {
 })
 
 test_that("draw_p_subpops is in range", {
-    m <- 1000
-    F <- c(0.1, 0.2, 0.3)
-    k <- length(F)
-    p_anc <- draw_p_anc(m)
-    p_subpops <- draw_p_subpops(p_anc, F)
-    expect_equal(nrow(p_subpops), m)
-    expect_equal(ncol(p_subpops), k)
+    
+    # a typical example with vector p_anc and inbr_subpops
+    m_loci <- 10
+    inbr_subpops <- c(0.1, 0.2, 0.3)
+    k_subpops <- length(inbr_subpops)
+    p_anc <- draw_p_anc(m_loci)
+
+    # make sure things die when parameters are missing
+    expect_error( draw_p_subpops() )
+    expect_error( draw_p_subpops(p_anc = p_anc) )
+    expect_error( draw_p_subpops(inbr_subpops = inbr_subpops) )
+    
+    # test main use case
+    p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
+    expect_equal(nrow(p_subpops), m_loci)
+    expect_equal(ncol(p_subpops), k_subpops)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+
+    # make sure this doesn't die or anything when extra parameters are passed but agree
+    expect_silent( p_subpops <- draw_p_subpops(p_anc, inbr_subpops, m_loci = m_loci) )
+    expect_silent( p_subpops <- draw_p_subpops(p_anc, inbr_subpops, k_subpops = k_subpops) )
+    expect_silent( p_subpops <- draw_p_subpops(p_anc, inbr_subpops, m_loci = m_loci, k_subpops = k_subpops) )
+
+    # special case of scalar p_anc
+    p_subpops <- draw_p_subpops(p_anc = 0.5, inbr_subpops, m_loci = m_loci)
+    expect_equal(nrow(p_subpops), m_loci)
+    expect_equal(ncol(p_subpops), k_subpops)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+    
+    # special case of scalar inbr_subpops
+    k_subpops <- 2
+    p_subpops <- draw_p_subpops(p_anc, inbr_subpops = 0.2, k_subpops = k_subpops)
+    expect_equal(nrow(p_subpops), m_loci)
+    expect_equal(ncol(p_subpops), k_subpops)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+    
+    # both main parameters scalars but return value still matrix
+    p_subpops <- draw_p_subpops(p_anc = 0.5, inbr_subpops = 0.2, m_loci = m_loci, k_subpops = k_subpops)
+    expect_equal(nrow(p_subpops), m_loci)
+    expect_equal(ncol(p_subpops), k_subpops)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+    
+    # passing scalar parameters without setting dimensions separately results in a 1x1 matrix
+    p_subpops <- draw_p_subpops(p_anc = 0.5, inbr_subpops = 0.2)
+    expect_equal(nrow(p_subpops), 1)
+    expect_equal(ncol(p_subpops), 1)
     expect_true(all(p_subpops >= 0)) # all are non-negative
     expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
 })
 
 test_that("make_p_ind_admix is in range", {
-    m <- 1000
+    m <- 10
     F <- c(0.1, 0.2, 0.3)
     k <- length(F)
     admix_proportions <- diag(rep.int(1, k)) # island model for test...
@@ -545,7 +588,7 @@ test_that("make_p_ind_admix is in range", {
 })
 
 test_that("draw_genotypes_admix is in range", {
-    m <- 1000
+    m <- 10
     F <- c(0.1, 0.2, 0.3)
     k <- length(F)
     admix_proportions <- diag(rep.int(1, k)) # island model for test...
@@ -573,7 +616,7 @@ test_that("draw_genotypes_admix is in range", {
 })
 
 test_that("rbnpsd works well", {
-    m <- 1000
+    m <- 10
     F <- c(0.1, 0.2, 0.3)
     k <- length(F)
     admix_proportions <- diag(rep.int(1, k)) # island model for test...
