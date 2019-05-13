@@ -9,3 +9,4 @@
 ^Makefile$
 ^cran-comments\.md$
 ^\.travis\.yml$
+scripts/*
