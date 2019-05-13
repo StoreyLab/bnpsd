@@ -7,7 +7,7 @@
 #'
 #' @param X The \eqn{m \times n}{m-by-n} genotype matrix
 #'
-#' @return A length-\eqn{m} boolean vector where the \eqn{i}th element is TRUE if locus \eqn{i} is fixed or completely missing, FALSE otherwise.
+#' @return A length-\eqn{m} boolean vector where the \eqn{i} element is TRUE if locus \eqn{i} is fixed or completely missing, FALSE otherwise.
 #'
 #' @examples
 #' # here's a toy genotype matrix

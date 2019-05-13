@@ -1,7 +1,7 @@
 #' Construct individual-specific allele frequency matrix under the PSD admixture model
 #'
 #' Here \eqn{m} is the number of loci, \eqn{n} the number of individuals, and \eqn{k} the number of intermediate subpopulations.
-#' The \eqn{m \times n}{m-by-n} Individual-specific Allele Frequency (IAF) matrix \eqn{P} is constructed from the \eqn{m \times k}{m-by-k} intermediate subpopulation allele frequency matrix \eqn{B} and the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q} using
+#' The \eqn{m \times n}{m-by-n} individual-specific allele frequency matrix \eqn{P} is constructed from the \eqn{m \times k}{m-by-k} intermediate subpopulation allele frequency matrix \eqn{B} and the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q} using
 #' \deqn{P = B Q^T.}{P = B * Q^T.}
 #' This function is a wrapper around \code{\link{tcrossprod}}, but also ensures the output allele frequencies are in [0, 1], as this is not guaranteed by \code{\link{tcrossprod}} due to limited machine precision.
 #' 

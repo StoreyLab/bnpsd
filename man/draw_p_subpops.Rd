@@ -12,11 +12,11 @@ draw_p_subpops(p_anc, inbr_subpops, m_loci = NA, k_subpops = NA)
 \item{inbr_subpops}{The length-\eqn{k} vector of subpopulation \eqn{F_{ST}}{FST} values.}
 
 \item{m_loci}{Optional.
-The desired number of loci \eqn{m}, to be used if `p_anc` is a scalar.
+The desired number of loci \eqn{m}, to be used if \code{p_anc} is a scalar.
 Stops if both \code{length(p_anc) > 1} and \code{m_loci} are set and they disagree.}
 
 \item{k_subpops}{Optional.
-The desired number of subpopualtions \eqn{k}, to be used if `inbr_subpops` is a scalar.
+The desired number of subpopulations \eqn{k}, to be used if \code{inbr_subpops} is a scalar.
 Stops if both \code{length(inbr_subpops) > 1} and \code{k_subpops} are set and they disagree.}
 }
 \value{

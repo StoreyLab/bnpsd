@@ -10,7 +10,7 @@ fixed_loci(X)
 \item{X}{The \eqn{m \times n}{m-by-n} genotype matrix}
 }
 \value{
-A length-\eqn{m} boolean vector where the \eqn{i}th element is TRUE if locus \eqn{i} is fixed or completely missing, FALSE otherwise.
+A length-\eqn{m} boolean vector where the \eqn{i} element is TRUE if locus \eqn{i} is fixed or completely missing, FALSE otherwise.
 }
 \description{
 A locus is said to be fixed if the non-missing sub-vector contains all 0's or all 2's (the locus is completely homozygous for one allele or completely homozygous for the other allele).

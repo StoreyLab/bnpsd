@@ -78,3 +78,4 @@ These loci are not polymorphic so they would normally not be considered in analy
 
 * Third CRAN submission.
 * Added ORCIDs to authors.
+* Corrected doc typos.

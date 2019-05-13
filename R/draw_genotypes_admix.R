@@ -31,7 +31,7 @@
 #' # non-trivial admixture proportions
 #' admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma = 1)
 #'
-#' # draw alelle frequencies
+#' # draw allele frequencies
 #' # vector of ancestral allele frequencies
 #' p_anc <- draw_p_anc(m_loci)
 #' 
