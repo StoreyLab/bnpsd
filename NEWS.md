@@ -73,3 +73,8 @@ These loci are not polymorphic so they would normally not be considered in analy
 * `draw_p_subpops` now admits scalar inputs `p_anc` and `inbr_subpops`, while number of loci and number of subpopulations can be provided as additional options.
 * Added more input checks to functions, informative error messages.
 * Updated documentation, particularly on whether intermediate subpopulation coancestries are accepted generally (`coanc_subpops`) or if the diagonal matrix case is required (specified as vector or scalar `inbr_subpops`).
+
+# 2019-05-13 - bnpsd 1.1.1
+
+* Third CRAN submission.
+* Added ORCIDs to authors.
