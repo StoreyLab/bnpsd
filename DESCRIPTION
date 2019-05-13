@@ -2,9 +2,17 @@ Package: bnpsd
 Title: Simulate Genotypes from the BN-PSD Admixture Model
 Version: 1.1.0.9000
 Authors@R: c(
-	   person("Alejandro", "Ochoa", email = "alejandro.ochoa@duke.edu", role = c("aut", "cre")),
-	   person("John D.", "Storey", email = "jstorey@princeton.edu", role = c("aut"))
-	   )
+    person(given = "Alejandro",
+	   family = "Ochoa",
+	   role = c("aut", "cre"),
+	   email = "alejandro.ochoa@duke.edu",
+           comment = c(ORCID = "0000-0003-4928-3403")),
+    person(given = "John D.",
+           family = "Storey",
+	   role = c("aut"),
+	   email = "jstorey@princeton.edu",
+           comment = c(ORCID = "0000-0001-5992-402X"))
+    )
 Description: The Pritchard-Stephens-Donnelly (PSD) admixture model has k intermediate subpopulations from which n individuals draw their alleles dictated by their individual-specific admixture proportions.  The BN-PSD model additionally imposes the Balding-Nichols (BN) allele frequency model to the intermediate populations, which therefore evolved independently from a common ancestral population T with subpopulation-specific FST (Wright's fixation index) parameters.  The BN-PSD model can be used to yield complex population structures.  Method described in Ochoa and Storey (2016) <doi:10.1101/083923>.
 Depends: 
 Imports: stats
