@@ -2,8 +2,14 @@
 
 #' Construct admixture proportion matrix for circular 1D geography
 #'
-#' Assumes \eqn{k} intermediate subpopulations placed along a circumference (the \eqn{[0, 2\pi]} line that wraps around) with even spacing spread by random walks, then \eqn{n} individuals sampled equally spaced in \eqn{[a,b]} (default \eqn{[0, 2\pi]}) draw their admixture proportions relative to the Von Mises density that models the random walks of each of these intermediate subpopulations.
+#' Assumes \eqn{k} intermediate subpopulations placed along a circumference (the \eqn{[0, 2\pi]} line that wraps around) with even spacing spread by random walks (see details below), then \eqn{n} individuals sampled equally spaced in \eqn{[a,b]} (default \eqn{[0, 2\pi]} with a small gap so first and last individual do not overlap) draw their admixture proportions relative to the Von Mises density that models the random walks of each of these intermediate subpopulations.
 #' The spread of the random walks (the \eqn{\sigma=1/\sqrt{\kappa}} of the Von Mises densities) is set to \code{sigma} if not missing, otherwise \eqn{\sigma} is found numerically to give the desired bias coefficient \code{bias_coeff}, the coancestry matrix of the intermediate subpopulations \code{coanc_subpops} (up to a scalar factor), and the final \eqn{F_{ST}}{FST} of the admixed individuals (see details below).
+#'
+#' Assuming the full range of \eqn{[0, 2\pi]} is considered, and the first and last individuals do not overlap, the gap between individuals is \eqn{\Delta = 2 \pi / n}.
+#' To not have any individuals on the edge, we place the first individual at \eqn{\Delta / 2} and the last at \eqn{2 \pi - \Delta / 2}.
+#' The location of subpopulation \eqn{j} is
+#' \deqn{\Delta / 2 + (j-1/2)/k (2 \pi - \Delta),}
+#' chosen to agree with the default correspondence between individuals and subpopulations of the linear 1D geography admixture scenario (\code{\link{admix_prop_1d_linear}}).
 #'
 #' When \code{sigma} is missing, the function determines its value using the desired \code{bias_coeff}, \code{coanc_subpops} up to a scalar factor, and \code{fst}.
 #' Uniform weights for the final generalized \eqn{F_{ST}}{FST} are assumed.
@@ -60,8 +66,8 @@ admix_prop_1d_circular <- function(
                                    n_ind,
                                    k_subpops,
                                    sigma = NA,
-                                   coord_ind_first = 0,
-                                   coord_ind_last = 2 * pi,
+                                   coord_ind_first = 2 * pi / (2 * n_ind),
+                                   coord_ind_last = 2 * pi * (1 - 1 / (2 * n_ind) ),
                                    bias_coeff,
                                    coanc_subpops,
                                    fst
@@ -101,11 +107,11 @@ admix_prop_1d_circular <- function(
             stop('sigma must be non-negative!')
     }
     sigma2 <- sigma^2 # square once for loop below
-    
+
     # the x-coordinates of the n individuals based on [coord_ind_first, coord_ind_last] limits
-    xs <- coord_ind_first + ( 0 : ( n_ind - 1 ) ) / n_ind * (coord_ind_last - coord_ind_first)
+    xs <- coord_ind_first + ( 0 : ( n_ind - 1 ) ) / ( n_ind - 1 ) * (coord_ind_last - coord_ind_first)
     # and subpopulations (same deal, except fixed [0, 2*pi] range)
-    mus <- ( 0 : ( k_subpops - 1 ) ) / k_subpops * 2 * pi
+    mus <- ( ( (1 : k_subpops) - 0.5 ) / k_subpops * (1 - 1 / n_ind) + 1 / (2 * n_ind) ) * 2 * pi
     
     # construct the coefficients of each person now!
     admix_proportions <- matrix(nrow = n_ind, ncol = k_subpops)

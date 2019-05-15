@@ -5,8 +5,8 @@
 \title{Construct admixture proportion matrix for circular 1D geography}
 \usage{
 admix_prop_1d_circular(n_ind, k_subpops, sigma = NA,
-  coord_ind_first = 0, coord_ind_last = 2 * pi, bias_coeff,
-  coanc_subpops, fst)
+  coord_ind_first = 2 * pi/(2 * n_ind), coord_ind_last = 2 * pi * (1 -
+  1/(2 * n_ind)), bias_coeff, coanc_subpops, fst)
 }
 \arguments{
 \item{n_ind}{Number of individuals}
@@ -36,10 +36,16 @@ If \code{sigma} was provided, the \eqn{n \times k}{n-by-k} admixture proportion 
 If \code{sigma} is missing, a named list is returned containing \code{admix_proportions}, the rescaled \code{coanc_subpops}, and the \code{sigma} that together give the desired \eqn{bias_coeff} and final \eqn{F_{ST}}{FST} of the admixed individuals.
 }
 \description{
-Assumes \eqn{k} intermediate subpopulations placed along a circumference (the \eqn{[0, 2\pi]} line that wraps around) with even spacing spread by random walks, then \eqn{n} individuals sampled equally spaced in \eqn{[a,b]} (default \eqn{[0, 2\pi]}) draw their admixture proportions relative to the Von Mises density that models the random walks of each of these intermediate subpopulations.
+Assumes \eqn{k} intermediate subpopulations placed along a circumference (the \eqn{[0, 2\pi]} line that wraps around) with even spacing spread by random walks (see details below), then \eqn{n} individuals sampled equally spaced in \eqn{[a,b]} (default \eqn{[0, 2\pi]} with a small gap so first and last individual do not overlap) draw their admixture proportions relative to the Von Mises density that models the random walks of each of these intermediate subpopulations.
 The spread of the random walks (the \eqn{\sigma=1/\sqrt{\kappa}} of the Von Mises densities) is set to \code{sigma} if not missing, otherwise \eqn{\sigma} is found numerically to give the desired bias coefficient \code{bias_coeff}, the coancestry matrix of the intermediate subpopulations \code{coanc_subpops} (up to a scalar factor), and the final \eqn{F_{ST}}{FST} of the admixed individuals (see details below).
 }
 \details{
+Assuming the full range of \eqn{[0, 2\pi]} is considered, and the first and last individuals do not overlap, the gap between individuals is \eqn{\Delta = 2 \pi / n}.
+To not have any individuals on the edge, we place the first individual at \eqn{\Delta / 2} and the last at \eqn{2 \pi - \Delta / 2}.
+The location of subpopulation \eqn{j} is
+\deqn{\Delta / 2 + (j-1/2)/k (2 \pi - \Delta),}
+chosen to agree with the default correspondence between individuals and subpopulations of the linear 1D geography admixture scenario (\code{\link{admix_prop_1d_linear}}).
+
 When \code{sigma} is missing, the function determines its value using the desired \code{bias_coeff}, \code{coanc_subpops} up to a scalar factor, and \code{fst}.
 Uniform weights for the final generalized \eqn{F_{ST}}{FST} are assumed.
 The scaling factor of the input \code{coanc_subpops} is irrelevant because it cancels out in \code{bias_coeff}; after \code{sigma} is found, \code{coanc_subpops} is rescaled to give the desired final \eqn{F_{ST}}{FST}.

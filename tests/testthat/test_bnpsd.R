@@ -270,8 +270,8 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     s_want <- 0.5
     coord_ind_first_linear <- 0.5
     coord_ind_last_linear <- k_subpops + 0.5
-    coord_ind_first_circular <- 0
-    coord_ind_last_circular <- 2 * pi
+    coord_ind_first_circular <- 2 * pi / (2 * n)
+    coord_ind_last_circular <- 2 * pi * (1 - 1 / (2 * n) )
 
     # test with admix_prop_1d_linear
     # get sigma
@@ -375,7 +375,13 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     # test extreme case s_want = minimum
     # test with admix_prop_1d_linear
     # construct directly
-    admix_prop_bias_coeff_min <- admix_prop_1d_linear(n, k_subpops, sigma = 0)
+    admix_prop_bias_coeff_min <- admix_prop_1d_linear(
+        n,
+        k_subpops,
+        sigma = 0,
+        coord_ind_first = coord_ind_first_linear,
+        coord_ind_last = coord_ind_last_linear
+    )
     # this is the mminimum s_want
     s_want <- bias_coeff_admix(admix_prop_bias_coeff_min, inbr_subpops)
     # get sigma
@@ -403,7 +409,13 @@ test_that("bias_coeff_admix_fit agrees with reverse func", {
     
     # test with admix_prop_1d_circular
     # construct directly
-    admix_prop_bias_coeff_min <- admix_prop_1d_circular(n, k_subpops, sigma = 0)
+    admix_prop_bias_coeff_min <- admix_prop_1d_circular(
+        n,
+        k_subpops,
+        sigma = 0,
+        coord_ind_first = coord_ind_first_circular,
+        coord_ind_last = coord_ind_last_circular
+    )
     # this is the mminimum s_want
     s_want <- bias_coeff_admix(admix_prop_bias_coeff_min, inbr_subpops)
     # get sigma
