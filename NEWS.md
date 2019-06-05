@@ -80,3 +80,9 @@ These loci are not polymorphic so they would normally not be considered in analy
 * Added ORCIDs to authors.
 * Corrected doc typos.
 * Adjusted layout of subpopulations and individuals (default limits) for circular 1D geography (`admix_prop_1d_circular`) to prevent overlapping individuals on the edges, and to better agree visually with the linear version (`admix_prop_1d_linear`).
+
+# 2019-06-05 - bnpsd 1.1.2
+
+* Non-code changes:
+  * Edited .Rbuildignore to stop ignoring README; also removed non-existent files from list
+  * Removed unused .travis.yml and bnpsd.Rproj files
