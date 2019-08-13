@@ -1,6 +1,6 @@
 Package: bnpsd
 Title: Simulate Genotypes from the BN-PSD Admixture Model
-Version: 1.1.2
+Version: 1.1.2.9000
 Authors@R: c(
     person(given = "Alejandro",
 	   family = "Ochoa",
@@ -20,6 +20,7 @@ Suggests: popkin (>= 1.2.2), testthat, knitr, rmarkdown, RColorBrewer
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1.9000
 VignetteBuilder: knitr
 URL: https://github.com/StoreyLab/bnpsd/

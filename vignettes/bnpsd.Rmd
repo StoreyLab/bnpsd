@@ -186,6 +186,8 @@ out <- draw_all_admix(
     m_loci = m_loci,
     # NOTE by default p_subpops and p_ind are not returned, but here we will ask for them
     want_p_subpops = TRUE,
+    # NOTE: asking for `p_ind` increases memory usage substantially,
+    # so don't ask for it unless you're sure you want it!
     want_p_ind = TRUE
 )
 # genotypes
@@ -294,30 +296,6 @@ dim(X_anc)
 # draws one individual per intermediate population
 X_subpops <- draw_genotypes_admix(p_subpops)
 ```
-
-## Low-memory genotype simulation algorithm
-
-If you desire to simulate a very large number of individuals ($n$) and loci ($m$), you might run out of memory while running `draw_all_admix`.
-Memory consumption is reduced by passing the `low_mem = TRUE` option to `draw_all_admix`, which draws the genotypes `X` directly from `p_subpops` and `admix_proportions`, without storing the entire intermediate matrix `p_ind` in memory at once.
-However, this algorithm can be much slower than the default one (`low_mem = FALSE`).
-
-```{r}
-out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, low_mem = TRUE)
-# genotypes
-X <- out$X
-# ancestral AFs
-p_anc <- out$p_anc
-# out$p_subpops missing (`want_p_subpops = FALSE` by default)
-# out$p_ind is not computed when `low_mem = TRUE`!
-```
-
-The same option exists for `draw_genotypes_admix`, which instead of accepting the `p_ind` matrix as input requires both `p_subpops` and `admix_proportions` as above:
-
-```{r}
-X <- draw_genotypes_admix(p_subpops, admix_proportions, low_mem = TRUE)
-```
-
-
 
 
 # Additional population structures

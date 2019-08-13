@@ -22,7 +22,7 @@ lowMem = FALSE, verbose = FALSE, noFixed = FALSE)
 
 \item{wantPa}{If TRUE (default), includes the random ancestral allele freq matrix in the return list}
 
-\item{lowMem}{If TRUE, uses a low-memory algorithm to raw genotypes without storing or returning the corresponding IAF matrix.}
+\item{lowMem}{OBSOLETE (the default algorithm is now the old lowMem=TRUE except if wantP=TRUE)}
 
 \item{verbose}{If TRUE, prints messages for every stage in the algorithm}
 

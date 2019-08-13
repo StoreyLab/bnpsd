@@ -86,3 +86,15 @@ These loci are not polymorphic so they would normally not be considered in analy
 * Non-code changes:
   * Edited .Rbuildignore to stop ignoring README; also removed non-existent files from list
   * Removed unused .travis.yml and bnpsd.Rproj files
+
+# 2019-08-13 - bnpsd 1.1.2.9000
+
+* Improved memory efficiency of default `draw_genotypes_admix`
+  * Old approach was by default very memory-hungry (created IAF matrix whole when admixture proportions were provided).
+    The `low_mem` option could be set but filled slowly by locus only.
+  * New approach is always low-memory (so the explicit option was removed).
+    This was made faster by filling by individual when there are fewer individuals than loci, or filling by locus otherwise, therefore always vectorizing as much as possible.
+	Test showed this was always as fast as the original full memory approach, so the latter was removed as an option.
+* `draw_all_admix` is also now automatically low-memory whenever `want_p_ind = FALSE`, and the explicit `low_mem` option has also been removed.
+* Updated documentation to use RMarkdown
+* Other code tidying

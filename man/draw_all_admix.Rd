@@ -6,7 +6,7 @@
 \usage{
 draw_all_admix(admix_proportions, inbr_subpops, m_loci,
   want_genotypes = TRUE, want_p_ind = FALSE, want_p_subpops = FALSE,
-  want_p_anc = TRUE, low_mem = FALSE, verbose = FALSE,
+  want_p_anc = TRUE, verbose = FALSE,
   require_polymorphic_loci = TRUE)
 }
 \arguments{
@@ -16,39 +16,38 @@ draw_all_admix(admix_proportions, inbr_subpops, m_loci,
 
 \item{m_loci}{The number of loci to draw.}
 
-\item{want_genotypes}{If TRUE (default), includes the matrix of random genotypes in the return list.}
+\item{want_genotypes}{If \code{TRUE} (default), includes the matrix of random genotypes in the return list.}
 
-\item{want_p_ind}{If TRUE (NOT default), includes the matrix of individual-specific allele frequencies in the return list.}
+\item{want_p_ind}{If \code{TRUE} (NOT default), includes the matrix of individual-specific allele frequencies in the return list.
+Note that by default \code{p_ind} is not constructed in full at all, instead a fast low-memory algorithm constructs it in parts as needed only; beware that setting \code{want_p_ind = TRUE} increases memory usage in comparison.}
 
-\item{want_p_subpops}{If TRUE (NOT default), includes the matrix of random intermediate subpopulation allele frequencies in the return list.}
+\item{want_p_subpops}{If \code{TRUE} (NOT default), includes the matrix of random intermediate subpopulation allele frequencies in the return list.}
 
-\item{want_p_anc}{If TRUE (default), includes the matrix of random ancestral allele frequencies in the return list.}
+\item{want_p_anc}{If \code{TRUE} (default), includes the matrix of random ancestral allele frequencies in the return list.}
 
-\item{low_mem}{If TRUE, uses a low-memory algorithm to raw genotypes without storing or returning the corresponding `p_ind` matrix.}
-
-\item{verbose}{If TRUE, prints messages for every stage in the algorithm.}
+\item{verbose}{If \code{TRUE}, prints messages for every stage in the algorithm.}
 
 \item{require_polymorphic_loci}{If TRUE (default), returned genotype matrix will not include any fixed loci (loci that happened to be fixed are drawn again, starting from their ancestral allele frequencies, and checked iteratively until no fixed loci remain, so that the final number of polymorphic loci is exactly \eqn{m_loci}).}
 }
 \value{
 A named list that includes the following randomly-generated data in this order:
 \describe{
-  \item{X:}{
-    An \eqn{m \times n}{m-by-n} matrix of genotypes.
-    Included if \code{want_genotypes = TRUE}.
-  }
-  \item{p_anc:}{
-    A length-\eqn{m} vector of ancestral allele frequencies.
-    Included if \code{want_p_anc = TRUE}.
-  }
-  \item{p_subpops:}{
-    An \eqn{m \times k}{m-by-k} matrix of intermediate subpopulation allele frequencies
-    Included if \code{want_p_subpops = TRUE}.
-  }
-  \item{p_ind:}{
-    An \eqn{m \times n}{m-by-n} matrix of individual-specific allele frequencies.
-    Included only if both \code{want_p_ind = TRUE} and \code{low_mem = FALSE}.
-  }
+\item{X:}{
+An \eqn{m \times n}{m-by-n} matrix of genotypes.
+Included if \code{want_genotypes = TRUE}.
+}
+\item{p_anc:}{
+A length-\eqn{m} vector of ancestral allele frequencies.
+Included if \code{want_p_anc = TRUE}.
+}
+\item{p_subpops:}{
+An \eqn{m \times k}{m-by-k} matrix of intermediate subpopulation allele frequencies
+Included if \code{want_p_subpops = TRUE}.
+}
+\item{p_ind:}{
+An \eqn{m \times n}{m-by-n} matrix of individual-specific allele frequencies.
+Included if \code{want_p_ind = TRUE}.
+}
 }
 }
 \description{
@@ -88,7 +87,7 @@ p_anc <- out$p_anc
 # # intermediate subpopulation AFs
 # p_subpops <- out$p_subpops
 # 
-# # ... `want_p_ind == TRUE` and `low_mem = FALSE`
+# # ... `want_p_ind == TRUE`
 # # individual-specific AFs
 # p_ind <- out$p_ind
 

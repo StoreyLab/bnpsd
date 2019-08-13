@@ -606,7 +606,7 @@ test_that("draw_genotypes_admix is in range", {
     admix_proportions <- diag(rep.int(1, k_subpops)) # island model for test...
     # repeat so we have multiple people per island
     admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
-    n <- nrow(admix_proportions) # number of individuals (3 * k_subpops)
+    n_ind <- nrow(admix_proportions) # number of individuals (3 * k_subpops)
     p_anc <- draw_p_anc(m_loci)
     p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
     p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
@@ -614,19 +614,25 @@ test_that("draw_genotypes_admix is in range", {
     # direct test
     X <- draw_genotypes_admix(p_ind)
     expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n)
+    expect_equal(ncol(X), n_ind)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
     
-    # indirect draw test
+    # indirect draw test (default low_mem now!)
     X <- draw_genotypes_admix(p_subpops, admix_proportions)
     expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n)
+    expect_equal(ncol(X), n_ind)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
     
-    # indirect draw test with low-mem algo
-    X <- draw_genotypes_admix(p_subpops, admix_proportions, low_mem = TRUE)
+    # the default test has 10 loci and 9 individuals
+    # create a test with more individuals to test (internal default) low_mem code when dimension ratio flips
+    # easy way is to reduce m_loci only, redraw only parts as needed
+    m_loci <- 5
+    p_anc <- draw_p_anc(m_loci)
+    p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
+    # indirect draw test (alternative low-mem algorithm triggered by dimension changes)
+    X <- draw_genotypes_admix(p_subpops, admix_proportions)
     expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n)
+    expect_equal(ncol(X), n_ind)
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
 })
 
@@ -736,7 +742,8 @@ test_that("draw_all_admix `require_polymorphic_loci = FALSE` works well", {
     expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
 })
 
-test_that("draw_all_admix `low_mem = TRUE` works well", {
+test_that("draw_all_admix `want_p_ind = FALSE` works well", {
+    # really tests low-memory scenario, which is the default `want_p_ind = FALSE` case (but originally we tested non-default `want_p_ind = TRUE` instead)
     m_loci <- 1000
     inbr_subpops <- c(0.1, 0.2, 0.3)
     k_subpops <- length(inbr_subpops)
@@ -746,7 +753,7 @@ test_that("draw_all_admix `low_mem = TRUE` works well", {
     n_ind <- nrow(admix_proportions) # number of individuals (3*k_subpops)
     
     # run draw_all_admix
-    out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, want_p_subpops = TRUE, low_mem = TRUE)
+    out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, want_p_subpops = TRUE)
     expect_equal( names(out), draw_all_admix_names_ret_low_mem )
     X <- out$X # genotypes
     p_subpops <- out$p_subpops # Intermediate AFs

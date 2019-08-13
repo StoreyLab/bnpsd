@@ -11,7 +11,7 @@ rgeno(P, Q = NULL, lowMem = FALSE)
 
 \item{Q}{The optional admixture proportion matrix}
 
-\item{lowMem}{If \code{TRUE}, the low-memory algorithm is used (Q must be present)}
+\item{lowMem}{OBSOLETE (the default algorithm is now the old lowMem=TRUE)}
 }
 \value{
 The genotype matrix

@@ -3,7 +3,7 @@
 #' Here \eqn{m} is the number of loci, \eqn{n} the number of individuals, and \eqn{k} the number of intermediate subpopulations.
 #' The \eqn{m \times n}{m-by-n} individual-specific allele frequency matrix \eqn{P} is constructed from the \eqn{m \times k}{m-by-k} intermediate subpopulation allele frequency matrix \eqn{B} and the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q} using
 #' \deqn{P = B Q^T.}{P = B * Q^T.}
-#' This function is a wrapper around \code{\link{tcrossprod}}, but also ensures the output allele frequencies are in [0, 1], as this is not guaranteed by \code{\link{tcrossprod}} due to limited machine precision.
+#' This function is a wrapper around \code{\link{tcrossprod}}, but also ensures the output allele frequencies are in \[0, 1\], as this is not guaranteed by \code{\link{tcrossprod}} due to limited machine precision.
 #' 
 #' @param p_subpops The \eqn{m \times k}{m-by-k} matrix of intermediate subpopulation allele frequencies.
 #' @param admix_proportions The \eqn{n \times k}{n-by-k} matrix of admixture proportions.

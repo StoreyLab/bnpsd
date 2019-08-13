@@ -4,14 +4,12 @@
 \alias{draw_genotypes_admix}
 \title{Draw genotypes from the admixture model}
 \usage{
-draw_genotypes_admix(p_ind, admix_proportions = NULL, low_mem = FALSE)
+draw_genotypes_admix(p_ind, admix_proportions = NULL)
 }
 \arguments{
 \item{p_ind}{The \eqn{m \times n}{m-by-n} IAF matrix (if \code{admix_proportions} is missing) or the \eqn{m \times k}{m-by-k} intermediate subpopulation allele frequency matrix (if \code{admix_proportions} is present)}
 
 \item{admix_proportions}{The optional \eqn{n \times k}{n-by-k} admixture proportion matrix}
-
-\item{low_mem}{If \code{TRUE}, the low-memory algorithm is used (\code{admix_proportions} must be present)}
 }
 \value{
 The \eqn{m \times n}{m-by-n} genotype matrix
@@ -22,11 +20,8 @@ Given the Individual-specific Allele Frequency (IAF) \eqn{\pi_{ij}} for locus \e
 Below \eqn{m} is the number of loci, \eqn{n} the number of individuals, and \eqn{k} the number of intermediate subpopulations.
 If an admixture proportion matrix \eqn{Q} is provided as the second argument, the first argument \eqn{P} is treated as the intermediate subpopulation allele frequency matrix and the IAF matrix is given by
 \deqn{P Q^T.}{P \%*\% t(Q).}
+However, in this case the IAF matrix is computed in parts only, never stored in full, greatly reducing memory usage.
 If \eqn{Q} is missing, then \eqn{P} is treated as the IAF matrix.
-}
-\details{
-To reduce memory, set \code{low_mem = TRUE} to draw genotypes one locus at the time from \eqn{P} and \eqn{Q} (both must be present).
-This low-memory algorithm prevents the construction of the entire IAF matrix, but is considerably slower than the standard algorithm.
 }
 \examples{
 # dimensions
@@ -60,10 +55,8 @@ X_subpops <- draw_genotypes_admix(p_subpops)
 X_ind <- draw_genotypes_admix(p_ind)
 
 # draw genotypes for admixed individuals without p_ind intermediate
-# (p_ind is computer internally and discarded when done)
+# (p_ind is computed internally in parts, never stored in full,
+# reducing memory use substantially)
 X_ind <- draw_genotypes_admix(p_subpops, admix_proportions)
-
-# use low-memory version (p_ind is computed by row, never fully in memory)
-X_ind <- draw_genotypes_admix(p_subpops, admix_proportions, low_mem = TRUE)
 
 }

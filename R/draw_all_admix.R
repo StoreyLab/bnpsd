@@ -8,12 +8,12 @@
 #' @param admix_proportions The \eqn{n \times k}{n-by-k} matrix of admixture proportions.
 #' @param inbr_subpops The length-\eqn{k} vector (or scalar) of intermediate subpopulation \eqn{F_{ST}}{FST} values.
 #' @param m_loci The number of loci to draw.
-#' @param want_genotypes If TRUE (default), includes the matrix of random genotypes in the return list.
-#' @param want_p_ind If TRUE (NOT default), includes the matrix of individual-specific allele frequencies in the return list.
-#' @param want_p_subpops If TRUE (NOT default), includes the matrix of random intermediate subpopulation allele frequencies in the return list.
-#' @param want_p_anc If TRUE (default), includes the matrix of random ancestral allele frequencies in the return list.
-#' @param low_mem If TRUE, uses a low-memory algorithm to raw genotypes without storing or returning the corresponding `p_ind` matrix.
-#' @param verbose If TRUE, prints messages for every stage in the algorithm.
+#' @param want_genotypes If `TRUE` (default), includes the matrix of random genotypes in the return list.
+#' @param want_p_ind If `TRUE` (NOT default), includes the matrix of individual-specific allele frequencies in the return list.
+#' Note that by default `p_ind` is not constructed in full at all, instead a fast low-memory algorithm constructs it in parts as needed only; beware that setting `want_p_ind = TRUE` increases memory usage in comparison.
+#' @param want_p_subpops If `TRUE` (NOT default), includes the matrix of random intermediate subpopulation allele frequencies in the return list.
+#' @param want_p_anc If `TRUE` (default), includes the matrix of random ancestral allele frequencies in the return list.
+#' @param verbose If `TRUE`, prints messages for every stage in the algorithm.
 #' @param require_polymorphic_loci If TRUE (default), returned genotype matrix will not include any fixed loci (loci that happened to be fixed are drawn again, starting from their ancestral allele frequencies, and checked iteratively until no fixed loci remain, so that the final number of polymorphic loci is exactly \eqn{m_loci}).
 #'
 #' @return A named list that includes the following randomly-generated data in this order:
@@ -32,7 +32,7 @@
 #'   }
 #'   \item{p_ind:}{
 #'     An \eqn{m \times n}{m-by-n} matrix of individual-specific allele frequencies.
-#'     Included only if both \code{want_p_ind = TRUE} and \code{low_mem = FALSE}.
+#'     Included if \code{want_p_ind = TRUE}.
 #'   }
 #' }
 #'
@@ -67,7 +67,7 @@
 #' # # intermediate subpopulation AFs
 #' # p_subpops <- out$p_subpops
 #' # 
-#' # # ... `want_p_ind == TRUE` and `low_mem = FALSE`
+#' # # ... `want_p_ind == TRUE`
 #' # # individual-specific AFs
 #' # p_ind <- out$p_ind
 #' 
@@ -80,7 +80,6 @@ draw_all_admix <- function(
                            want_p_ind = FALSE,
                            want_p_subpops = FALSE,
                            want_p_anc = TRUE,
-                           low_mem = FALSE,
                            verbose = FALSE,
                            require_polymorphic_loci = TRUE
                            ) {
@@ -118,25 +117,25 @@ draw_all_admix <- function(
     # pass k_subpops in case inbr_subpops was a scalar (otherwise provides a redundant check)
     p_subpops <- draw_p_subpops(p_anc, inbr_subpops, m_loci = m_loci, k_subpops = k_subpops)
     
-    if (low_mem) {
-        # draw genotypes!
-        if (want_genotypes) {
-            if (verbose)
-                message('drawing X')
-            X <- draw_genotypes_admix(p_subpops, admix_proportions, low_mem = low_mem)
-        }
-    } else {
-        if (want_p_ind || want_genotypes) {
-            if (verbose)
-                message('drawing p_ind')
-            p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
-        }
+    if (want_p_ind) {
+        # this triggers higher-memory path
+        if (verbose)
+            message('drawing p_ind')
+        p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
         
         # draw genotypes from p_ind
         if (want_genotypes) {
             if (verbose)
                 message('drawing X')
             X <- draw_genotypes_admix(p_ind)
+        }
+    } else {
+        # draw genotypes skipping p_ind
+        # (always low memory now!)
+        if (want_genotypes) {
+            if (verbose)
+                message('drawing X')
+            X <- draw_genotypes_admix(p_subpops, admix_proportions)
         }
     }
     
@@ -158,13 +157,12 @@ draw_all_admix <- function(
                 want_p_ind = want_p_ind,
                 want_p_subpops = want_p_subpops,
                 want_p_anc = want_p_anc,
-                low_mem = low_mem,
                 verbose = FALSE, # don't show more messages for additional iterations
                 require_polymorphic_loci = require_polymorphic_loci
             )
             # overwrite fixed loci with redrawn polymorphic data
             X[fixed_loci_indexes, ] <- obj$X # guaranteed to be there
-            if (want_p_ind && !low_mem)
+            if (want_p_ind)
                 p_ind[fixed_loci_indexes, ] <- obj$p_ind
             if (want_p_subpops)
                 p_subpops[fixed_loci_indexes, ] <- obj$p_subpops
@@ -181,8 +179,8 @@ draw_all_admix <- function(
         out$p_anc <- p_anc
     if (want_p_subpops)
         out$p_subpops <- p_subpops
-    if (want_p_ind && !low_mem)
-        out$p_ind <- p_ind # don't have when low-mem!
+    if (want_p_ind)
+        out$p_ind <- p_ind
     return(out)
 }
 
@@ -197,7 +195,7 @@ draw_all_admix <- function(
 #' @param wantP If TRUE (default), includes the random IAF matrix in the return list
 #' @param wantB If TRUE (default), includes the random intermediate pop allele freq matrix in the return list
 #' @param wantPa If TRUE (default), includes the random ancestral allele freq matrix in the return list
-#' @param lowMem If TRUE, uses a low-memory algorithm to raw genotypes without storing or returning the corresponding IAF matrix.
+#' @param lowMem OBSOLETE (the default algorithm is now the old lowMem=TRUE except if wantP=TRUE)
 #' @param verbose If TRUE, prints messages for every stage in the algorithm
 #' @param noFixed If TRUE, returned matrix will not include any fixed loci (loci that happened to be fixed are drawn again, starting from the ancestral allele frequency, and checked iteratively until no fixed loci remain, so that the final number of loci is exactly \eqn{m} as specified).
 #' @return A named list that includes the following random matrices: X=genotypes, P=IAFs, B=intermediate pop allele freqs, Pa=vector of ancestral allele frequencies.  Items may be omitted depending on the values of wantX, wantP, wantB, or wantPa above.
@@ -227,7 +225,6 @@ rbnpsd <- function(Q, F, m, wantX = TRUE, wantP = TRUE, wantB = TRUE, wantPa = T
         want_p_ind = wantP,
         want_p_subpops = wantB,
         want_p_anc = wantPa,
-        low_mem = lowMem,
         verbose = verbose,
         require_polymorphic_loci = noFixed
     )
