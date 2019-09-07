@@ -98,3 +98,9 @@ These loci are not polymorphic so they would normally not be considered in analy
 * `draw_all_admix` is also now automatically low-memory whenever `want_p_ind = FALSE`, and the explicit `low_mem` option has also been removed.
 * Updated documentation to use RMarkdown
 * Other code tidying
+
+# 2019-09-06 - bnpsd 1.1.3.9000
+
+* Added option `beta` in function `draw_p_anc` to trigger a symmetric Beta distribution for the ancestral allele frequencies, with the desired shape parameter.
+  The `beta` option can also be set on the wrapper function `draw_all_admix`.
+  This option allows simulation of a distribution heavier on rare variants (when `beta` is much smaller than 1), more similar to real human data.

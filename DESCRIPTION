@@ -1,6 +1,6 @@
 Package: bnpsd
 Title: Simulate Genotypes from the BN-PSD Admixture Model
-Version: 1.1.2.9000
+Version: 1.1.3.9000
 Authors@R: c(
     person(given = "Alejandro",
 	   family = "Ochoa",

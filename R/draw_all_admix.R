@@ -15,6 +15,9 @@
 #' @param want_p_anc If `TRUE` (default), includes the matrix of random ancestral allele frequencies in the return list.
 #' @param verbose If `TRUE`, prints messages for every stage in the algorithm.
 #' @param require_polymorphic_loci If TRUE (default), returned genotype matrix will not include any fixed loci (loci that happened to be fixed are drawn again, starting from their ancestral allele frequencies, and checked iteratively until no fixed loci remain, so that the final number of polymorphic loci is exactly \eqn{m_loci}).
+#' @param beta Shape parameter for a symmetric Beta for ancestral allele frequencies `p_anc`.
+#' If `NA` (default), `p_anc` is uniform with range in \[0.01, 0.5\].
+#' Otherwise, `p_anc` has a symmetric Beta distribution with range in \[0, 1\].
 #'
 #' @return A named list that includes the following randomly-generated data in this order:
 #' \describe{
@@ -81,7 +84,8 @@ draw_all_admix <- function(
                            want_p_subpops = FALSE,
                            want_p_anc = TRUE,
                            verbose = FALSE,
-                           require_polymorphic_loci = TRUE
+                           require_polymorphic_loci = TRUE,
+                           beta = NA
                            ) {
     # stop if required parameters are missing
     if (missing(admix_proportions))
@@ -108,7 +112,7 @@ draw_all_admix <- function(
     # generate the random ancestral allele frequencies, in usual range and with minimum threshold for simplicity
     if (verbose)
         message('drawing p_anc')
-    p_anc <- draw_p_anc(m_loci)
+    p_anc <- draw_p_anc(m_loci, beta = beta)
     
     # draw intermediate allele frequencies from Balding-Nichols
     if (verbose)
@@ -158,7 +162,8 @@ draw_all_admix <- function(
                 want_p_subpops = want_p_subpops,
                 want_p_anc = want_p_anc,
                 verbose = FALSE, # don't show more messages for additional iterations
-                require_polymorphic_loci = require_polymorphic_loci
+                require_polymorphic_loci = require_polymorphic_loci,
+                beta = beta
             )
             # overwrite fixed loci with redrawn polymorphic data
             X[fixed_loci_indexes, ] <- obj$X # guaranteed to be there

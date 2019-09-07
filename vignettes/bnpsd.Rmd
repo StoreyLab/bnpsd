@@ -271,12 +271,21 @@ X <- draw_genotypes_admix(p_ind)
 ```
 
 We provide functions for these separate steps to allow for more flexibility.
-For example, the ancestral allele frequencies could be drawn from a Symmetric Beta instead of using `draw_p_anc`:
+It is worth noting that `draw_p_anc` can be used to draw from a Symmetric Beta distribution if the `beta` parameter is set.
+In the example below, a small shape value of `beta` $< 1$ is used to draw a distribution with more rare minor variants.
+```{r, fig.width = 4, fig.height = 2, fig.align = 'center'}
+# this increases the proportion of rare alleles
+p_anc <- draw_p_anc(m_loci, beta = 0.1)
+# shrink default margins for these figures
+par(mar = c(4, 4, 0, 0) + 0.2)
+hist(p_anc, xlab = 'Ancestral AF', main = '', xlim = c(0, 1))
+```
+However, if you want any other distribution, that can be implemented at this step.
+For a ridiculous example, the ancestral allele frequencies could be drawn from a (non-symmetric) Beta instead of using `draw_p_anc`:
 
 ```{r, fig.width = 4, fig.height = 2, fig.align = 'center'}
 # this increases the proportion of rare alleles
-alpha <- 1/2
-p_anc <- rbeta(m_loci, alpha, alpha)
+p_anc <- rbeta(m_loci, shape1 = 0.1, shape2 = 1)
 # shrink default margins for these figures
 par(mar = c(4, 4, 0, 0) + 0.2)
 hist(p_anc, xlab = 'Ancestral AF', main = '', xlim = c(0, 1))

@@ -2,9 +2,9 @@
 % Please edit documentation in R/draw_p_anc.R
 \name{draw_p_anc}
 \alias{draw_p_anc}
-\title{Draw random uniform ancestral allele frequencies}
+\title{Draw random Uniform or Beta ancestral allele frequencies}
 \usage{
-draw_p_anc(m_loci, p_min = 0.01, p_max = 0.5)
+draw_p_anc(m_loci, p_min = 0.01, p_max = 0.5, beta = NA)
 }
 \arguments{
 \item{m_loci}{Number of loci to draw}
@@ -12,14 +12,24 @@ draw_p_anc(m_loci, p_min = 0.01, p_max = 0.5)
 \item{p_min}{Minimum allele frequency to draw}
 
 \item{p_max}{Maximum allele frequency to draw}
+
+\item{beta}{Shape parameter for a symmetric Beta.
+If \code{NA} (default), Uniform with user-specified range (\code{p_min}, \code{p_max}) is used.
+Otherwise, a Symmetric Beta is used and the user-specified range is ignored (values in [0, 1] will be returned).}
 }
 \value{
 A length-\eqn{m} vector of random ancestral allele frequencies
 }
 \description{
-This is simply a wrapper around \code{\link[stats]{runif}} with different defaults and additional validations.
+This is simply a wrapper around \code{\link[stats]{runif}} and \code{\link[stats]{rbeta}} (depending on parameters) with different defaults and additional validations.
 }
 \examples{
+# Default is uniform with range between 0.01 and 0.5
 p_anc <- draw_p_anc(m_loci = 10)
+
+# Use of `beta` triggers a symmetric Beta distribution.
+# This parameter has increased density for rare minor allele frequencies,
+# resembling the 1000 Genomes allele frequency distribution
+p_anc <- draw_p_anc(m_loci = 10, beta = 0.03)
 
 }

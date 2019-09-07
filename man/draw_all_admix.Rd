@@ -7,7 +7,7 @@
 draw_all_admix(admix_proportions, inbr_subpops, m_loci,
   want_genotypes = TRUE, want_p_ind = FALSE, want_p_subpops = FALSE,
   want_p_anc = TRUE, verbose = FALSE,
-  require_polymorphic_loci = TRUE)
+  require_polymorphic_loci = TRUE, beta = NA)
 }
 \arguments{
 \item{admix_proportions}{The \eqn{n \times k}{n-by-k} matrix of admixture proportions.}
@@ -28,6 +28,10 @@ Note that by default \code{p_ind} is not constructed in full at all, instead a f
 \item{verbose}{If \code{TRUE}, prints messages for every stage in the algorithm.}
 
 \item{require_polymorphic_loci}{If TRUE (default), returned genotype matrix will not include any fixed loci (loci that happened to be fixed are drawn again, starting from their ancestral allele frequencies, and checked iteratively until no fixed loci remain, so that the final number of polymorphic loci is exactly \eqn{m_loci}).}
+
+\item{beta}{Shape parameter for a symmetric Beta for ancestral allele frequencies \code{p_anc}.
+If \code{NA} (default), \code{p_anc} is uniform with range in [0.01, 0.5].
+Otherwise, \code{p_anc} has a symmetric Beta distribution with range in [0, 1].}
 }
 \value{
 A named list that includes the following randomly-generated data in this order:
