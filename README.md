@@ -1,3 +1,5 @@
+<img src="logo.png" alt="BNPSD" align="right" />
+
 # Model and Simulate Admixed Populations with `bnpsd`
 
 The `bnpsd` ("Balding-Nichols Pritchard-Stephens-Donnelly") R package facilitates construction of admixed population structures and simulation of allele frequencies and genotypes from the BN-PSD admixture model.
