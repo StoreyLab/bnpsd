@@ -162,12 +162,11 @@ mtext('Individuals', 1)
 
 ```{r, fig.width = 4.2, fig.height = 3, fig.align = 'center'}
 # Visualize the coancestry matrix using "popkin"!
-# set outer margin for axis labels (left and right are non-zero)
-par(oma = c(0, 1.5, 0, 3))
-# zero inner margin (plus padding) because we have no individual or subpopulation labels
-par(mar = c(0, 0, 0, 0) + 0.2)
-# now plot!
-plot_popkin(coancestry)
+plot_popkin(
+    coancestry,
+    # zero inner margin (plus padding) because we have no labels
+    mar = 0
+)
 ```
 
 ## Draw random allele frequencies and genotypes
@@ -233,14 +232,12 @@ kinship_estimate <- popkin(X, subpops)
 coancestry_estimate <- inbr_diag(kinship_estimate)
 
 # Visualize the coancestry matrix using "popkin"!
-# set outer margin for axis labels (left and right are non-zero)
-par(oma = c(0, 1.5, 0, 3))
-# increase inner top margin for panel titles
-par(mar = c(0, 0, 2.5, 0) + 0.2)
-# now plot!
-coancestries <- list(coancestry, coancestry_estimate)
-titles <- c('Truth', 'Estimate')
-plot_popkin(coancestries, titles)
+plot_popkin(
+    list( coancestry, coancestry_estimate ),
+    titles = c('Truth', 'Estimate'),
+    # second value is top margin, for panel titles
+    mar = c(0, 2.5)
+)
 ```
 
 
@@ -377,11 +374,13 @@ barplot(t(admix_proportions), col = col_subpops, border = NA, space = 0, ylab = 
 mtext('Individuals', 1)
 ```
 
-```{r, fig.width = 3.1, fig.height = 2, fig.align = 'center'}
+```{r, fig.width = 4.2, fig.height = 3, fig.align = 'center'}
 # Visualize the coancestry matrix using "popkin"!
-# tweak margins/etc
-par(oma = c(0, 1.5, 0, 3), mar = c(0, 0, 0.4, 0) + 0.2)
-plot_popkin(coancestry, leg_n = 3)
+plot_popkin(
+    coancestry,
+    leg_n = 3,
+    mar = c(0, 0.4)
+)
 ```
 
 
@@ -455,11 +454,13 @@ barplot(t(admix_proportions), col = col_subpops, border = NA, space = 0, ylab = 
 mtext('Individuals', 1)
 ```
 
-```{r, fig.width = 3.1, fig.height = 2, fig.align = 'center'}
+```{r, fig.width = 4.2, fig.height = 3, fig.align = 'center'}
 # Visualize the coancestry matrix using "popkin"!
-# tweak margins/etc
-par(oma = c(0, 1.5, 0, 3), mar = c(0, 0, 0.4, 0) + 0.2)
-plot_popkin(coancestry, leg_n = 3)
+plot_popkin(
+    coancestry,
+    leg_n = 3,
+    mar = c(0, 0.4)
+)
 ```
 
 # References
