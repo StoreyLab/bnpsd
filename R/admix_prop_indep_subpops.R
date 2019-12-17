@@ -48,29 +48,3 @@ admix_prop_indep_subpops <- function(labs, subpops) {
     }
     admix_proportions # return!
 }
-
-# stick deprecated function name here
-
-#' @title Construct admixture proportion matrix for independent subpopulations
-#' @description Construct admixture proportion matrix for independent subpopulations
-#' @param labs Vector of subpopulation labels.
-#' @param subpops Optional vector of unique subpopulations in desired order.
-#' @return The admixture proportion matrix.
-#'
-#' @name qis-deprecated
-#' @usage qis(labs, subpops)
-#' @seealso \code{\link{bnpsd-deprecated}}
-#' @keywords internal
-NULL
-
-#' @rdname bnpsd-deprecated
-#' @section \code{qis}:
-#' For \code{qis}, use \code{\link{admix_prop_indep_subpops}}.
-#'
-#' @export
-qis <- function(labs, subpops) {
-    # mark as deprecated
-    .Deprecated('admix_prop_indep_subpops')
-    # return as usual, to not break things just yet
-    admix_prop_indep_subpops(labs, subpops)
-}

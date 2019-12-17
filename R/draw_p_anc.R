@@ -45,30 +45,3 @@ draw_p_anc <- function(m_loci, p_min = 0.01, p_max = 0.5, beta = NA) {
         stats::rbeta(m_loci, shape1 = beta, shape2 = beta)
     }
 }
-
-# stick deprecated function name here
-
-#' @title Draw uniform ancestral allele frequencies
-#' @description Draw uniform ancestral allele frequencies
-#' @param m Number of loci
-#' @param min Minimum allele frequency to draw
-#' @param max Maximum allele frequency to draw
-#' @return A vector of ancestral allele frequencies
-#'
-#' @name rpanc-deprecated
-#' @usage rpanc(m, min = 0.01, max = 0.5)
-#' @seealso \code{\link{bnpsd-deprecated}}
-#' @keywords internal
-NULL
-
-#' @rdname bnpsd-deprecated
-#' @section \code{rpanc}:
-#' For \code{rpanc}, use \code{\link{draw_p_anc}}.
-#'
-#' @export
-rpanc <- function(m, min = 0.01, max = 0.5) {
-    # mark as deprecated
-    .Deprecated('draw_p_anc')
-    # return as usual, to not break things just yet
-    draw_p_anc(m, min, max)
-}

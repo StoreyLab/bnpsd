@@ -72,29 +72,3 @@ coanc_admix <- function(admix_proportions, coanc_subpops) {
     } else
         stop('`admix_proportions` and `coanc_subpops` are not compatible: length(coanc_subpops) = ', length(coanc_subpops), ' != ', k, ' == ncol(admix_proportions)')
 }
-
-# stick deprecated function name here
-
-#' @title Construct the coancestry matrix of an admixture model
-#' @description Construct the coancestry matrix of an admixture model
-#' @param Q The admixture proportion matrix
-#' @param F Either the intermediate subpopulation coancestry matrix, or the vector of intermediate subpopulation \eqn{F_{ST}}{FST} values, or a scalar \eqn{F_{ST}}{FST} value shared by all intermediate subpopulations.
-#' @return The coancestry matrix
-#'
-#' @name coanc-deprecated
-#' @usage coanc(Q, F)
-#' @seealso \code{\link{bnpsd-deprecated}}
-#' @keywords internal
-NULL
-
-#' @rdname bnpsd-deprecated
-#' @section \code{coanc}:
-#' For \code{coanc}, use \code{\link{coanc_admix}}.
-#'
-#' @export
-coanc <- function(Q, F) {
-    # mark as deprecated
-    .Deprecated('coanc_admix')
-    # return as usual, to not break things just yet
-    coanc_admix(Q, F)
-}

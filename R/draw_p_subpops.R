@@ -103,29 +103,3 @@ draw_p_subpops <- function(p_anc, inbr_subpops, m_loci = NA, k_subpops = NA) {
     
     p_subpops # the only thing we want out of this
 }
-
-# stick deprecated function name here
-
-#' @title Draw intermediate subpopulation allele frequencies
-#' @description Draw intermediate subpopulation allele frequencies
-#' @param pAnc The vector of ancestral allele frequencies per locus
-#' @param F The vector of subpopulation \eqn{F_{ST}}{FST} values
-#' @return The matrix of intermediate subpopulation allele frequencies
-#'
-#' @name rpint-deprecated
-#' @usage rpint(pAnc, F)
-#' @seealso \code{\link{bnpsd-deprecated}}
-#' @keywords internal
-NULL
-
-#' @rdname bnpsd-deprecated
-#' @section \code{rpint}:
-#' For \code{rpint}, use \code{\link{draw_p_subpops}}.
-#'
-#' @export
-rpint <- function(pAnc, F) {
-    # mark as deprecated
-    .Deprecated('draw_p_subpops')
-    # return as usual, to not break things just yet
-    draw_p_subpops(pAnc, F)
-}

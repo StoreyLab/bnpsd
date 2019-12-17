@@ -104,3 +104,10 @@ These loci are not polymorphic so they would normally not be considered in analy
 * Added option `beta` in function `draw_p_anc` to trigger a symmetric Beta distribution for the ancestral allele frequencies, with the desired shape parameter.
   The `beta` option can also be set on the wrapper function `draw_all_admix`.
   This option allows simulation of a distribution heavier on rare variants (when `beta` is much smaller than 1), more similar to real human data.
+
+# 2019-12-17 - bnpsd 1.2.0
+
+* Fourth CRAN submission.
+* Removed deprecated function names: `q1dc`, `q1d`, `qis`, `coanc`, `rbnpsd`, `rgeno`, `rpanc`, `rpint`, `rpiaf`.
+* Moved logo to `man/figures/`
+* Minor Roxygen-related updates.

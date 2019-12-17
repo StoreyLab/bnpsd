@@ -122,30 +122,3 @@ draw_genotypes_admix <- function(p_ind, admix_proportions = NULL) {
     # return for all cases
     X
 }
-
-# stick deprecated function name here
-
-#' @title Draw genotypes from the admixture model
-#' @description Draw genotypes from the admixture model
-#' @param P The IAF matrix (if Q is missing) or the intermediate subpopulation allele frequency matrix (if Q is present)
-#' @param Q The optional admixture proportion matrix
-#' @param lowMem OBSOLETE (the default algorithm is now the old lowMem=TRUE)
-#' @return The genotype matrix
-#'
-#' @name rgeno-deprecated
-#' @usage rgeno(P, Q = NULL, lowMem = FALSE)
-#' @seealso \code{\link{bnpsd-deprecated}}
-#' @keywords internal
-NULL
-
-#' @rdname bnpsd-deprecated
-#' @section \code{rgeno}:
-#' For \code{rgeno}, use \code{\link{draw_genotypes_admix}}.
-#'
-#' @export
-rgeno <- function(P, Q = NULL, lowMem = FALSE) {
-    # mark as deprecated
-    .Deprecated('draw_genotypes_admix')
-    # return as usual, to not break things just yet
-    draw_genotypes_admix(P, Q)
-}

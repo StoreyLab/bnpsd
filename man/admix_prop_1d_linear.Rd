@@ -4,9 +4,16 @@
 \alias{admix_prop_1d_linear}
 \title{Construct admixture proportion matrix for 1D geography}
 \usage{
-admix_prop_1d_linear(n_ind, k_subpops, sigma = NA,
-  coord_ind_first = 0.5, coord_ind_last = k_subpops + 0.5, bias_coeff,
-  coanc_subpops, fst)
+admix_prop_1d_linear(
+  n_ind,
+  k_subpops,
+  sigma = NA,
+  coord_ind_first = 0.5,
+  coord_ind_last = k_subpops + 0.5,
+  bias_coeff,
+  coanc_subpops,
+  fst
+)
 }
 \arguments{
 \item{n_ind}{Number of individuals.}

@@ -4,10 +4,18 @@
 \alias{draw_all_admix}
 \title{Simulate random allele frequencies and genotypes from the BN-PSD admixture model}
 \usage{
-draw_all_admix(admix_proportions, inbr_subpops, m_loci,
-  want_genotypes = TRUE, want_p_ind = FALSE, want_p_subpops = FALSE,
-  want_p_anc = TRUE, verbose = FALSE,
-  require_polymorphic_loci = TRUE, beta = NA)
+draw_all_admix(
+  admix_proportions,
+  inbr_subpops,
+  m_loci,
+  want_genotypes = TRUE,
+  want_p_ind = FALSE,
+  want_p_subpops = FALSE,
+  want_p_anc = TRUE,
+  verbose = FALSE,
+  require_polymorphic_loci = TRUE,
+  beta = NA
+)
 }
 \arguments{
 \item{admix_proportions}{The \eqn{n \times k}{n-by-k} matrix of admixture proportions.}

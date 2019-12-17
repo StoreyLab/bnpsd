@@ -4,9 +4,16 @@
 \alias{admix_prop_1d_circular}
 \title{Construct admixture proportion matrix for circular 1D geography}
 \usage{
-admix_prop_1d_circular(n_ind, k_subpops, sigma = NA,
-  coord_ind_first = 2 * pi/(2 * n_ind), coord_ind_last = 2 * pi * (1 -
-  1/(2 * n_ind)), bias_coeff, coanc_subpops, fst)
+admix_prop_1d_circular(
+  n_ind,
+  k_subpops,
+  sigma = NA,
+  coord_ind_first = 2 * pi/(2 * n_ind),
+  coord_ind_last = 2 * pi * (1 - 1/(2 * n_ind)),
+  bias_coeff,
+  coanc_subpops,
+  fst
+)
 }
 \arguments{
 \item{n_ind}{Number of individuals}

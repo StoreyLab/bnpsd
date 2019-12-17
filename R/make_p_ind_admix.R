@@ -62,29 +62,3 @@ make_p_ind_admix <- function(p_subpops, admix_proportions) {
     
     return(p_ind)
 }
-
-# stick deprecated function name here
-
-#' @title Construct individual-specific allele frequency matrix under the PSD admixture model
-#' @description Construct individual-specific allele frequency matrix under the PSD admixture model
-#' @param B The matrix of intermediate subpopulation allele frequencies.
-#' @param Q The matrix of admixture proportions.
-#' @return The matrix of individual-specific allele frequencies.
-#'
-#' @name rpiaf-deprecated
-#' @usage rpiaf(B, Q)
-#' @seealso \code{\link{bnpsd-deprecated}}
-#' @keywords internal
-NULL
-
-#' @rdname bnpsd-deprecated
-#' @section \code{rpiaf}:
-#' For \code{rpiaf}, use \code{\link{make_p_ind_admix}}.
-#'
-#' @export
-rpiaf <- function(B, Q) {
-    # mark as deprecated
-    .Deprecated('make_p_ind_admix')
-    # return as usual, to not break things just yet
-    make_p_ind_admix(B, Q)
-}
