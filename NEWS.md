@@ -111,3 +111,11 @@ These loci are not polymorphic so they would normally not be considered in analy
 * Removed deprecated function names: `q1dc`, `q1d`, `qis`, `coanc`, `rbnpsd`, `rgeno`, `rpanc`, `rpint`, `rpiaf`.
 * Moved logo to `man/figures/`
 * Minor Roxygen-related updates.
+
+# 2020-01-08 - bnpsd 1.2.1
+
+* Fourth CRAN submission, second attempt.
+* Fixed a rare bug in `bias_coeff_admix_fit`, which caused it to die if the desired bias coefficient was an extreme value (particularly `1`).
+  The error message was: `f() values at end points not of opposite sign`.
+  The actual bug was not observed in the regular R build, but rather in a limited precision setting where R was configured with `--disable-long-double`.
+  
