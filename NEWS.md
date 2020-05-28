@@ -118,4 +118,8 @@ These loci are not polymorphic so they would normally not be considered in analy
 * Fixed a rare bug in `bias_coeff_admix_fit`, which caused it to die if the desired bias coefficient was an extreme value (particularly `1`).
   The error message was: `f() values at end points not of opposite sign`.
   The actual bug was not observed in the regular R build, but rather in a limited precision setting where R was configured with `--disable-long-double`.
-  
+
+# 2020-01-08 - bnpsd 1.2.1.9000
+
+* Added option `p_anc` to function `draw_all_admix`, to specify desired ancestral allele frequencies instead of having the code generate it randomly (default).
+* Added details for documentation of function `draw_p_subpops.R`, clarifying that input `p_anc` can be scalar.

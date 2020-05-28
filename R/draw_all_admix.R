@@ -18,6 +18,7 @@
 #' @param beta Shape parameter for a symmetric Beta for ancestral allele frequencies `p_anc`.
 #' If `NA` (default), `p_anc` is uniform with range in \[0.01, 0.5\].
 #' Otherwise, `p_anc` has a symmetric Beta distribution with range in \[0, 1\].
+#' @param p_anc If provided, it is used as the ancestral allele frequencies (instead of drawing random ones).  Must either be a scalar or a length-`m_loci` vector.
 #'
 #' @return A named list that includes the following randomly-generated data in this order:
 #' \describe{
@@ -85,7 +86,8 @@ draw_all_admix <- function(
                            want_p_anc = TRUE,
                            verbose = FALSE,
                            require_polymorphic_loci = TRUE,
-                           beta = NA
+                           beta = NA,
+                           p_anc = NULL
                            ) {
     # stop if required parameters are missing
     if (missing(admix_proportions))
@@ -108,16 +110,33 @@ draw_all_admix <- function(
         k_subpops != k_subpops_inbr # but if it's not scalar, it must agree with admix_proportions
     )
         stop('`admix_proportions` and `inbr_subpops` are not compatible: ncol(admix_proportions) == ', k_subpops, ' != ', k_subpops_inbr, ' == length(inbr_subpops)')
-    
-    # generate the random ancestral allele frequencies, in usual range and with minimum threshold for simplicity
-    if (verbose)
-        message('drawing p_anc')
-    p_anc <- draw_p_anc(m_loci, beta = beta)
+
+    # validate or generate p_anc
+    p_anc_in <- p_anc # remember its original value, for later
+    if ( !is.null( p_anc ) ) {
+        # validate length
+        m_loci_p_anc <- length( p_anc )
+        if (
+            m_loci_p_anc > 1 && # ok if it's scalar
+            m_loci_p_anc != m_loci # otherwise must agree with m_loci
+        )
+            stop('Provided `p_anc` has length (', m_loci_p_anc, ') neither 1 nor m_loci (', m_loci, ')')
+        # validate range
+        if ( any( p_anc < 0 ) )
+            stop('Provided `p_anc` has negative values!')
+        if ( any( p_anc > 1 ) )
+            stop('Provided `p_anc` has values exceeding 1!')
+    } else {
+        # generate the random ancestral allele frequencies, in usual range and with minimum threshold for simplicity
+        if (verbose)
+            message('drawing p_anc')
+        p_anc <- draw_p_anc(m_loci, beta = beta)
+    }
     
     # draw intermediate allele frequencies from Balding-Nichols
     if (verbose)
         message('drawing p_subpops')
-    # pass m_loci for consistency check (it already ought to match length(p_anc))
+    # pass m_loci for consistency check (required if p_anc is a scalar, otherwise it already ought to match length(p_anc))
     # pass k_subpops in case inbr_subpops was a scalar (otherwise provides a redundant check)
     p_subpops <- draw_p_subpops(p_anc, inbr_subpops, m_loci = m_loci, k_subpops = k_subpops)
     
@@ -149,6 +168,14 @@ draw_all_admix <- function(
         fixed_loci_indexes <- fixed_loci(X) # boolean vector identifies fixed loci
         m_loci_fixed <- sum(fixed_loci_indexes) # number of cases
         if (m_loci_fixed > 0) {
+            # p_anc is tricky here
+            # this is what we'll pass below
+            p_anc_redo <- p_anc_in
+            # if null or length 1, nothing changes, so look at rest
+            if ( !is.null( p_anc_in ) && length( p_anc_in ) > 1 ) {
+                # only pass cases that are getting redone, must be a vector of the right length
+                p_anc_redo <- p_anc_in[ fixed_loci_indexes ]
+            }
             # call self with desired number of loci, all the same parameters otherwise
             # note that since this is also called asking for no fixed loci, it will work recursively within itself and return when all loci desired are not fixed!
             if (verbose)
@@ -163,7 +190,8 @@ draw_all_admix <- function(
                 want_p_anc = want_p_anc,
                 verbose = FALSE, # don't show more messages for additional iterations
                 require_polymorphic_loci = require_polymorphic_loci,
-                beta = beta
+                beta = beta,
+                p_anc = p_anc_redo
             )
             # overwrite fixed loci with redrawn polymorphic data
             X[fixed_loci_indexes, ] <- obj$X # guaranteed to be there
@@ -171,7 +199,9 @@ draw_all_admix <- function(
                 p_ind[fixed_loci_indexes, ] <- obj$p_ind
             if (want_p_subpops)
                 p_subpops[fixed_loci_indexes, ] <- obj$p_subpops
-            if (want_p_anc)
+            # this works when we didn't specify p_anc
+            # otherwise p_anc doesn't change, it is what we wanted it to be
+            if ( want_p_anc && is.null( p_anc_in ) )
                 p_anc[fixed_loci_indexes] <- obj$p_anc
         }
     }

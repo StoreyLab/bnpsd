@@ -14,7 +14,8 @@ draw_all_admix(
   want_p_anc = TRUE,
   verbose = FALSE,
   require_polymorphic_loci = TRUE,
-  beta = NA
+  beta = NA,
+  p_anc = NULL
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ Note that by default \code{p_ind} is not constructed in full at all, instead a f
 \item{beta}{Shape parameter for a symmetric Beta for ancestral allele frequencies \code{p_anc}.
 If \code{NA} (default), \code{p_anc} is uniform with range in [0.01, 0.5].
 Otherwise, \code{p_anc} has a symmetric Beta distribution with range in [0, 1].}
+
+\item{p_anc}{If provided, it is used as the ancestral allele frequencies (instead of drawing random ones).  Must either be a scalar or a length-\code{m_loci} vector.}
 }
 \value{
 A named list that includes the following randomly-generated data in this order:

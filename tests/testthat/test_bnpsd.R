@@ -813,3 +813,60 @@ test_that("draw_all_admix `want_p_ind = FALSE` works well", {
     expect_true(all(p_anc >= 0)) # all are non-negative
     expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
 })
+
+test_that("draw_all_admix with provided p_anc (scalar) works well", {
+    m_loci <- 10
+    inbr_subpops <- c(0.1, 0.2, 0.3)
+    k_subpops <- length(inbr_subpops)
+    admix_proportions <- diag(rep.int(1, k_subpops)) # island model for test...
+    # repeat so we have multiple people per island
+    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
+    n_ind <- nrow(admix_proportions) # number of individuals (3*k_subpops)
+    # this is key, to pass so all loci have p_anc 0.2, passed as scalar (not length m_loci)
+    p_anc <- 0.2
+    
+    # run draw_all_admix
+    # only test default (p_ind and p_subpops not returned)
+    out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, p_anc = p_anc)
+    expect_equal( names(out), draw_all_admix_names_ret_default )
+
+    X <- out$X # genotypes
+    
+    # test X
+    expect_equal(nrow(X), m_loci)
+    expect_equal(ncol(X), n_ind)
+    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
+    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
+    
+    # test p_anc, should just match what we passed
+    expect_equal( out$p_anc, p_anc )
+})
+
+test_that("draw_all_admix with provided p_anc (vector) works well", {
+    m_loci <- 10
+    inbr_subpops <- c(0.1, 0.2, 0.3)
+    k_subpops <- length(inbr_subpops)
+    admix_proportions <- diag(rep.int(1, k_subpops)) # island model for test...
+    # repeat so we have multiple people per island
+    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
+    n_ind <- nrow(admix_proportions) # number of individuals (3*k_subpops)
+    # construct p_anc separately here, but will demand that the code use it without changes 
+    p_anc <- runif( m_loci )
+    
+    # run draw_all_admix
+    # only test default (p_ind and p_subpops not returned)
+    out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, p_anc = p_anc)
+    expect_equal( names(out), draw_all_admix_names_ret_default )
+
+    X <- out$X # genotypes
+    
+    # test X
+    expect_equal(nrow(X), m_loci)
+    expect_equal(ncol(X), n_ind)
+    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
+    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
+    
+    # test p_anc, should just match what we passed
+    expect_equal( out$p_anc, p_anc )
+})
+

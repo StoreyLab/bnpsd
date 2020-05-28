@@ -7,7 +7,7 @@
 draw_p_subpops(p_anc, inbr_subpops, m_loci = NA, k_subpops = NA)
 }
 \arguments{
-\item{p_anc}{The length-\eqn{m} vector of ancestral allele frequencies per locus.}
+\item{p_anc}{The scalar or length-\eqn{m} vector of ancestral allele frequencies per locus.}
 
 \item{inbr_subpops}{The length-\eqn{k} vector of subpopulation \eqn{F_{ST}}{FST} values.}
 

@@ -5,7 +5,7 @@
 #' where \eqn{\nu_u = 1/f^T_{S_u} - 1}.
 #' Below \eqn{m} is the number of loci and \eqn{k} is the number of subpopulations.
 #'
-#' @param p_anc The length-\eqn{m} vector of ancestral allele frequencies per locus.
+#' @param p_anc The scalar or length-\eqn{m} vector of ancestral allele frequencies per locus.
 #' @param inbr_subpops The length-\eqn{k} vector of subpopulation \eqn{F_{ST}}{FST} values.
 #' @param m_loci Optional.
 #' The desired number of loci \eqn{m}, to be used if \code{p_anc} is a scalar.
