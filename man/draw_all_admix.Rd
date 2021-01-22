@@ -32,7 +32,7 @@ Note that by default \code{p_ind} is not constructed in full at all, instead a f
 
 \item{want_p_subpops}{If \code{TRUE} (NOT default), includes the matrix of random intermediate subpopulation allele frequencies in the return list.}
 
-\item{want_p_anc}{If \code{TRUE} (default), includes the matrix of random ancestral allele frequencies in the return list.}
+\item{want_p_anc}{If \code{TRUE} (default), includes the vector of random ancestral allele frequencies in the return list.}
 
 \item{verbose}{If \code{TRUE}, prints messages for every stage in the algorithm.}
 
@@ -42,7 +42,8 @@ Note that by default \code{p_ind} is not constructed in full at all, instead a f
 If \code{NA} (default), \code{p_anc} is uniform with range in [0.01, 0.5].
 Otherwise, \code{p_anc} has a symmetric Beta distribution with range in [0, 1].}
 
-\item{p_anc}{If provided, it is used as the ancestral allele frequencies (instead of drawing random ones).  Must either be a scalar or a length-\code{m_loci} vector.}
+\item{p_anc}{If provided, it is used as the ancestral allele frequencies (instead of drawing random ones).  Must either be a scalar or a length-\code{m_loci} vector.
+If scalar and \code{want_p_anc = TRUE}, then the returned \code{p_anc} is the scalar value repeated \code{m_loci} times (it is always a vector).}
 }
 \value{
 A named list that includes the following randomly-generated data in this order:

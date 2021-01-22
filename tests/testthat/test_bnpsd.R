@@ -839,7 +839,8 @@ test_that("draw_all_admix with provided p_anc (scalar) works well", {
     expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
     
     # test p_anc, should just match what we passed
-    expect_equal( out$p_anc, p_anc )
+    # but always returns vector, compare as vector
+    expect_equal( out$p_anc, rep.int( p_anc, m_loci ) )
 })
 
 test_that("draw_all_admix with provided p_anc (vector) works well", {

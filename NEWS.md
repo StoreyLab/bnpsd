@@ -123,3 +123,7 @@ These loci are not polymorphic so they would normally not be considered in analy
 
 * Added option `p_anc` to function `draw_all_admix`, to specify desired ancestral allele frequencies instead of having the code generate it randomly (default).
 * Added details for documentation of function `draw_p_subpops.R`, clarifying that input `p_anc` can be scalar.
+
+# 2021-01-21 - bnpsd 1.2.2.9000
+
+* Function `draw_all_admix`: when option `p_anc` is provided as scalar and `want_p_anc = TRUE`, now the return value is always a vector (in this case the input scalar value repeated `m_loci` times).  The previous behavior was to return `p_anc` as scalar if that was the input, which could be problematic for downstream applications.

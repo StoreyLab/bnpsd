@@ -12,13 +12,14 @@
 #' @param want_p_ind If `TRUE` (NOT default), includes the matrix of individual-specific allele frequencies in the return list.
 #' Note that by default `p_ind` is not constructed in full at all, instead a fast low-memory algorithm constructs it in parts as needed only; beware that setting `want_p_ind = TRUE` increases memory usage in comparison.
 #' @param want_p_subpops If `TRUE` (NOT default), includes the matrix of random intermediate subpopulation allele frequencies in the return list.
-#' @param want_p_anc If `TRUE` (default), includes the matrix of random ancestral allele frequencies in the return list.
+#' @param want_p_anc If `TRUE` (default), includes the vector of random ancestral allele frequencies in the return list.
 #' @param verbose If `TRUE`, prints messages for every stage in the algorithm.
 #' @param require_polymorphic_loci If TRUE (default), returned genotype matrix will not include any fixed loci (loci that happened to be fixed are drawn again, starting from their ancestral allele frequencies, and checked iteratively until no fixed loci remain, so that the final number of polymorphic loci is exactly \eqn{m_loci}).
 #' @param beta Shape parameter for a symmetric Beta for ancestral allele frequencies `p_anc`.
 #' If `NA` (default), `p_anc` is uniform with range in \[0.01, 0.5\].
 #' Otherwise, `p_anc` has a symmetric Beta distribution with range in \[0, 1\].
 #' @param p_anc If provided, it is used as the ancestral allele frequencies (instead of drawing random ones).  Must either be a scalar or a length-`m_loci` vector.
+#' If scalar and `want_p_anc = TRUE`, then the returned `p_anc` is the scalar value repeated `m_loci` times (it is always a vector).
 #'
 #' @return A named list that includes the following randomly-generated data in this order:
 #' \describe{
@@ -116,11 +117,13 @@ draw_all_admix <- function(
     if ( !is.null( p_anc ) ) {
         # validate length
         m_loci_p_anc <- length( p_anc )
-        if (
-            m_loci_p_anc > 1 && # ok if it's scalar
-            m_loci_p_anc != m_loci # otherwise must agree with m_loci
-        )
+        if ( m_loci_p_anc == 1 ) {
+            # expand scalar into vector, so it looks as desired
+            p_anc <- rep.int( p_anc, m_loci )
+        } else if ( m_loci_p_anc != m_loci )
+            # otherwise must agree with m_loci
             stop('Provided `p_anc` has length (', m_loci_p_anc, ') neither 1 nor m_loci (', m_loci, ')')
+        
         # validate range
         if ( any( p_anc < 0 ) )
             stop('Provided `p_anc` has negative values!')
