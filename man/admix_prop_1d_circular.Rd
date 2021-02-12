@@ -10,9 +10,9 @@ admix_prop_1d_circular(
   sigma = NA,
   coord_ind_first = 2 * pi/(2 * n_ind),
   coord_ind_last = 2 * pi * (1 - 1/(2 * n_ind)),
-  bias_coeff,
-  coanc_subpops,
-  fst
+  bias_coeff = NA,
+  coanc_subpops = NULL,
+  fst = NA
 )
 }
 \arguments{
@@ -29,41 +29,41 @@ The edge cases \code{sigma = 0} and \code{sigma = Inf} are handled appropriately
 
 OPTIONS FOR BIAS COEFFICIENT VERSION}
 
-\item{bias_coeff}{The desired bias coefficient, which specifies \eqn{\sigma} indirectly.
-Required if \code{sigma} is missing.}
+\item{bias_coeff}{If \code{sigma} is \code{NA}, this bias coefficient is required.}
 
-\item{coanc_subpops}{The length-\eqn{k} vector of inbreeding coefficients (or \eqn{F_{ST}}{FST}'s) of the intermediate subpopulations, up to a scaling factor (which cancels out in calculations).
-Required if \code{sigma} is missing.}
+\item{coanc_subpops}{If \code{sigma} is \code{NA}, this intermediate subpops coancestry is required.
+It can be provided as a \code{k_subpops}-by-\code{k_subpops} matrix, a length-\code{k_subpops} population inbreeding vector (for independent subpopulations, where between-subpop coancestries are zero) or scalar (if population inbreeding values are all equal and coancestries are zero).
+This \code{coanc_subpops} can be in the wrong scale (it cancels out in calculations), which is returned corrected, to result in the desired \code{fst} (next).}
 
-\item{fst}{The desired final \eqn{F_{ST}}{FST} of the admixed individuals.
-Required if \code{sigma} is missing.}
+\item{fst}{If \code{sigma} is \code{NA}, this FST of the admixed individuals is required.}
 }
 \value{
-If \code{sigma} was provided, the \eqn{n \times k}{n-by-k} admixture proportion matrix.
-If \code{sigma} is missing, a named list is returned containing \code{admix_proportions}, the rescaled \code{coanc_subpops}, and the \code{sigma} that together give the desired \eqn{bias_coeff} and final \eqn{F_{ST}}{FST} of the admixed individuals.
+If \code{sigma} was provided, the \code{n_ind}-by-\code{k_subpops} admixture proportion matrix (\code{admix_proportions}).
+If \code{sigma} is missing, a named list is returned containing \code{admix_proportions}, the rescaled \code{coanc_subpops}, and the \code{sigma} (which together give the desired \code{bias_coeff} and \code{fst}).
 }
 \description{
-Assumes \eqn{k} intermediate subpopulations placed along a circumference (the \eqn{[0, 2\pi]} line that wraps around) with even spacing spread by random walks (see details below), then \eqn{n} individuals sampled equally spaced in \eqn{[a,b]} (default \eqn{[0, 2\pi]} with a small gap so first and last individual do not overlap) draw their admixture proportions relative to the Von Mises density that models the random walks of each of these intermediate subpopulations.
-The spread of the random walks (the \eqn{\sigma=1/\sqrt{\kappa}} of the Von Mises densities) is set to \code{sigma} if not missing, otherwise \eqn{\sigma} is found numerically to give the desired bias coefficient \code{bias_coeff}, the coancestry matrix of the intermediate subpopulations \code{coanc_subpops} (up to a scalar factor), and the final \eqn{F_{ST}}{FST} of the admixed individuals (see details below).
+Assumes \code{k_subpops} intermediate subpopulations placed along a circumference (the [\code{0}, \code{2 * pi}] line that wraps around) with even spacing spread by random walks (see details below), then \code{n_ind} individuals sampled equally spaced in [\code{coord_ind_first},\code{coord_ind_last}] (default [\code{0}, \code{2 * pi}] with a small gap so first and last individual do not overlap) draw their admixture proportions relative to the Von Mises density that models the random walks of each of these intermediate subpopulations.
+The spread of the random walks is \code{sigma = 1 / sqrt(kappa)} of the Von Mises density.
+If \code{sigma} is missing, it can be set indirectly by providing three variables: (1) the desired bias coefficient \code{bias_coeff}, (2) the coancestry matrix of the intermediate subpopulations \code{coanc_subpops} (up to a scalar factor), and (3) the final \code{fst} of the admixed individuals (see details below).
 }
 \details{
-Assuming the full range of \eqn{[0, 2\pi]} is considered, and the first and last individuals do not overlap, the gap between individuals is \eqn{\Delta = 2 \pi / n}.
-To not have any individuals on the edge, we place the first individual at \eqn{\Delta / 2} and the last at \eqn{2 \pi - \Delta / 2}.
-The location of subpopulation \eqn{j} is
-\deqn{\Delta / 2 + (j-1/2)/k (2 \pi - \Delta),}
-chosen to agree with the default correspondence between individuals and subpopulations of the linear 1D geography admixture scenario (\code{\link{admix_prop_1d_linear}}).
+Assuming the full range of [\code{0}, \code{2 * pi}] is considered, and the first and last individuals do not overlap, the gap between individuals is \code{delta = 2 * pi / n}.
+To not have any individuals on the edge, we place the first individual at \code{delta / 2} and the last at \code{2 * pi - delta / 2}.
+The location of subpopulation \code{j} is \code{delta / 2 + ( j - 1/2 ) / k * (2 * pi - delta)}, chosen to agree with the default correspondence between individuals and subpopulations of the linear 1D geography admixture scenario (\verb{\link{admix_prop_1d_linear}}).
 
-When \code{sigma} is missing, the function determines its value using the desired \code{bias_coeff}, \code{coanc_subpops} up to a scalar factor, and \code{fst}.
-Uniform weights for the final generalized \eqn{F_{ST}}{FST} are assumed.
-The scaling factor of the input \code{coanc_subpops} is irrelevant because it cancels out in \code{bias_coeff}; after \code{sigma} is found, \code{coanc_subpops} is rescaled to give the desired final \eqn{F_{ST}}{FST}.
-However, the function stops with a fatal error if the rescaled \code{coanc_subpops} takes on any values greater than 1, which are not allowed since \code{coanc_subpops} are IBD probabilities.
+If \code{sigma} is \code{NA}, its value is determined from the desired \code{bias_coeff}, \code{coanc_subpops} up to a scalar factor, and \code{fst}.
+Uniform weights for the final generalized FST are assumed.
+The scale of \code{coanc_subpops} is irrelevant because it cancels out in \code{bias_coeff}; after \code{sigma} is found, \code{coanc_subpops} is rescaled to give the desired final FST.
+However, the function stops if any rescaled \code{coanc_subpops} values are greater than 1, which are not allowed since they are IBD probabilities.
 }
 \examples{
 # admixture matrix for 1000 individuals drawing alleles from 10 subpops
-# and a spread of about 2 standard deviations along the circular 1D geography
+# simple version: spread of about 2 standard deviations along the circular 1D geography
+# (just set sigma)
 admix_proportions <- admix_prop_1d_circular(n_ind = 1000, k_subpops = 10, sigma = 2)
 
-# a similar model but with a bias coefficient of exactly 1/2
+# advanced version: a similar model but with a bias coefficient of exactly 1/2
+# (must provide bias_coeff, coanc_subpops, and fst in lieu of sigma)
 k_subpops <- 10
 # FST vector for intermediate independent subpops, up to a factor (will be rescaled below)
 coanc_subpops <- 1 : k_subpops

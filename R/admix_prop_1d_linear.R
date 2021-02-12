@@ -1,41 +1,43 @@
 #' Construct admixture proportion matrix for 1D geography
 #'
-#' Assumes \eqn{k} intermediate subpopulations placed along a line at locations \eqn{1:k} spread by random walks, then \eqn{n} individuals sampled equally spaced in \eqn{[a,b]} (default \eqn{[0.5, k+0.5]}) draw their admixture proportions relative to the Normal density that models the random walks of each of these intermediate subpopulations.
-#' The spread of the random walks (the \eqn{\sigma} of the Normal densities) is set to \code{sigma} if not missing, otherwise \eqn{\sigma} is found numerically to give the desired bias coefficient \code{bias_coeff}, the coancestry matrix of the intermediate subpopulations \code{coanc_subpops} (up to a scalar factor), and the final \eqn{F_{ST}}{FST} of the admixed individuals (see details below).
+#' Assumes `k_subpops` intermediate subpopulations placed along a line at locations `1 : k_subpops` spread by random walks, then `n_ind` individuals equally spaced in \[`coord_ind_first`,`coord_ind_last`\] draw their admixture proportions relative to the Normal density that models the random walks of each of these intermediate subpopulations.
+#' The spread of the random walks (the standard deviation of the Normal densities) is `sigma`.
+#' If `sigma` is missing, it can be set indirectly by providing three variables: (1) the desired bias coefficient `bias_coeff`, (2) the coancestry matrix of the intermediate subpopulations `coanc_subpops` (up to a scalar factor), and (3) the final `fst` of the admixed individuals (see details below).
 #'
-#' When \code{sigma} is missing, the function determines its value using the desired \code{bias_coeff}, \code{coanc_subpops} up to a scalar factor, and \code{fst}.
-#' Uniform weights for the final generalized \eqn{F_{ST}}{FST} are assumed.
-#' The scale of \code{coanc_subpops} is irrelevant because it cancels out in \code{bias_coeff}; after \code{sigma} is found, \code{coanc_subpops} is rescaled to give the desired final \eqn{F_{ST}}{FST}.
-#' However, the function stops with a fatal error if the rescaled \code{coanc_subpops} takes on any values greater than 1, which are not allowed since \code{coanc_subpops} are IBD probabilities.
+#' If `sigma` is `NA`, its value is determined from the desired `bias_coeff`, `coanc_subpops` up to a scalar factor, and `fst`.
+#' Uniform weights for the final generalized FST are assumed.
+#' The scale of `coanc_subpops` is irrelevant because it cancels out in `bias_coeff`; after `sigma` is found, `coanc_subpops` is rescaled to give the desired final FST.
+#' However, the function stops if any rescaled `coanc_subpops` values are greater than 1, which are not allowed since they are IBD probabilities.
 #'
 #' @param n_ind Number of individuals.
 #' @param k_subpops Number of intermediate subpopulations.
 #' @param sigma Spread of intermediate subpopulations (standard deviation of normal densities).
-#' The edge cases \code{sigma = 0} and \code{sigma = Inf} are handled appropriately!
-#' @param coord_ind_first Location of first individual.
-#' @param coord_ind_last Location of last individual.
+#' The edge cases `sigma = 0` and `sigma = Inf` are handled appropriately!
+#' @param coord_ind_first Location of first individual (default `0.5`).
+#' @param coord_ind_last Location of last individual (default `k_subpops + 0.5`).
 #'
 #' OPTIONS FOR BIAS COEFFICIENT VERSION
 #' 
-#' @param bias_coeff The desired bias coefficient, which specifies \eqn{\sigma} indirectly.
-#' Required if \code{sigma} is missing.
-#' @param coanc_subpops The \eqn{k \times k}{k-by-k} coancestry matrix of the intermediate subpopulations, or equivalent vector or scalar forms (which model independent subpopulations), up to a scaling factor (which cancels out in calculations)
-#' Required if \code{sigma} is missing.
-#' @param fst The desired final \eqn{F_{ST}}{FST} of the admixed individuals.
-#' Required if \code{sigma} is missing.
+#' @param bias_coeff If `sigma` is `NA`, this bias coefficient is required.
+#' @param coanc_subpops If `sigma` is `NA`, this intermediate subpops coancestry is required.
+#' It can be provided as a `k_subpops`-by-`k_subpops` matrix, a length-`k_subpops` population inbreeding vector (for independent subpopulations, where between-subpop coancestries are zero) or scalar (if population inbreeding values are all equal and coancestries are zero).
+#' This `coanc_subpops` can be in the wrong scale (it cancels out in calculations), which is returned corrected, to result in the desired `fst` (next).
+#' @param fst If `sigma` is `NA`, this FST of the admixed individuals is required.
 #'
-#' @return If \code{sigma} was provided, the \eqn{n \times k}{n-by-k} admixture proportion matrix.
-#' If \code{sigma} is missing, a named list is returned containing \code{admix_proportions}, the rescaled \code{coanc_subpops}, and the \code{sigma} that together give the desired \eqn{bias_coeff} and final \eqn{F_{ST}}{FST} of the admixed individuals.
+#' @return If `sigma` was provided, the `n_ind`-by-`k_subpops` admixture proportion matrix (`admix_proportions`).
+#' If `sigma` is missing, a named list is returned containing `admix_proportions`, the rescaled `coanc_subpops`, and the `sigma` (which together give the desired `bias_coeff` and `fst`).
 #'
 #' @examples
 #' # admixture matrix for 1000 individuals drawing alleles from 10 subpops
-#' # and a spread of 2 standard deviations along the 1D geography
+#' # simple version: spread of 2 standard deviations along the 1D geography
+#' # (just set sigma)
 #' admix_proportions <- admix_prop_1d_linear(n_ind = 1000, k_subpops = 10, sigma = 2)
 #'
 #' # as sigma approaches zero, admix_proportions approaches the independent subpopulations matrix
 #' admix_prop_1d_linear(n_ind = 10, k_subpops = 2, sigma = 0)
 #'
-#' # a similar model but with a bias coefficient of exactly 1/2
+#' # advanced version: a similar model but with a bias coefficient of exactly 1/2
+#' # (must provide bias_coeff, coanc_subpops, and fst in lieu of sigma)
 #' k_subpops <- 10
 #' # FST vector for intermediate independent subpops, up to a factor (will be rescaled below)
 #' coanc_subpops <- 1 : k_subpops
@@ -64,9 +66,9 @@ admix_prop_1d_linear <- function(
                                  sigma = NA,
                                  coord_ind_first = 0.5,
                                  coord_ind_last = k_subpops + 0.5,
-                                 bias_coeff,
-                                 coanc_subpops,
-                                 fst
+                                 bias_coeff = NA,
+                                 coanc_subpops = NULL,
+                                 fst = NA
                                  ) {
     # stop if these required parameters are missing
     if (missing(n_ind))
@@ -80,11 +82,11 @@ admix_prop_1d_linear <- function(
         # this triggers version that fits bias coefficient
         
         # check for more required parameters
-        if (missing(bias_coeff))
+        if (is.na(bias_coeff))
             stop('`bias_coeff` is required when sigma is missing!')
-        if (missing(coanc_subpops))
+        if (is.null(coanc_subpops))
             stop('`coanc_subpops` is required when sigma is missing!')
-        if (missing(fst))
+        if (is.na(fst))
             stop('fst` is required when sigma is missing!')
 
         # fit sigma!

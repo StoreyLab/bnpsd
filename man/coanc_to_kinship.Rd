@@ -7,18 +7,14 @@
 coanc_to_kinship(coancestry)
 }
 \arguments{
-\item{coancestry}{The \eqn{n \times n}{n-by-n} coancestry matrix}
+\item{coancestry}{The \code{n}-by-\code{n} coancestry matrix}
 }
 \value{
-The \eqn{n \times n}{n-by-n} kinship matrix, preserving column and row names.
+The \code{n}-by-\code{n} kinship matrix, preserving column and row names.
 }
 \description{
-Let
-\eqn{\Theta = (\theta_{jk})} be the coancestry matrix and
-\eqn{\Phi = (\varphi_{jk})} be the kinship matrix.
-These matrices agree off-diagonal, but the diagonal gets transformed as
-\deqn{\phi_{jj} = \frac{1 + \theta_{jj}}{2}.}
-Below \eqn{n} is the number of individuals.
+If \code{Theta} is the coancestry matrix and \code{Phi} is the kinship matrix (both are \code{n}-by-\code{n} symmetric), then these matrices agree off-diagonal, but the diagonal gets transformed as
+\code{diag( Phi ) = ( 1 + diag( Theta ) ) / 2}.
 }
 \examples{
 # a trivial case: unadmixed individuals from independent subpopulations
@@ -47,5 +43,5 @@ kinship <- coanc_to_kinship( coancestry )
 
 }
 \seealso{
-The inverse function is given by \code{\link[popkin]{inbr_diag}}.
+The inverse function is given by \verb{\link[popkin]\{inbr_diag\}}.
 }

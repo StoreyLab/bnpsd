@@ -1,15 +1,15 @@
 #' Draw random Uniform or Beta ancestral allele frequencies
 #'
-#' This is simply a wrapper around \code{\link[stats]{runif}} and \code{\link[stats]{rbeta}} (depending on parameters) with different defaults and additional validations.
+#' This is simply a wrapper around `\link[stats]{runif}` or `\link[stats]{rbeta}` (depending on parameters) with different defaults and additional validations.
 #'
-#' @param m_loci Number of loci to draw
-#' @param p_min Minimum allele frequency to draw
-#' @param p_max Maximum allele frequency to draw
+#' @param m_loci Number of loci to draw.
+#' @param p_min Minimum allele frequency to draw (Uniform case only).
+#' @param p_max Maximum allele frequency to draw (Uniform case only).
 #' @param beta Shape parameter for a symmetric Beta.
-#' If `NA` (default), Uniform with user-specified range (`p_min`, `p_max`) is used.
+#' If `NA` (default), Uniform(`p_min`, `p_max`) is used.
 #' Otherwise, a Symmetric Beta is used and the user-specified range is ignored (values in \[0, 1\] will be returned).
 #'
-#' @return A length-\eqn{m} vector of random ancestral allele frequencies
+#' @return A length-`m` vector of random ancestral allele frequencies
 #'
 #' @examples
 #' # Default is uniform with range between 0.01 and 0.5

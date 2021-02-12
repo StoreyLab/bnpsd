@@ -7,7 +7,7 @@
 \title{A package for modeling and simulating an admixed population}
 \description{
 The underlying model is called the BN-PSD admixture model, which combines the Balding-Nichols (BN) allele frequency model for the intermediate subpopulations with the Pritchard-Stephens-Donnelly (PSD) model of individual-specific admixture proportions.
-The BN-PSD model enables the simulation of complex population structures, ideal for illustrating challenges in kinship coefficient and \eqn{F_{ST}}{FST} estimation.
+The BN-PSD model enables the simulation of complex population structures, ideal for illustrating challenges in kinship coefficient and FST estimation.
 Simulated loci are drawn independently (in linkage equilibrium).
 }
 \examples{

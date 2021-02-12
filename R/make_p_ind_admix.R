@@ -1,14 +1,14 @@
 #' Construct individual-specific allele frequency matrix under the PSD admixture model
 #'
-#' Here \eqn{m} is the number of loci, \eqn{n} the number of individuals, and \eqn{k} the number of intermediate subpopulations.
-#' The \eqn{m \times n}{m-by-n} individual-specific allele frequency matrix \eqn{P} is constructed from the \eqn{m \times k}{m-by-k} intermediate subpopulation allele frequency matrix \eqn{B} and the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q} using
-#' \deqn{P = B Q^T.}{P = B * Q^T.}
-#' This function is a wrapper around \code{\link{tcrossprod}}, but also ensures the output allele frequencies are in \[0, 1\], as this is not guaranteed by \code{\link{tcrossprod}} due to limited machine precision.
+#' Here `m` is the number of loci, `n` the number of individuals, and `k` the number of intermediate subpopulations.
+#' The `m`-by-`n` individual-specific allele frequency matrix `p_ind` is constructed from the `m`-by-`k` intermediate subpopulation allele frequency matrix `p_subpops` and the `n`-by-`k` admixture proportion matrix `admix_proportions` equivalent to
+#' `p_ind <- p_subpops %*% t( admix_proportions )`.
+#' This function is a wrapper around `\link{tcrossprod}`, but also ensures the output allele frequencies are in \[0, 1\] (otherwise not guaranteed due to limited machine precision).
 #' 
-#' @param p_subpops The \eqn{m \times k}{m-by-k} matrix of intermediate subpopulation allele frequencies.
-#' @param admix_proportions The \eqn{n \times k}{n-by-k} matrix of admixture proportions.
+#' @param p_subpops The `m`-by-`k` matrix of intermediate subpopulation allele frequencies.
+#' @param admix_proportions The `n`-by-`k` matrix of admixture proportions.
 #'
-#' @return The \eqn{m \times n}{m-by-n} matrix of individual-specific allele frequencies.
+#' @return The `m`-by-`n` matrix of individual-specific allele frequencies `p_ind`.
 #'
 #' @examples
 #' # data dimensions

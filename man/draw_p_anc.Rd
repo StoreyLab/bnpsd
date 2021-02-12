@@ -7,21 +7,21 @@
 draw_p_anc(m_loci, p_min = 0.01, p_max = 0.5, beta = NA)
 }
 \arguments{
-\item{m_loci}{Number of loci to draw}
+\item{m_loci}{Number of loci to draw.}
 
-\item{p_min}{Minimum allele frequency to draw}
+\item{p_min}{Minimum allele frequency to draw (Uniform case only).}
 
-\item{p_max}{Maximum allele frequency to draw}
+\item{p_max}{Maximum allele frequency to draw (Uniform case only).}
 
 \item{beta}{Shape parameter for a symmetric Beta.
-If \code{NA} (default), Uniform with user-specified range (\code{p_min}, \code{p_max}) is used.
+If \code{NA} (default), Uniform(\code{p_min}, \code{p_max}) is used.
 Otherwise, a Symmetric Beta is used and the user-specified range is ignored (values in [0, 1] will be returned).}
 }
 \value{
-A length-\eqn{m} vector of random ancestral allele frequencies
+A length-\code{m} vector of random ancestral allele frequencies
 }
 \description{
-This is simply a wrapper around \code{\link[stats]{runif}} and \code{\link[stats]{rbeta}} (depending on parameters) with different defaults and additional validations.
+This is simply a wrapper around \verb{\link[stats]\{runif\}} or \verb{\link[stats]\{rbeta\}} (depending on parameters) with different defaults and additional validations.
 }
 \examples{
 # Default is uniform with range between 0.01 and 0.5

@@ -19,9 +19,9 @@ draw_all_admix(
 )
 }
 \arguments{
-\item{admix_proportions}{The \eqn{n \times k}{n-by-k} matrix of admixture proportions.}
+\item{admix_proportions}{The \code{n}-by-\code{k} matrix of admixture proportions.}
 
-\item{inbr_subpops}{The length-\eqn{k} vector (or scalar) of intermediate subpopulation \eqn{F_{ST}}{FST} values.}
+\item{inbr_subpops}{The length-\code{k} vector (or scalar) of intermediate subpopulation FST values.}
 
 \item{m_loci}{The number of loci to draw.}
 
@@ -36,7 +36,7 @@ Note that by default \code{p_ind} is not constructed in full at all, instead a f
 
 \item{verbose}{If \code{TRUE}, prints messages for every stage in the algorithm.}
 
-\item{require_polymorphic_loci}{If TRUE (default), returned genotype matrix will not include any fixed loci (loci that happened to be fixed are drawn again, starting from their ancestral allele frequencies, and checked iteratively until no fixed loci remain, so that the final number of polymorphic loci is exactly \eqn{m_loci}).}
+\item{require_polymorphic_loci}{If TRUE (default), returned genotype matrix will not include any fixed loci (loci that happened to be fixed are drawn again, starting from their ancestral allele frequencies, and checked iteratively until no fixed loci remain, so that the final number of polymorphic loci is exactly \code{m_loci}).}
 
 \item{beta}{Shape parameter for a symmetric Beta for ancestral allele frequencies \code{p_anc}.
 If \code{NA} (default), \code{p_anc} is uniform with range in [0.01, 0.5].
@@ -46,31 +46,23 @@ Otherwise, \code{p_anc} has a symmetric Beta distribution with range in [0, 1].}
 If scalar and \code{want_p_anc = TRUE}, then the returned \code{p_anc} is the scalar value repeated \code{m_loci} times (it is always a vector).}
 }
 \value{
-A named list that includes the following randomly-generated data in this order:
-\describe{
-\item{X:}{
-An \eqn{m \times n}{m-by-n} matrix of genotypes.
+A named list with the following items (which may be missing depending on options):
+\itemize{
+\item \code{X}: An \code{m}-by-\code{n} matrix of genotypes.
 Included if \code{want_genotypes = TRUE}.
-}
-\item{p_anc:}{
-A length-\eqn{m} vector of ancestral allele frequencies.
+\item \code{p_anc}: A length-\code{m} vector of ancestral allele frequencies.
 Included if \code{want_p_anc = TRUE}.
-}
-\item{p_subpops:}{
-An \eqn{m \times k}{m-by-k} matrix of intermediate subpopulation allele frequencies
+\item \code{p_subpops}: An \code{m}-by-\code{k} matrix of intermediate subpopulation allele frequencies
 Included if \code{want_p_subpops = TRUE}.
-}
-\item{p_ind:}{
-An \eqn{m \times n}{m-by-n} matrix of individual-specific allele frequencies.
+\item \code{p_ind}: An \code{m}-by-\code{n} matrix of individual-specific allele frequencies.
 Included if \code{want_p_ind = TRUE}.
 }
 }
-}
 \description{
-This function returns simulated ancestral, intermediate, and individual-specific allele frequencies and genotypes given the admixture structure, as determined by the admixture proportions and the vector of intermediate subpopulation \eqn{F_{ST}}{FST} values.
-The function is a wrapper around \code{\link{draw_p_anc}}, \code{\link{draw_p_subpops}}, \code{\link{make_p_ind_admix}}, and \code{\link{draw_genotypes_admix}} with additional features such as requiring polymorphic loci.
-Importantly, by default fixed loci are re-drawn from the start (starting from the ancestral allele frequencies) so no fixed loci are in the output and no biases are introduced by re-drawing genotypes conditional on any of the previous allele frequencies (ancestral, intermediate, or individual-specific).
-Below \eqn{m} is the number of loci, \eqn{n} is the number of individuals, and \eqn{k} is the number of intermediate subpopulations.
+This function returns simulated ancestral, intermediate, and individual-specific allele frequencies and genotypes given the admixture structure, as determined by the admixture proportions and the vector of intermediate subpopulation FST values.
+The function is a wrapper around \verb{\link{draw_p_anc}}, \verb{\link{draw_p_subpops}}, \verb{\link{make_p_ind_admix}}, and \verb{\link{draw_genotypes_admix}} with additional features such as requiring polymorphic loci.
+Importantly, by default fixed loci (where all individuals were homozygous for the same allele) are re-drawn from the start (starting from the ancestral allele frequencies) so no fixed loci are in the output and no biases are introduced by re-drawing genotypes conditional on any of the previous allele frequencies (ancestral, intermediate, or individual-specific).
+Below \code{m_loci} (also \code{m}) is the number of loci, \code{n} is the number of individuals, and \code{k} is the number of intermediate subpopulations.
 }
 \examples{
 # dimensions

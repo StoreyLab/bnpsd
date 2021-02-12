@@ -1,20 +1,18 @@
 #' Draw allele frequencies for independent subpopulations
 #'
-#' Allele frequencies \eqn{p_i^{S_u}} for independent subpopulations \eqn{S_u} at locus \eqn{i} are drawn from the Balding-Nichols distribution with ancestral allele frequency \eqn{p_i^T} and \eqn{F_{ST}}{FST} parameter \eqn{f^T_{S_u}} as
-#' \deqn{p_i^{S_u} \sim \mbox{Beta}(\nu_u p_i^T, \nu_u (1-p_i^T)),}
-#' where \eqn{\nu_u = 1/f^T_{S_u} - 1}.
-#' Below \eqn{m} is the number of loci and \eqn{k} is the number of subpopulations.
+#' The allele frequency matrix `P` for `m_loci` loci (rows) and `k_subpops` independent subpopulations (columns) are drawn from the Balding-Nichols distribution with ancestral allele frequencies `p_anc` and FST parameters `inbr_subpops` equivalent to
+#' `P[ i, j ] <- rbeta( 1, nu_j * p_anc[i], nu_j * ( 1 - p_anc[i] ) )`,
+#' where `nu_j <- 1 / inbr_subpops[j] - 1`.
+#' The actual function is more efficient than the above code.
 #'
-#' @param p_anc The scalar or length-\eqn{m} vector of ancestral allele frequencies per locus.
-#' @param inbr_subpops The length-\eqn{k} vector of subpopulation \eqn{F_{ST}}{FST} values.
-#' @param m_loci Optional.
-#' The desired number of loci \eqn{m}, to be used if \code{p_anc} is a scalar.
-#' Stops if both \code{length(p_anc) > 1} and \code{m_loci} are set and they disagree.
-#' @param k_subpops Optional.
-#' The desired number of subpopulations \eqn{k}, to be used if \code{inbr_subpops} is a scalar.
-#' Stops if both \code{length(inbr_subpops) > 1} and \code{k_subpops} are set and they disagree.
+#' @param p_anc The scalar or length-`m_loci` vector of ancestral allele frequencies per locus.
+#' @param inbr_subpops The length-`k_subpops` vector of subpopulation FST values.
+#' @param m_loci If `p_anc` is scalar, optionally provide the desired number of loci (lest only one locus be simulated).
+#' Stops if both `length(p_anc) > 1` and `m_loci` is not `NA` and they disagree.
+#' @param k_subpops If `inbr_subpops` is a scalar, optionally provide the desired number of subpopulations (lest a single subpopulation be simulated).
+#' Stops if both `length(inbr_subpops) > 1` and `k_subpops` is not `NA` and they disagree.
 #'
-#' @return The \eqn{m \times k}{m-by-k} matrix of independent subpopulation allele frequencies
+#' @return The `m_loci`-by-`k_subpops` matrix of independent subpopulation allele frequencies
 #'
 #' @examples
 #' # a typical, non-trivial example

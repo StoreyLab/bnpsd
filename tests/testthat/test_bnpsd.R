@@ -622,12 +622,14 @@ test_that("draw_genotypes_admix is in range", {
     X <- draw_genotypes_admix(p_ind)
     expect_equal(nrow(X), m_loci)
     expect_equal(ncol(X), n_ind)
+    expect_true( !anyNA( X ) ) # no missing values
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
     
     # indirect draw test (default low_mem now!)
     X <- draw_genotypes_admix(p_subpops, admix_proportions)
     expect_equal(nrow(X), m_loci)
     expect_equal(ncol(X), n_ind)
+    expect_true( !anyNA( X ) ) # no missing values
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
     
     # the default test has 10 loci and 9 individuals
@@ -640,6 +642,7 @@ test_that("draw_genotypes_admix is in range", {
     X <- draw_genotypes_admix(p_subpops, admix_proportions)
     expect_equal(nrow(X), m_loci)
     expect_equal(ncol(X), n_ind)
+    expect_true( !anyNA( X ) ) # no missing values
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
 })
 
@@ -685,6 +688,7 @@ test_that("draw_all_admix works well", {
     # test X
     expect_equal(nrow(X), m_loci)
     expect_equal(ncol(X), n_ind)
+    expect_true( !anyNA( X ) ) # no missing values
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
     expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
     
@@ -727,6 +731,7 @@ test_that("draw_all_admix beta works well", {
     # test X
     expect_equal(nrow(X), m_loci)
     expect_equal(ncol(X), n_ind)
+    expect_true( !anyNA( X ) ) # no missing values
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
     expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
     
@@ -758,6 +763,7 @@ test_that("draw_all_admix `require_polymorphic_loci = FALSE` works well", {
     # test X
     expect_equal(nrow(X), m_loci)
     expect_equal(ncol(X), n_ind)
+    expect_true( !anyNA( X ) ) # no missing values
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
     # here loci may be fixed, don't require otherwise
 
@@ -799,6 +805,7 @@ test_that("draw_all_admix `want_p_ind = FALSE` works well", {
     # test X
     expect_equal(nrow(X), m_loci)
     expect_equal(ncol(X), n_ind)
+    expect_true( !anyNA( X ) ) # no missing values
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
     expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
     
@@ -835,6 +842,7 @@ test_that("draw_all_admix with provided p_anc (scalar) works well", {
     # test X
     expect_equal(nrow(X), m_loci)
     expect_equal(ncol(X), n_ind)
+    expect_true( !anyNA( X ) ) # no missing values
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
     expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
     
@@ -864,6 +872,7 @@ test_that("draw_all_admix with provided p_anc (vector) works well", {
     # test X
     expect_equal(nrow(X), m_loci)
     expect_equal(ncol(X), n_ind)
+    expect_true( !anyNA( X ) ) # no missing values
     expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
     expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
     

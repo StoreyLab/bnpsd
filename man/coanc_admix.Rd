@@ -7,17 +7,16 @@
 coanc_admix(admix_proportions, coanc_subpops)
 }
 \arguments{
-\item{admix_proportions}{The \eqn{n \times k}{n-by-k} admixture proportion matrix}
+\item{admix_proportions}{The \code{n}-by-\code{k} admixture proportion matrix}
 
-\item{coanc_subpops}{Either the \eqn{k \times k}{k-by-k} intermediate subpopulation coancestry matrix (for the complete admixture model), or the length-\eqn{k} vector of intermediate subpopulation \eqn{F_{ST}}{FST} values (for the BN-PSD model), or a scalar \eqn{F_{ST}}{FST} value shared by all intermediate subpopulations.}
+\item{coanc_subpops}{The intermediate subpopulation coancestry, given either as a \code{k}-by-\code{k} matrix (for the complete admixture model), or the length-\code{k} vector of intermediate subpopulation FST values (for the BN-PSD model; implies zero coancestry between subpopulations), or a scalar FST value shared by all intermediate subpopulations (also implies zero coancestry between subpopulations).}
 }
 \value{
-The \eqn{n \times n}{n-by-n} coancestry matrix.
+The \code{n}-by-\code{n} coancestry matrix.
 }
 \description{
-In the most general case, the \eqn{n \times n}{n-by-n} coancestry matrix \eqn{\Theta} of admixed individuals is determined by the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q} and the \eqn{k \times k}{k-by-k} intermediate subpopulation coancestry matrix \eqn{\Psi}, given by
-\deqn{\Theta = Q \Psi Q^T}{\Theta = Q * \Psi * Q^T}
-In the BN-PSD model \eqn{\Psi} is a diagonal matrix (with \eqn{F_{ST}}{FST} values for the intermediate subpopulations along the diagonal, zero values off-diagonal).
+The \code{n}-by-\code{n} coancestry matrix \code{Theta} of admixed individuals is determined by the \code{n}-by-\code{k} admixture proportion matrix \code{Q} and the \code{k}-by-\code{k} intermediate subpopulation coancestry matrix \code{Psi}, given by \code{Theta = Q \%*\% Psi \%*\% t(Q)}
+In the more restricted BN-PSD model, \code{Psi} is a diagonal matrix (with FST values for the intermediate subpopulations along the diagonal, zero values off-diagonal).
 }
 \examples{
 # a trivial case: unadmixed individuals from independent subpopulations

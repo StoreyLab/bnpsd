@@ -1,13 +1,12 @@
 #' Construct the coancestry matrix of an admixture model
 #'
-#' In the most general case, the \eqn{n \times n}{n-by-n} coancestry matrix \eqn{\Theta} of admixed individuals is determined by the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q} and the \eqn{k \times k}{k-by-k} intermediate subpopulation coancestry matrix \eqn{\Psi}, given by
-#' \deqn{\Theta = Q \Psi Q^T}{\Theta = Q * \Psi * Q^T}
-#' In the BN-PSD model \eqn{\Psi} is a diagonal matrix (with \eqn{F_{ST}}{FST} values for the intermediate subpopulations along the diagonal, zero values off-diagonal).
+#' The `n`-by-`n` coancestry matrix `Theta` of admixed individuals is determined by the `n`-by-`k` admixture proportion matrix `Q` and the `k`-by-`k` intermediate subpopulation coancestry matrix `Psi`, given by `Theta = Q %*% Psi %*% t(Q)`
+#' In the more restricted BN-PSD model, `Psi` is a diagonal matrix (with FST values for the intermediate subpopulations along the diagonal, zero values off-diagonal).
 #'
-#' @param admix_proportions The \eqn{n \times k}{n-by-k} admixture proportion matrix
-#' @param coanc_subpops Either the \eqn{k \times k}{k-by-k} intermediate subpopulation coancestry matrix (for the complete admixture model), or the length-\eqn{k} vector of intermediate subpopulation \eqn{F_{ST}}{FST} values (for the BN-PSD model), or a scalar \eqn{F_{ST}}{FST} value shared by all intermediate subpopulations.
+#' @param admix_proportions The `n`-by-`k` admixture proportion matrix
+#' @param coanc_subpops The intermediate subpopulation coancestry, given either as a `k`-by-`k` matrix (for the complete admixture model), or the length-`k` vector of intermediate subpopulation FST values (for the BN-PSD model; implies zero coancestry between subpopulations), or a scalar FST value shared by all intermediate subpopulations (also implies zero coancestry between subpopulations).
 #'
-#' @return The \eqn{n \times n}{n-by-n} coancestry matrix.
+#' @return The `n`-by-`n` coancestry matrix.
 #'
 #' @examples
 #' # a trivial case: unadmixed individuals from independent subpopulations

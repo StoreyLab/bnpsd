@@ -4,22 +4,22 @@
 \alias{admix_prop_indep_subpops}
 \title{Construct admixture proportion matrix for independent subpopulations}
 \usage{
-admix_prop_indep_subpops(labs, subpops)
+admix_prop_indep_subpops(labs, subpops = sort(unique(labs)))
 }
 \arguments{
-\item{labs}{Length-\eqn{n} vector of subpopulation labels}
+\item{labs}{Length-\code{n} vector of subpopulation labels}
 
-\item{subpops}{Optional length-\eqn{k} vector of unique subpopulations in desired order.
+\item{subpops}{Optional length-\code{k} vector of unique subpopulations in desired order.
 Stops if \code{subpops} does not contain all unique labels in \code{labs} (no error if \code{subpops} contains additional labels).}
 }
 \value{
-The \eqn{n \times k}{n-by-k} admixture proportion matrix.
+The \code{n}-by-\code{k} admixture proportion matrix.
 The unique subpopulation labels are given in the column names.
 }
 \description{
 This function constructs an admixture proportion matrix where every individuals is actually unadmixed (draws its full ancestry from a single intermediate subpopulation).
-The inputs are the vector of subpopulation labels \code{labs} for every individual (length \eqn{n}), and
-the length-\eqn{k} vector of unique subpopulations \code{subpops} in the desired order.
+The inputs are the vector of subpopulation labels \code{labs} for every individual (length \code{n}), and
+the length-\code{k} vector of unique subpopulations \code{subpops} in the desired order.
 If \code{subpops} is missing, the sorted unique subpopulations observed in \code{labs} is used.
 This function returns the admixture proportion matrix, for each individual 1 for the column corresponding to its subpopulation, 0 otherwise.
 }

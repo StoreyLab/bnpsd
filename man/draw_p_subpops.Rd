@@ -7,26 +7,24 @@
 draw_p_subpops(p_anc, inbr_subpops, m_loci = NA, k_subpops = NA)
 }
 \arguments{
-\item{p_anc}{The scalar or length-\eqn{m} vector of ancestral allele frequencies per locus.}
+\item{p_anc}{The scalar or length-\code{m_loci} vector of ancestral allele frequencies per locus.}
 
-\item{inbr_subpops}{The length-\eqn{k} vector of subpopulation \eqn{F_{ST}}{FST} values.}
+\item{inbr_subpops}{The length-\code{k_subpops} vector of subpopulation FST values.}
 
-\item{m_loci}{Optional.
-The desired number of loci \eqn{m}, to be used if \code{p_anc} is a scalar.
-Stops if both \code{length(p_anc) > 1} and \code{m_loci} are set and they disagree.}
+\item{m_loci}{If \code{p_anc} is scalar, optionally provide the desired number of loci (lest only one locus be simulated).
+Stops if both \code{length(p_anc) > 1} and \code{m_loci} is not \code{NA} and they disagree.}
 
-\item{k_subpops}{Optional.
-The desired number of subpopulations \eqn{k}, to be used if \code{inbr_subpops} is a scalar.
-Stops if both \code{length(inbr_subpops) > 1} and \code{k_subpops} are set and they disagree.}
+\item{k_subpops}{If \code{inbr_subpops} is a scalar, optionally provide the desired number of subpopulations (lest a single subpopulation be simulated).
+Stops if both \code{length(inbr_subpops) > 1} and \code{k_subpops} is not \code{NA} and they disagree.}
 }
 \value{
-The \eqn{m \times k}{m-by-k} matrix of independent subpopulation allele frequencies
+The \code{m_loci}-by-\code{k_subpops} matrix of independent subpopulation allele frequencies
 }
 \description{
-Allele frequencies \eqn{p_i^{S_u}} for independent subpopulations \eqn{S_u} at locus \eqn{i} are drawn from the Balding-Nichols distribution with ancestral allele frequency \eqn{p_i^T} and \eqn{F_{ST}}{FST} parameter \eqn{f^T_{S_u}} as
-\deqn{p_i^{S_u} \sim \mbox{Beta}(\nu_u p_i^T, \nu_u (1-p_i^T)),}
-where \eqn{\nu_u = 1/f^T_{S_u} - 1}.
-Below \eqn{m} is the number of loci and \eqn{k} is the number of subpopulations.
+The allele frequency matrix \code{P} for \code{m_loci} loci (rows) and \code{k_subpops} independent subpopulations (columns) are drawn from the Balding-Nichols distribution with ancestral allele frequencies \code{p_anc} and FST parameters \code{inbr_subpops} equivalent to
+\code{P[ i, j ] <- rbeta( 1, nu_j * p_anc[i], nu_j * ( 1 - p_anc[i] ) )},
+where \code{nu_j <- 1 / inbr_subpops[j] - 1}.
+The actual function is more efficient than the above code.
 }
 \examples{
 # a typical, non-trivial example

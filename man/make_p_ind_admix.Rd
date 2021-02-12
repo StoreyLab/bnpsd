@@ -7,18 +7,18 @@
 make_p_ind_admix(p_subpops, admix_proportions)
 }
 \arguments{
-\item{p_subpops}{The \eqn{m \times k}{m-by-k} matrix of intermediate subpopulation allele frequencies.}
+\item{p_subpops}{The \code{m}-by-\code{k} matrix of intermediate subpopulation allele frequencies.}
 
-\item{admix_proportions}{The \eqn{n \times k}{n-by-k} matrix of admixture proportions.}
+\item{admix_proportions}{The \code{n}-by-\code{k} matrix of admixture proportions.}
 }
 \value{
-The \eqn{m \times n}{m-by-n} matrix of individual-specific allele frequencies.
+The \code{m}-by-\code{n} matrix of individual-specific allele frequencies \code{p_ind}.
 }
 \description{
-Here \eqn{m} is the number of loci, \eqn{n} the number of individuals, and \eqn{k} the number of intermediate subpopulations.
-The \eqn{m \times n}{m-by-n} individual-specific allele frequency matrix \eqn{P} is constructed from the \eqn{m \times k}{m-by-k} intermediate subpopulation allele frequency matrix \eqn{B} and the \eqn{n \times k}{n-by-k} admixture proportion matrix \eqn{Q} using
-\deqn{P = B Q^T.}{P = B * Q^T.}
-This function is a wrapper around \code{\link{tcrossprod}}, but also ensures the output allele frequencies are in [0, 1], as this is not guaranteed by \code{\link{tcrossprod}} due to limited machine precision.
+Here \code{m} is the number of loci, \code{n} the number of individuals, and \code{k} the number of intermediate subpopulations.
+The \code{m}-by-\code{n} individual-specific allele frequency matrix \code{p_ind} is constructed from the \code{m}-by-\code{k} intermediate subpopulation allele frequency matrix \code{p_subpops} and the \code{n}-by-\code{k} admixture proportion matrix \code{admix_proportions} equivalent to
+\code{p_ind <- p_subpops \%*\% t( admix_proportions )}.
+This function is a wrapper around \verb{\link{tcrossprod}}, but also ensures the output allele frequencies are in [0, 1] (otherwise not guaranteed due to limited machine precision).
 }
 \examples{
 # data dimensions

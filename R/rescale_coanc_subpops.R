@@ -1,14 +1,14 @@
 # Rescale subpopulation inbreeding vector to give a desired FST for the admixed individuals
 #
-# Given a final admixture proportion matrix for \eqn{n} individuals and \eqn{k} intermediate subpopulations, the coancestry of intermediate subpopulations assumed to be incorrectly scaled, and the desired final \eqn{F_{ST}}{FST} of the admixed individuals, this function returns the correctly-scaled intermediate coancestry matrix (or its special cases).
+# Given a final admixture proportion matrix for `n` individuals and `k` intermediate subpopulations, the coancestry of intermediate subpopulations assumed to be incorrectly scaled, and the desired final FST of the admixed individuals, this function returns the correctly-scaled intermediate coancestry matrix (or its special cases).
 # 
-# The idea is that we have determined the admixture structure, and \eqn{coanc_subpops} in a relative scale, but now we want to get \eqn{coanc_subpops} in the correct scale so the final \eqn{F_{ST}}{FST} is reasonable.
-# After rescaling, the function stops with an error if \eqn{coanc_subpops} has a maximum value beyond 1.
+# The idea is that we have determined the admixture structure, and `coanc_subpops` in a relative scale, but now we want to get `coanc_subpops` in the correct scale so the final FST is reasonable.
+# After rescaling, the function stops with an error if `coanc_subpops` has a maximum value beyond 1.
 #
-# @param admix_proportions The \eqn{n \times k}{n-by-k} admixture proportion matrix
-# @param coanc_subpops The length-\eqn{k} vector of intermediate subpopulation inbreeding coefficients, assumed to be in the wrong scale
-# @param fst The desired final \eqn{F_{ST}}{FST} of the admixed individuals
-# @param weights The length-\eqn{n} vector of weights for individuals that define \eqn{F_{ST}}{FST} (default uniform weights)
+# @param admix_proportions The `n`-by-`k` admixture proportion matrix
+# @param coanc_subpops The length-`k` vector of intermediate subpopulation inbreeding coefficients, assumed to be in the wrong scale
+# @param fst The desired final FST of the admixed individuals
+# @param weights The length-`n` vector of weights for individuals that define FST (default uniform weights)
 #
 # @return The rescaled intermediate subpopulation inbreeding coefficient vector
 #

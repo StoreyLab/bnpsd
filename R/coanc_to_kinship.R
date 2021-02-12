@@ -1,15 +1,11 @@
 #' Transform coancestry matrix to kinship matrix
 #'
-#' Let
-#' \eqn{\Theta = (\theta_{jk})} be the coancestry matrix and
-#' \eqn{\Phi = (\varphi_{jk})} be the kinship matrix.
-#' These matrices agree off-diagonal, but the diagonal gets transformed as
-#' \deqn{\phi_{jj} = \frac{1 + \theta_{jj}}{2}.}
-#' Below \eqn{n} is the number of individuals.
+#' If `Theta` is the coancestry matrix and `Phi` is the kinship matrix (both are `n`-by-`n` symmetric), then these matrices agree off-diagonal, but the diagonal gets transformed as
+#' `diag( Phi ) = ( 1 + diag( Theta ) ) / 2`.
 #'
-#' @param coancestry The \eqn{n \times n}{n-by-n} coancestry matrix
+#' @param coancestry The `n`-by-`n` coancestry matrix
 #'
-#' @return The \eqn{n \times n}{n-by-n} kinship matrix, preserving column and row names.
+#' @return The `n`-by-`n` kinship matrix, preserving column and row names.
 #'
 #' @examples
 #' # a trivial case: unadmixed individuals from independent subpopulations
@@ -37,7 +33,7 @@
 #' kinship <- coanc_to_kinship( coancestry )
 #'
 #' @seealso
-#' The inverse function is given by \code{\link[popkin]{inbr_diag}}.
+#' The inverse function is given by `\link[popkin]{inbr_diag}`.
 #' 
 #' @export
 coanc_to_kinship <- function(coancestry) {

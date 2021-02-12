@@ -1,7 +1,7 @@
 # Find the sigma that gives the desired bias coefficient
 #
-# This function uses a numerical solver to find the value of \code{sigma} in \code{func} that give the desired bias coefficient \eqn{s} given the other PSD parameters.
-# The admixture scenarios guaranteed to work are the 1D linear and 1D circular geographies as provided in \code{func}.
+# This function uses a numerical solver to find the value of `sigma` in `func` that give the desired bias coefficient `s` given the other PSD parameters.
+# The admixture scenarios guaranteed to work are the 1D linear and 1D circular geographies as provided in `func`.
 # Therefore the structure of the admixture coefficients is not explicitly stated in the inputs.
 # Assumes uniform weights in calculating the bias coefficient.
 #
@@ -9,11 +9,11 @@
 # @param coanc_subpops The coancestry matrix of the intermediate subpopulations (or equivalent vector or scalar), up to a scaling factor (which is irrelevant as it cancels out in the bias coefficient).
 # @param n_ind The number of individuals.
 # @param k_subpops The number of subpopulations.
-# @param func A function that accepts \code{(n_ind, k_subpops, sigma, coord_ind_first = coord_ind_first, coord_ind_last = coord_ind_last)} as inputs and returns the admixture proportions matrix.
+# @param func A function that accepts `(n_ind, k_subpops, sigma, coord_ind_first = coord_ind_first, coord_ind_last = coord_ind_last)` as inputs and returns the admixture proportions matrix.
 # @param coord_ind_first Location of first individual (to pass to func).
 # @param coord_ind_last Location of last individual (to pass to func).
 #
-# @return The desired value of \code{sigma}
+# @return The desired value of `sigma`
 #
 # @examples
 # # number of intermediate subpops
@@ -59,6 +59,25 @@ bias_coeff_admix_fit <- function(
         stop('Desired `bias_coeff` must be <= 1, passed ', bias_coeff)
     if (bias_coeff < 0)
         stop('Desired `bias_coeff` must be >= 0, passed ', bias_coeff)
+
+    # handle an edge case that is problematic in some systems (looking at you Apple M1)
+    if ( bias_coeff == 1 ) {
+        # in the existing cases the answer is:
+        sigma <- Inf
+        # before returning that value, let's check that we get the right answer
+        # (to ensure that this will not make incorrect assumption if applied to other "func"s other than the two official ones
+        admix_proportions <- func(
+            n_ind,
+            k_subpops,
+            sigma,
+            coord_ind_first,
+            coord_ind_last
+        )
+        # get actual bias coefficient of this case
+        bias_coeff2 <- bias_coeff_admix(admix_proportions, coanc_subpops)
+        if ( bias_coeff2 == bias_coeff )
+            return( sigma )
+    }
     
     # actual minimum is greater than zero, but it seems that message should be different for non-negative values out of this range
     # set sigma = 0 here, in both cases that we have (admix_prop_1d_linear, admix_prop_1d_circular) it's the minimum bias (independent subpopulations)!

@@ -7,21 +7,21 @@
 draw_genotypes_admix(p_ind, admix_proportions = NULL)
 }
 \arguments{
-\item{p_ind}{The \eqn{m \times n}{m-by-n} IAF matrix (if \code{admix_proportions} is missing) or the \eqn{m \times k}{m-by-k} intermediate subpopulation allele frequency matrix (if \code{admix_proportions} is present)}
+\item{p_ind}{The \code{m}-by-\code{n} IAF matrix (if \code{admix_proportions} is missing) or the \code{m}-by-\code{k} intermediate subpopulation allele frequency matrix (if \code{admix_proportions} is present)}
 
-\item{admix_proportions}{The optional \eqn{n \times k}{n-by-k} admixture proportion matrix}
+\item{admix_proportions}{The optional \code{n}-by-\code{k} admixture proportion matrix (to draw data from the admixture model using reduced memory, by not fully forming the IAF matrix)}
 }
 \value{
-The \eqn{m \times n}{m-by-n} genotype matrix
+The \code{m}-by-\code{n} genotype matrix
 }
 \description{
-Given the Individual-specific Allele Frequency (IAF) \eqn{\pi_{ij}} for locus \eqn{i} and individual \eqn{j}, genotypes are drawn binomially:
-\deqn{x_{ij}|\pi_{ij} \sim \mbox{Binomial}(2, \pi_{ij}).}
-Below \eqn{m} is the number of loci, \eqn{n} the number of individuals, and \eqn{k} the number of intermediate subpopulations.
-If an admixture proportion matrix \eqn{Q} is provided as the second argument, the first argument \eqn{P} is treated as the intermediate subpopulation allele frequency matrix and the IAF matrix is given by
-\deqn{P Q^T.}{P \%*\% t(Q).}
-However, in this case the IAF matrix is computed in parts only, never stored in full, greatly reducing memory usage.
-If \eqn{Q} is missing, then \eqn{P} is treated as the IAF matrix.
+Given the Individual-specific Allele Frequency (IAF) matrix \code{p_ind} for \code{m} loci (rows) and \code{n} individuals (columns), the genotype matrix \code{X} (same dimensions as \code{p_ind}) is drawn from the Binomial distribution equivalent to
+\code{X[ i, j ] <- rbinom( 1, 2, p_ind[ i, j ] )},
+except the function is more efficient.
+If \code{admix_proportions} is provided as the second argument (a matrix with \code{n} individuals along rows and \code{k} intermediate subpopulations along the columns), the first argument \code{p_ind} is treated as the intermediate subpopulation allele frequency matrix (must be \code{m}-by-\code{k}) and the IAF matrix is equivalent to
+\code{p_ind \%*\% t( admix_proportions )}.
+However, in this case the function computes the IAF matrix in parts only, never stored in full, greatly reducing memory usage.
+If \code{admix_proportions} is missing, then \code{p_ind} is treated as the IAF matrix.
 }
 \examples{
 # dimensions

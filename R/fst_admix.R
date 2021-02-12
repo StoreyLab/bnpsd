@@ -1,13 +1,14 @@
 #' Calculate FST for the admixed individuals
 #'
-#' This function returns the \eqn{F_{ST}}{FST} of the admixed individuals given the admixture proportion matrix for \eqn{n} individuals and \eqn{k} intermediate subpopulations, the coancestry matrix of intermediate subpopulations (or its special cases, see \code{coanc_subpops} parameter below), and optional weights for individuals.
-#' This \eqn{F_{ST}}{FST} equals the weighted mean of the diagonal of the coancestry matrix (see \code{\link{coanc_admix}}).
+#' This function returns the generalized FST of the admixed individuals given their admixture proportion matrix, the coancestry matrix of intermediate subpopulations (or its special cases, see `coanc_subpops` parameter below), and optional weights for individuals.
+#' This FST equals the weighted mean of the diagonal of the coancestry matrix (see `\link{coanc_admix}`).
+#' Below there are `n` individuals and `k` intermediate subpopulations.
 #' 
-#' @param admix_proportions The \eqn{n \times k}{n-by-k} admixture proportion matrix
-#' @param coanc_subpops Either the \eqn{k \times k}{k-by-k} intermediate subpopulation coancestry matrix (for the complete admixture model), or the length-\eqn{k} vector of intermediate subpopulation \eqn{F_{ST}}{FST} values (for the BN-PSD model), or a scalar \eqn{F_{ST}}{FST} value shared by all intermediate subpopulations.
-#' @param weights The length-\eqn{n} vector of weights for individuals that define \eqn{F_{ST}}{FST} (default uniform weights)
+#' @param admix_proportions The `n`-by-`k` admixture proportion matrix
+#' @param coanc_subpops Either the `k`-by-`k` intermediate subpopulation coancestry matrix (for the complete admixture model), or the length-`k` vector of intermediate subpopulation FST values (for the BN-PSD model; assumes zero coancestries between subpopulations), or a scalar FST value shared by all intermediate subpopulations (also assumes zero coancestry between subpopulations).
+#' @param weights Optional length-`n` vector of weights for individuals that define their generalized FST (default uniform weights)
 #'
-#' @return The \eqn{F_{ST}}{FST} of the admixed individuals
+#' @return The generalized FST of the admixed individuals
 #'
 #' @examples
 #' # set desired parameters

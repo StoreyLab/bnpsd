@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 bibliography: bnpsd.bib
 vignette: >
-  %\VignetteIndexEntry{Simulate Genotypes from the BN-PSD Admixture Model}
+  %\VignetteIndexEntry{Simulate Admixed Populations with `bnpsd`}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -29,7 +29,7 @@ The `bnpsd` package simulates the genotypes of an admixed population.
 In the PSD model [@pritchard_inference_2000], admixed individuals draw their alleles with individual-specific probabilities (admixture proportions) from $K$ intermediate subpopulations.
 We impose the BN model [@balding_method_1995] to the intermediate subpopulation allele frequency, which thus evolve independently with subpopulation-specific inbreeding coefficients ($\Fst$ values) from a common ancestral population $T$.
 The kinship coefficients and generalized $\Fst$ of the admixed individuals were derived in recent work [@Ochoa083915].
-A simulated admixed population generated using this package was used to benchmark kinship and $\Fst$ estimators in the accompanying paper [@Ochoa083923].
+A simulated admixed population generated using this package was used to benchmark kinship and $\Fst$ estimators in the accompanying paper [@ochoa_estimating_2021].
 Here we briefly summarize the notation and intuition behind the key parameters (see [@Ochoa083915] for precise definitions).
 
 There are conceptually two parts of the BN-PSD model, one that defines relatedness between individuals (under the admixture framework), while the other simulates allele frequencies and genotypes conditional on the specified parameters of relatedness/admixture.
@@ -93,7 +93,7 @@ $$
 
 ## Population structure: 1D geography
 
-Let's generate the same population structure used in the simulation of [@Ochoa083923].
+Let's generate the same population structure used in the simulation of [@ochoa_estimating_2021].
 ```{r}
 # this package
 library(bnpsd)

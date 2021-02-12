@@ -7,18 +7,19 @@
 fst_admix(admix_proportions, coanc_subpops, weights = NULL)
 }
 \arguments{
-\item{admix_proportions}{The \eqn{n \times k}{n-by-k} admixture proportion matrix}
+\item{admix_proportions}{The \code{n}-by-\code{k} admixture proportion matrix}
 
-\item{coanc_subpops}{Either the \eqn{k \times k}{k-by-k} intermediate subpopulation coancestry matrix (for the complete admixture model), or the length-\eqn{k} vector of intermediate subpopulation \eqn{F_{ST}}{FST} values (for the BN-PSD model), or a scalar \eqn{F_{ST}}{FST} value shared by all intermediate subpopulations.}
+\item{coanc_subpops}{Either the \code{k}-by-\code{k} intermediate subpopulation coancestry matrix (for the complete admixture model), or the length-\code{k} vector of intermediate subpopulation FST values (for the BN-PSD model; assumes zero coancestries between subpopulations), or a scalar FST value shared by all intermediate subpopulations (also assumes zero coancestry between subpopulations).}
 
-\item{weights}{The length-\eqn{n} vector of weights for individuals that define \eqn{F_{ST}}{FST} (default uniform weights)}
+\item{weights}{Optional length-\code{n} vector of weights for individuals that define their generalized FST (default uniform weights)}
 }
 \value{
-The \eqn{F_{ST}}{FST} of the admixed individuals
+The generalized FST of the admixed individuals
 }
 \description{
-This function returns the \eqn{F_{ST}}{FST} of the admixed individuals given the admixture proportion matrix for \eqn{n} individuals and \eqn{k} intermediate subpopulations, the coancestry matrix of intermediate subpopulations (or its special cases, see \code{coanc_subpops} parameter below), and optional weights for individuals.
-This \eqn{F_{ST}}{FST} equals the weighted mean of the diagonal of the coancestry matrix (see \code{\link{coanc_admix}}).
+This function returns the generalized FST of the admixed individuals given their admixture proportion matrix, the coancestry matrix of intermediate subpopulations (or its special cases, see \code{coanc_subpops} parameter below), and optional weights for individuals.
+This FST equals the weighted mean of the diagonal of the coancestry matrix (see \verb{\link{coanc_admix}}).
+Below there are \code{n} individuals and \code{k} intermediate subpopulations.
 }
 \examples{
 # set desired parameters
