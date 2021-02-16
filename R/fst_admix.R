@@ -1,7 +1,7 @@
 #' Calculate FST for the admixed individuals
 #'
 #' This function returns the generalized FST of the admixed individuals given their admixture proportion matrix, the coancestry matrix of intermediate subpopulations (or its special cases, see `coanc_subpops` parameter below), and optional weights for individuals.
-#' This FST equals the weighted mean of the diagonal of the coancestry matrix (see `\link{coanc_admix}`).
+#' This FST equals the weighted mean of the diagonal of the coancestry matrix (see [coanc_admix()]).
 #' Below there are `n` individuals and `k` intermediate subpopulations.
 #' 
 #' @param admix_proportions The `n`-by-`k` admixture proportion matrix

@@ -3,7 +3,7 @@
 #' Here `m` is the number of loci, `n` the number of individuals, and `k` the number of intermediate subpopulations.
 #' The `m`-by-`n` individual-specific allele frequency matrix `p_ind` is constructed from the `m`-by-`k` intermediate subpopulation allele frequency matrix `p_subpops` and the `n`-by-`k` admixture proportion matrix `admix_proportions` equivalent to
 #' `p_ind <- p_subpops %*% t( admix_proportions )`.
-#' This function is a wrapper around `\link{tcrossprod}`, but also ensures the output allele frequencies are in \[0, 1\] (otherwise not guaranteed due to limited machine precision).
+#' This function is a wrapper around [tcrossprod()], but also ensures the output allele frequencies are in \[0, 1\] (otherwise not guaranteed due to limited machine precision).
 #' 
 #' @param p_subpops The `m`-by-`k` matrix of intermediate subpopulation allele frequencies.
 #' @param admix_proportions The `n`-by-`k` matrix of admixture proportions.

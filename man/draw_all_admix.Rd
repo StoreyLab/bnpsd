@@ -60,7 +60,7 @@ Included if \code{want_p_ind = TRUE}.
 }
 \description{
 This function returns simulated ancestral, intermediate, and individual-specific allele frequencies and genotypes given the admixture structure, as determined by the admixture proportions and the vector of intermediate subpopulation FST values.
-The function is a wrapper around \verb{\link{draw_p_anc}}, \verb{\link{draw_p_subpops}}, \verb{\link{make_p_ind_admix}}, and \verb{\link{draw_genotypes_admix}} with additional features such as requiring polymorphic loci.
+The function is a wrapper around \code{\link[=draw_p_anc]{draw_p_anc()}}, \code{\link[=draw_p_subpops]{draw_p_subpops()}}, \code{\link[=make_p_ind_admix]{make_p_ind_admix()}}, and \code{\link[=draw_genotypes_admix]{draw_genotypes_admix()}} with additional features such as requiring polymorphic loci.
 Importantly, by default fixed loci (where all individuals were homozygous for the same allele) are re-drawn from the start (starting from the ancestral allele frequencies) so no fixed loci are in the output and no biases are introduced by re-drawing genotypes conditional on any of the previous allele frequencies (ancestral, intermediate, or individual-specific).
 Below \code{m_loci} (also \code{m}) is the number of loci, \code{n} is the number of individuals, and \code{k} is the number of intermediate subpopulations.
 }

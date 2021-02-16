@@ -15,7 +15,7 @@ coanc_admix(admix_proportions, coanc_subpops)
 The \code{n}-by-\code{n} coancestry matrix.
 }
 \description{
-The \code{n}-by-\code{n} coancestry matrix \code{Theta} of admixed individuals is determined by the \code{n}-by-\code{k} admixture proportion matrix \code{Q} and the \code{k}-by-\code{k} intermediate subpopulation coancestry matrix \code{Psi}, given by \code{Theta = Q \%*\% Psi \%*\% t(Q)}
+The \code{n}-by-\code{n} coancestry matrix \code{Theta} of admixed individuals is determined by the \code{n}-by-\code{k} admixture proportion matrix \code{Q} and the \code{k}-by-\code{k} intermediate subpopulation coancestry matrix \code{Psi}, given by \code{Theta = Q \%*\% Psi \%*\% t(Q)}.
 In the more restricted BN-PSD model, \code{Psi} is a diagonal matrix (with FST values for the intermediate subpopulations along the diagonal, zero values off-diagonal).
 }
 \examples{

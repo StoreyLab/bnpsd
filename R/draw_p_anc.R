@@ -1,6 +1,6 @@
 #' Draw random Uniform or Beta ancestral allele frequencies
 #'
-#' This is simply a wrapper around `\link[stats]{runif}` or `\link[stats]{rbeta}` (depending on parameters) with different defaults and additional validations.
+#' This is simply a wrapper around [stats::runif()] or [stats::rbeta()] (depending on parameters) with different defaults and additional validations.
 #'
 #' @param m_loci Number of loci to draw.
 #' @param p_min Minimum allele frequency to draw (Uniform case only).

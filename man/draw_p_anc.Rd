@@ -21,7 +21,7 @@ Otherwise, a Symmetric Beta is used and the user-specified range is ignored (val
 A length-\code{m} vector of random ancestral allele frequencies
 }
 \description{
-This is simply a wrapper around \verb{\link[stats]\{runif\}} or \verb{\link[stats]\{rbeta\}} (depending on parameters) with different defaults and additional validations.
+This is simply a wrapper around \code{\link[stats:Uniform]{stats::runif()}} or \code{\link[stats:Beta]{stats::rbeta()}} (depending on parameters) with different defaults and additional validations.
 }
 \examples{
 # Default is uniform with range between 0.01 and 0.5

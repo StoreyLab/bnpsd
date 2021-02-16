@@ -1,7 +1,7 @@
 #' Simulate random allele frequencies and genotypes from the BN-PSD admixture model
 #'
 #' This function returns simulated ancestral, intermediate, and individual-specific allele frequencies and genotypes given the admixture structure, as determined by the admixture proportions and the vector of intermediate subpopulation FST values.
-#' The function is a wrapper around `\link{draw_p_anc}`, `\link{draw_p_subpops}`, `\link{make_p_ind_admix}`, and `\link{draw_genotypes_admix}` with additional features such as requiring polymorphic loci.
+#' The function is a wrapper around [draw_p_anc()], [draw_p_subpops()], [make_p_ind_admix()], and [draw_genotypes_admix()] with additional features such as requiring polymorphic loci.
 #' Importantly, by default fixed loci (where all individuals were homozygous for the same allele) are re-drawn from the start (starting from the ancestral allele frequencies) so no fixed loci are in the output and no biases are introduced by re-drawing genotypes conditional on any of the previous allele frequencies (ancestral, intermediate, or individual-specific).
 #' Below `m_loci` (also `m`) is the number of loci, `n` is the number of individuals, and `k` is the number of intermediate subpopulations.
 #'

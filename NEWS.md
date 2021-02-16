@@ -138,3 +138,8 @@ These loci are not polymorphic so they would normally not be considered in analy
 * Function `admix_prop_indep_subpops`: default value for the optional parameter `subpops` is now made more clear in arguments definition.
 * Simplified documentation (most functions) by clarifying language, using markdown roxygen, and replacing all LaTeX equations with simpler code equations.
 * Updated paper citations in `DESCRIPTION`, `README.md` and the vignette, to point to the published method in PLoS Genetics.
+
+# 2021-02-16 - bnpsd 1.2.3.9000
+
+* Documentation updates:
+  - Fixed links to functions, in many cases these were broken because of incompatible mixed Rd and markdown syntax (now markdown is used more fully).

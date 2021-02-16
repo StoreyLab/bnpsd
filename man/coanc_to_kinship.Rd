@@ -43,5 +43,5 @@ kinship <- coanc_to_kinship( coancestry )
 
 }
 \seealso{
-The inverse function is given by \verb{\link[popkin]\{inbr_diag\}}.
+The inverse function is given by \code{\link[popkin:inbr_diag]{popkin::inbr_diag()}}.
 }

@@ -1,6 +1,6 @@
 #' Construct the coancestry matrix of an admixture model
 #'
-#' The `n`-by-`n` coancestry matrix `Theta` of admixed individuals is determined by the `n`-by-`k` admixture proportion matrix `Q` and the `k`-by-`k` intermediate subpopulation coancestry matrix `Psi`, given by `Theta = Q %*% Psi %*% t(Q)`
+#' The `n`-by-`n` coancestry matrix `Theta` of admixed individuals is determined by the `n`-by-`k` admixture proportion matrix `Q` and the `k`-by-`k` intermediate subpopulation coancestry matrix `Psi`, given by `Theta = Q %*% Psi %*% t(Q)`.
 #' In the more restricted BN-PSD model, `Psi` is a diagonal matrix (with FST values for the intermediate subpopulations along the diagonal, zero values off-diagonal).
 #'
 #' @param admix_proportions The `n`-by-`k` admixture proportion matrix

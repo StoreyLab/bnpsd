@@ -18,7 +18,7 @@ The \code{m}-by-\code{n} matrix of individual-specific allele frequencies \code{
 Here \code{m} is the number of loci, \code{n} the number of individuals, and \code{k} the number of intermediate subpopulations.
 The \code{m}-by-\code{n} individual-specific allele frequency matrix \code{p_ind} is constructed from the \code{m}-by-\code{k} intermediate subpopulation allele frequency matrix \code{p_subpops} and the \code{n}-by-\code{k} admixture proportion matrix \code{admix_proportions} equivalent to
 \code{p_ind <- p_subpops \%*\% t( admix_proportions )}.
-This function is a wrapper around \verb{\link{tcrossprod}}, but also ensures the output allele frequencies are in [0, 1] (otherwise not guaranteed due to limited machine precision).
+This function is a wrapper around \code{\link[=tcrossprod]{tcrossprod()}}, but also ensures the output allele frequencies are in [0, 1] (otherwise not guaranteed due to limited machine precision).
 }
 \examples{
 # data dimensions

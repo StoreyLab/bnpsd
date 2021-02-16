@@ -33,7 +33,7 @@
 #' kinship <- coanc_to_kinship( coancestry )
 #'
 #' @seealso
-#' The inverse function is given by `\link[popkin]{inbr_diag}`.
+#' The inverse function is given by [popkin::inbr_diag()].
 #' 
 #' @export
 coanc_to_kinship <- function(coancestry) {

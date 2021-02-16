@@ -49,7 +49,7 @@ If \code{sigma} is missing, it can be set indirectly by providing three variable
 \details{
 Assuming the full range of [\code{0}, \code{2 * pi}] is considered, and the first and last individuals do not overlap, the gap between individuals is \code{delta = 2 * pi / n}.
 To not have any individuals on the edge, we place the first individual at \code{delta / 2} and the last at \code{2 * pi - delta / 2}.
-The location of subpopulation \code{j} is \code{delta / 2 + ( j - 1/2 ) / k * (2 * pi - delta)}, chosen to agree with the default correspondence between individuals and subpopulations of the linear 1D geography admixture scenario (\verb{\link{admix_prop_1d_linear}}).
+The location of subpopulation \code{j} is \code{delta / 2 + ( j - 1/2 ) / k * (2 * pi - delta)}, chosen to agree with the default correspondence between individuals and subpopulations of the linear 1D geography admixture scenario (\code{\link[=admix_prop_1d_linear]{admix_prop_1d_linear()}}).
 
 If \code{sigma} is \code{NA}, its value is determined from the desired \code{bias_coeff}, \code{coanc_subpops} up to a scalar factor, and \code{fst}.
 Uniform weights for the final generalized FST are assumed.

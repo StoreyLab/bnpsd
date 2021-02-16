@@ -6,7 +6,7 @@
 #'
 #' Assuming the full range of \[`0`, `2 * pi`\] is considered, and the first and last individuals do not overlap, the gap between individuals is `delta = 2 * pi / n`.
 #' To not have any individuals on the edge, we place the first individual at `delta / 2` and the last at `2 * pi - delta / 2`.
-#' The location of subpopulation `j` is `delta / 2 + ( j - 1/2 ) / k * (2 * pi - delta)`, chosen to agree with the default correspondence between individuals and subpopulations of the linear 1D geography admixture scenario (`\link{admix_prop_1d_linear}`).
+#' The location of subpopulation `j` is `delta / 2 + ( j - 1/2 ) / k * (2 * pi - delta)`, chosen to agree with the default correspondence between individuals and subpopulations of the linear 1D geography admixture scenario ([admix_prop_1d_linear()]).
 #'
 #' If `sigma` is `NA`, its value is determined from the desired `bias_coeff`, `coanc_subpops` up to a scalar factor, and `fst`.
 #' Uniform weights for the final generalized FST are assumed.
