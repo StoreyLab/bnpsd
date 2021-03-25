@@ -5,12 +5,14 @@
 # The idea is that we have determined the admixture structure, and `coanc_subpops` in a relative scale, but now we want to get `coanc_subpops` in the correct scale so the final FST is reasonable.
 # After rescaling, the function stops with an error if `coanc_subpops` has a maximum value beyond 1.
 #
-# @param admix_proportions The `n`-by-`k` admixture proportion matrix
-# @param coanc_subpops The length-`k` vector of intermediate subpopulation inbreeding coefficients, assumed to be in the wrong scale
-# @param fst The desired final FST of the admixed individuals
-# @param weights The length-`n` vector of weights for individuals that define FST (default uniform weights)
+# @param admix_proportions The `n`-by-`k` admixture proportion matrix.
+# @param coanc_subpops The length-`k` vector of intermediate subpopulation inbreeding coefficients, or `k`-by-`k` intermediate coancestry matrix, assumed to be in the wrong scale.
+# @param fst The desired final FST of the admixed individuals.
+# @param weights The length-`n` vector of weights for individuals that define FST (default uniform weights).
 #
-# @return The rescaled intermediate subpopulation inbreeding coefficient vector
+# @return A named list containing
+# - `coanc_subpops`: The rescaled intermediate subpopulation inbreeding coefficient vector
+# - `factor`: the multiplicative factor used to rescale `coanc_subpops`
 #
 # @examples
 # # set desired parameters
@@ -28,7 +30,11 @@
 # admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma = 1)
 #
 # # lastly, rescale coanc_subpops to give desired FST!!!
-# coanc_subpops <- rescale_coanc_subpops(admix_proportions, coanc_subpops, Fst)
+# obj <- rescale_coanc_subpops(admix_proportions, coanc_subpops, Fst)
+# # rescaled vector or matrix
+# obj$coanc_subpops
+# # and factor used
+# obj$factor
 #
 rescale_coanc_subpops <- function(admix_proportions, coanc_subpops, fst, weights = NULL) {
     # die informatively...
@@ -46,15 +52,23 @@ rescale_coanc_subpops <- function(admix_proportions, coanc_subpops, fst, weights
 
     # get fst under this model (wrong scale, yields adjustment!)
     fst_0 <- fst_admix( admix_proportions, coanc_subpops, weights)
+    # calculate multiplicative factor that corrects coanc_subpops (will return separately)
+    factor <- fst / fst_0
     # this fixes scale
-    coanc_subpops <- coanc_subpops * fst / fst_0
+    coanc_subpops <- coanc_subpops * factor
     
     # unfortunately, some coanc_subpops may be rescaled to values greater than 1, which would be disallowed under the probabilistic inbreeding framework.
     # Check and stop if needed!
-    if (max(coanc_subpops) > 1)
-        stop('Rescaling for `fst = ', fst, '` resulted in max(coanc_subpops) = ', max(coanc_subpops), ' > 1')
+    if ( max( coanc_subpops ) > 1 )
+        stop( 'Rescaling for `fst = ', fst, '` resulted in max(coanc_subpops) = ', max(coanc_subpops), ' > 1.  This can be fixed by changing input `coanc_subpops` or lowering `fst`.' )
 
     # return rescaled version if things were good!
-    return( coanc_subpops )
+    # factor too
+    return(
+        list(
+            coanc_subpops = coanc_subpops,
+            factor = factor
+        )
+    )
 }
 

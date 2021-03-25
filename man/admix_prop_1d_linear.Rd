@@ -38,8 +38,14 @@ This \code{coanc_subpops} can be in the wrong scale (it cancels out in calculati
 \item{fst}{If \code{sigma} is \code{NA}, this FST of the admixed individuals is required.}
 }
 \value{
-If \code{sigma} was provided, the \code{n_ind}-by-\code{k_subpops} admixture proportion matrix (\code{admix_proportions}).
-If \code{sigma} is missing, a named list is returned containing \code{admix_proportions}, the rescaled \code{coanc_subpops}, and the \code{sigma} (which together give the desired \code{bias_coeff} and \code{fst}).
+If \code{sigma} was provided, returns the \code{n_ind}-by-\code{k_subpops} admixture proportion matrix (\code{admix_proportions}).
+If \code{sigma} is missing, returns a named list containing:
+\itemize{
+\item \code{admix_proportions}: the \code{n_ind}-by-\code{k_subpops} admixture proportion matrix.
+\item \code{coanc_subpops}: the input \code{coanc_subpops} rescaled.
+\item \code{sigma}: the fit value of the spread of intermediate subpopulations
+\item \code{coanc_factor}: multiplicative factor used to rescale \code{coanc_subpops}
+}
 }
 \description{
 Assumes \code{k_subpops} intermediate subpopulations placed along a line at locations \code{1 : k_subpops} spread by random walks, then \code{n_ind} individuals equally spaced in [\code{coord_ind_first},\code{coord_ind_last}] draw their admixture proportions relative to the Normal density that models the random walks of each of these intermediate subpopulations.

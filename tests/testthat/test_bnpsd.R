@@ -201,6 +201,9 @@ test_that("admix_prop_indep_subpops returns valid admixture coefficients", {
     expect_error( admix_prop_indep_subpops(labs, subpops) )
 })
 
+# expected names for return object when sigma is fit
+names_admix_prop_1d <- c('admix_proportions', 'coanc_subpops', 'sigma', 'coanc_factor')
+
 test_that("admix_prop_1d_linear returns valid admixture coefficients", {
     n <- 10
     k_subpops <- 2
@@ -225,7 +228,11 @@ test_that("admix_prop_1d_linear returns valid admixture coefficients", {
     expect_equal(admix_proportions, admix_proportions2)
 
     # test bias_coeff version
-    obj <- admix_prop_1d_linear(n, k_subpops, bias_coeff = 0.5, coanc_subpops = 1:k_subpops, fst = 0.1)
+    expect_silent(
+        obj <- admix_prop_1d_linear(n, k_subpops, bias_coeff = 0.5, coanc_subpops = 1:k_subpops, fst = 0.1)
+    )
+    expect_true( is.list( obj ) )
+    expect_equal( names( obj ), names_admix_prop_1d )
     admix_proportions <- obj$admix_proportions # returns many things in this case, get admix_proportions here
     expect_equal(nrow(admix_proportions), n) # n rows
     expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
@@ -254,7 +261,11 @@ test_that("admix_prop_1d_circular returns valid admixture coefficients", {
     # though the result is nearly island-like, there is an annoying shift I'd rather not try to figure out for this test...
 
     # test bias_coeff version
-    obj <- admix_prop_1d_circular(n, k_subpops, bias_coeff = 0.5, coanc_subpops = 1:k_subpops, fst = 0.1)
+    expect_silent(
+        obj <- admix_prop_1d_circular(n, k_subpops, bias_coeff = 0.5, coanc_subpops = 1:k_subpops, fst = 0.1)
+    )
+    expect_true( is.list( obj ) )
+    expect_equal( names( obj ), names_admix_prop_1d )
     admix_proportions <- obj$admix_proportions # returns many things in this case, get admix_proportions here
     expect_equal(nrow(admix_proportions), n) # n rows
     expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
@@ -512,11 +523,19 @@ test_that("rescale_coanc_subpops agrees with explicitly FST calculation", {
     Fst <- 0.1
     admix_proportions <- admix_prop_1d_linear(n, k_subpops, sigma)
     F <- 1:k_subpops # scale doesn't matter right now...
-    F2 <- rescale_coanc_subpops(admix_proportions, F, Fst) # calculation to compare to
+    expect_silent( 
+        obj <- rescale_coanc_subpops(admix_proportions, F, Fst) # calculation to compare to
+    )
+    F2 <- obj$coanc_subpops
     coancestry <- coanc_admix(admix_proportions, F2) # in wrong scale but meh
     Fst2 <- mean(diag(coancestry)) # this is the actual FST, with uniform weights
     expect_equal(Fst, Fst2)
     # since 0 < Fst=0.1 < 1, there's nothing else to test
+
+    # test factor too
+    factor <- obj$factor
+    expect_equal( length( factor ), 1 )
+    expect_equal( factor, mean( F2 ) / mean( F ) )
 })
 
 test_that("draw_p_anc is in range", {
@@ -546,9 +565,19 @@ test_that("draw_p_subpops is in range", {
     expect_error( draw_p_subpops() )
     expect_error( draw_p_subpops(p_anc = p_anc) )
     expect_error( draw_p_subpops(inbr_subpops = inbr_subpops) )
+    # error if p_anc vector is out of range
+    expect_error( draw_p_subpops( 1000 * p_anc, inbr_subpops ) )
+    # or negative
+    expect_error( draw_p_subpops( - p_anc, inbr_subpops ) )
+    # error if inbr vector is out of range
+    expect_error( draw_p_subpops( p_anc, 10 * inbr_subpops ) )
+    # or negative
+    expect_error( draw_p_subpops( p_anc, - inbr_subpops ) )
     
     # test main use case
-    p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
+    expect_silent(
+        p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
+    )
     expect_equal(nrow(p_subpops), m_loci)
     expect_equal(ncol(p_subpops), k_subpops)
     expect_true(all(p_subpops >= 0)) # all are non-negative
@@ -651,7 +680,7 @@ draw_all_admix_names_ret_default <- c('X', 'p_anc')
 draw_all_admix_names_ret_full <- c('X', 'p_anc', 'p_subpops', 'p_ind')
 draw_all_admix_names_ret_low_mem <- c('X', 'p_anc', 'p_subpops') # excludes p_ind
 
-test_that("draw_all_admix works well", {
+test_that("draw_all_admix works", {
     m_loci <- 10
     inbr_subpops <- c(0.1, 0.2, 0.3)
     k_subpops <- length(inbr_subpops)
@@ -710,7 +739,7 @@ test_that("draw_all_admix works well", {
     expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
 })
 
-test_that("draw_all_admix beta works well", {
+test_that("draw_all_admix beta works", {
     m_loci <- 10
     beta <- 0.01
     inbr_subpops <- c(0.1, 0.2, 0.3)
@@ -741,7 +770,7 @@ test_that("draw_all_admix beta works well", {
     expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
 })
 
-test_that("draw_all_admix `require_polymorphic_loci = FALSE` works well", {
+test_that("draw_all_admix `require_polymorphic_loci = FALSE` works", {
     # testing FALSE here since TRUE is default
     
     m_loci <- 1000
@@ -785,7 +814,7 @@ test_that("draw_all_admix `require_polymorphic_loci = FALSE` works well", {
     expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
 })
 
-test_that("draw_all_admix `want_p_ind = FALSE` works well", {
+test_that("draw_all_admix `want_p_ind = FALSE` works", {
     # really tests low-memory scenario, which is the default `want_p_ind = FALSE` case (but originally we tested non-default `want_p_ind = TRUE` instead)
     m_loci <- 1000
     inbr_subpops <- c(0.1, 0.2, 0.3)
@@ -821,7 +850,7 @@ test_that("draw_all_admix `want_p_ind = FALSE` works well", {
     expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
 })
 
-test_that("draw_all_admix with provided p_anc (scalar) works well", {
+test_that("draw_all_admix with provided p_anc (scalar) works", {
     m_loci <- 10
     inbr_subpops <- c(0.1, 0.2, 0.3)
     k_subpops <- length(inbr_subpops)
@@ -851,7 +880,7 @@ test_that("draw_all_admix with provided p_anc (scalar) works well", {
     expect_equal( out$p_anc, rep.int( p_anc, m_loci ) )
 })
 
-test_that("draw_all_admix with provided p_anc (vector) works well", {
+test_that("draw_all_admix with provided p_anc (vector) works", {
     m_loci <- 10
     inbr_subpops <- c(0.1, 0.2, 0.3)
     k_subpops <- length(inbr_subpops)
@@ -880,3 +909,396 @@ test_that("draw_all_admix with provided p_anc (vector) works well", {
     expect_equal( out$p_anc, p_anc )
 })
 
+test_that( "validate_coanc_tree works", {
+    # draw a random tree that is valid
+    k_subpops <- 5
+    # this one automatically draws edge lengths between 0 and 1, as desired
+    tree <- ape::rtree( k_subpops )
+    # let's test a tree without names, still valid
+    tree_no_names <- ape::rtree( k_subpops, tip.label = rep.int( '', k_subpops ) )
+    # unrooted tree (bad example)
+    tree_unrooted <- ape::rtree( k_subpops, rooted = FALSE )
+
+    # errors due to missing arguments
+    # only `tree` is required
+    expect_error( validate_coanc_tree() )
+    # pass things that are not `phylo` objects
+    expect_error( validate_coanc_tree( 'a' ) )
+    expect_error( validate_coanc_tree( 1 ) )
+    # a correct tree except without class
+    tree_bad <- unclass( tree )
+    expect_error( validate_coanc_tree( tree_bad ) )
+    # a correct tree except class name is different
+    tree_bad <- tree
+    class( tree_bad ) <- 'phylo_coanc'
+    expect_error( validate_coanc_tree( tree_bad ) )
+    # a list with the right class but nothing else is right
+    tree_bad <- list( a = 1 )
+    class( tree_bad ) <- 'phylo'
+    expect_error( validate_coanc_tree( tree_bad ) )
+    # unrooted trees are not acceptable
+    expect_error( validate_coanc_tree( tree_unrooted ) )
+    
+    # successful runs
+    expect_silent( validate_coanc_tree( tree ) )
+    expect_silent( validate_coanc_tree( tree, name = 'treebeard' ) )
+    expect_silent( validate_coanc_tree( tree_no_names ) )
+    expect_silent( validate_coanc_tree( tree_no_names, name = 'treebeard' ) )
+
+    # valid trees except small details are wrong
+    # here delete each of the 4 mandatory elements in turn
+    tree_bad <- tree
+    tree_bad$edge <- NULL # delete this element
+    expect_error( validate_coanc_tree( tree_bad ) )
+    tree_bad <- tree
+    tree_bad$edge.length <- NULL # delete this element
+    expect_error( validate_coanc_tree( tree_bad ) )
+    tree_bad <- tree
+    tree_bad$tip.label <- NULL # delete this element
+    expect_error( validate_coanc_tree( tree_bad ) )
+    tree_bad <- tree
+    tree_bad$Nnode <- NULL # delete this element
+    expect_error( validate_coanc_tree( tree_bad ) )
+    # make an edge have value greater than 1
+    tree_bad <- tree
+    tree_bad$edge.length[1] <- 10
+    expect_error( validate_coanc_tree( tree_bad ) )
+    # negative edges
+    tree_bad <- tree
+    tree_bad$edge.length[1] <- -0.1
+    expect_error( validate_coanc_tree( tree_bad ) )
+    # mess with dimensions
+    tree_bad <- tree
+    tree_bad$edge.length <- tree_bad$edge.length[ -1 ]
+    expect_error( validate_coanc_tree( tree_bad ) )
+    tree_bad <- tree
+    tree_bad$edge <- tree_bad$edge[ , -1 ]
+    expect_error( validate_coanc_tree( tree_bad ) )
+    tree_bad <- tree
+    tree_bad$edge <- tree_bad$edge[ -1, ]
+    expect_error( validate_coanc_tree( tree_bad ) )
+    tree_bad <- tree
+    tree_bad$Nnode <- tree_bad$Nnode + 1
+    expect_error( validate_coanc_tree( tree_bad ) )
+    tree_bad <- tree
+    tree_bad$tip.label <- tree_bad$tip.label[ -1 ]
+    expect_error( validate_coanc_tree( tree_bad ) )
+    # mess with `tree$edge` table
+    # max index is wrong
+    tree_bad <- tree
+    i_max <- max( tree_bad$edge )
+    tree_bad$edge[ tree_bad$edge == i_max ] <- i_max + 1
+    expect_error( validate_coanc_tree( tree_bad ) )
+    # some other index is missing
+    tree_bad <- tree
+    tree_bad$edge[ tree_bad$edge == i_max - 1 ] <- i_max
+    expect_error( validate_coanc_tree( tree_bad ) )
+    
+    # test that additional elements don't cause problems
+    tree_ext <- tree
+    tree_ext$extra <- 'a'
+    expect_silent( validate_coanc_tree( tree_ext ) )
+    # test that extended class doesn't cause problems
+    tree_ext <- tree
+    class( tree_ext ) <- c( class( tree_ext ), 'phylo_coanc' )
+    expect_silent( validate_coanc_tree( tree_ext ) )
+})
+
+test_that( "draw_p_subpops_tree works", {
+    k_subpops <- 5
+    m_loci <- 10
+
+    # simulate a random tree
+    # this one automatically draws edge lengths between 0 and 1, as desired
+    tree_subpops <- ape::rtree( k_subpops )
+    # let's test a tree without names
+    tree_subpops_no_names <- ape::rtree( k_subpops, tip.label = rep.int( '', k_subpops ) )
+    # draw allele frequencies too
+    p_anc <- runif( m_loci )
+
+    # create a version where internal nodes have names too
+    tree_subpops_full_names <- tree_subpops
+    tree_subpops_full_names$node.label <- paste0( 'n', 1 : tree_subpops_full_names$Nnode )
+    
+    # cause errors on purpose
+    # first two arguments are required
+    expect_error( draw_p_subpops_tree( ) )
+    expect_error( draw_p_subpops_tree( p_anc = p_anc ) )
+    expect_error( draw_p_subpops_tree( tree_subpops = tree_subpops ) )
+
+    # now a successful run
+    expect_silent(
+        p_subpops <- draw_p_subpops_tree(
+            p_anc = p_anc,
+            tree_subpops = tree_subpops
+        )
+    )
+    expect_equal(nrow(p_subpops), m_loci)
+    expect_equal(ncol(p_subpops), k_subpops)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+    # names are inherited from tree
+    expect_equal( colnames( p_subpops ), tree_subpops$tip.label )
+
+    # request AFs for all internal nodes too
+    expect_silent(
+        p_subpops <- draw_p_subpops_tree(
+            p_anc = p_anc,
+            tree_subpops = tree_subpops,
+            nodes = TRUE
+        )
+    )
+    expect_equal(nrow(p_subpops), m_loci)
+    expect_equal(ncol(p_subpops), 2 * k_subpops - 1 ) # there should be these many columns instead (assumes bifurcating tree, which rtree does return)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+    # names are inherited from tree (this only has tip names)
+    expect_equal( colnames( p_subpops )[ 1 : k_subpops ], tree_subpops$tip.label )
+    # test that non-tips names are blank
+    expect_true( all( colnames( p_subpops )[ ( k_subpops + 1 ) : ( 2 * k_subpops - 1 ) ] == '' ) )
+    
+    # pass scalar p_anc, specify m_loci separately
+    expect_silent(
+        p_subpops <- draw_p_subpops_tree(
+            p_anc = 0.5,
+            tree_subpops = tree_subpops,
+            m_loci = m_loci
+        )
+    )
+    expect_equal(nrow(p_subpops), m_loci)
+    expect_equal(ncol(p_subpops), k_subpops)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+    # names are inherited from tree
+    expect_equal( colnames( p_subpops ), tree_subpops$tip.label )
+    
+    # pass scalar p_anc, but don't specify m_loci
+    expect_silent(
+        p_subpops <- draw_p_subpops_tree(
+            p_anc = 0.5,
+            tree_subpops = tree_subpops
+        )
+    )
+    expect_equal(nrow(p_subpops), 1 ) # expect a single locus
+    expect_equal(ncol(p_subpops), k_subpops)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+    # names are inherited from tree
+    expect_equal( colnames( p_subpops ), tree_subpops$tip.label )
+
+    # run a case with a tree without names
+    expect_silent(
+        p_subpops <- draw_p_subpops_tree(
+            p_anc = p_anc,
+            tree_subpops = tree_subpops_no_names
+        )
+    )
+    expect_equal(nrow(p_subpops), m_loci)
+    expect_equal(ncol(p_subpops), k_subpops)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+    # names should be null
+    expect_true( is.null( colnames( p_subpops ) ) )
+
+    # run a case with full names, but only tips are returned
+    expect_silent(
+        p_subpops <- draw_p_subpops_tree(
+            p_anc = p_anc,
+            tree_subpops = tree_subpops_full_names
+        )
+    )
+    expect_equal(nrow(p_subpops), m_loci)
+    expect_equal(ncol(p_subpops), k_subpops)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+    # names are inherited from tree
+    expect_equal( colnames( p_subpops ), tree_subpops_full_names$tip.label )
+
+    # run a case with full names, but all nodes are returned
+    expect_silent(
+        p_subpops <- draw_p_subpops_tree(
+            p_anc = p_anc,
+            tree_subpops = tree_subpops_full_names,
+            nodes = TRUE
+        )
+    )
+    expect_equal(nrow(p_subpops), m_loci)
+    expect_equal(ncol(p_subpops), 2 * k_subpops - 1 ) # there should be these many columns instead (assumes bifurcating tree, which rtree does return)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+    # names are inherited from tree (this only has tip names)
+    expect_equal( colnames( p_subpops )[ 1 : k_subpops ], tree_subpops_full_names$tip.label )
+    # test that non-tips names are blank
+    expect_equal( colnames( p_subpops )[ ( k_subpops + 1 ) : ( 2 * k_subpops - 1 ) ], tree_subpops_full_names$node.label )
+})
+
+test_that( "tree_coanc_to_linear works", {
+    # draw a random tree that is valid
+    k_subpops <- 5
+    # this one automatically draws edge lengths between 0 and 1, as desired
+    tree <- ape::rtree( k_subpops )
+
+    # only errors are is if tree is missing or is not a tree
+    expect_error( tree_coanc_to_linear() )
+    expect_error( tree_coanc_to_linear( 1 : k_subpops ) )
+
+    # now a successful run
+    expect_silent(
+        tree2 <- tree_coanc_to_linear( tree )
+    )
+    # validate tree
+    expect_silent(
+        validate_coanc_tree( tree2 )
+    )
+    # check for data that extends beyond regular tree
+    expect_true( !is.null( tree2$edge.length.add ) )
+    expect_equal( length( tree2$edge.length.add ), length( tree2$edge.length ) )
+    expect_true( all( tree2$edge.length.add >= 0 ) )
+})
+
+test_that( "coanc_tree works", {
+    # draw a random tree that is valid
+    k_subpops <- 5
+    # this one automatically draws edge lengths between 0 and 1, as desired
+    tree <- ape::rtree( k_subpops )
+
+    # only errors are is if tree is missing or is not a tree
+    expect_error( coanc_tree() )
+    expect_error( coanc_tree( 1 : k_subpops ) )
+
+    # now a successful run
+    expect_silent(
+        coanc_mat <- coanc_tree( tree )
+    )
+    expect_true( is.numeric( coanc_mat ) )
+    expect_true( !anyNA( coanc_mat ) )
+    expect_true( is.matrix( coanc_mat ) )
+    expect_equal( nrow( coanc_mat ), k_subpops )
+    expect_equal( ncol( coanc_mat ), k_subpops )
+    expect_true( isSymmetric( coanc_mat ) )
+    expect_true( all( coanc_mat >= 0 ) )
+    # answer should also be positive-semidefinite at least, but meh we don't test that here
+})
+
+test_that("draw_all_admix works with a tree", {
+    # draw a random tree that is valid
+    k_subpops <- 3
+    # this one automatically draws edge lengths between 0 and 1, as desired
+    tree_subpops <- ape::rtree( k_subpops )
+    # other info
+    m_loci <- 10
+    admix_proportions <- diag(rep.int(1, k_subpops)) # island model for test...
+    # repeat so we have multiple people per island
+    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
+    n_ind <- nrow(admix_proportions) # number of individuals (3*k_subpops)
+
+    # make sure things die when important parameters are missing
+    # all missing
+    expect_error( draw_all_admix() )
+    # two missing
+    expect_error( draw_all_admix(admix_proportions = admix_proportions) )
+    expect_error( draw_all_admix(tree_subpops = tree_subpops) )
+    expect_error( draw_all_admix(m_loci = m_loci) )
+    # one missing
+    expect_error( draw_all_admix(tree_subpops = tree_subpops, m_loci = m_loci) )
+    expect_error( draw_all_admix(admix_proportions = admix_proportions, m_loci = m_loci) )
+    expect_error( draw_all_admix(admix_proportions = admix_proportions, tree_subpops = tree_subpops) )
+
+    # expect error if both inbr_subpops and tree_subpops are passed
+    expect_error( draw_all_admix(admix_proportions, inbr_subpops = c(0.1, 0.2, 0.3), tree_subpops = tree_subpops, m_loci = m_loci) )
+    
+    # run draw_all_admix
+    # first test default (p_ind and p_subpops not returned)
+    expect_silent( 
+        out <- draw_all_admix(admix_proportions, tree_subpops = tree_subpops, m_loci = m_loci)
+    )
+    expect_equal( names(out), draw_all_admix_names_ret_default )
+
+    # now rerun with all outpts, so we can test them all
+    expect_silent( 
+        out <- draw_all_admix(admix_proportions, tree_subpops = tree_subpops, m_loci = m_loci, want_p_ind = TRUE, want_p_subpops = TRUE)
+    )
+    expect_equal( names(out), draw_all_admix_names_ret_full )
+    X <- out$X # genotypes
+    p_ind <- out$p_ind # IAFs
+    p_subpops <- out$p_subpops # Intermediate AFs
+    p_anc <- out$p_anc # Ancestral AFs
+    
+    # test X
+    expect_equal(nrow(X), m_loci)
+    expect_equal(ncol(X), n_ind)
+    expect_true( !anyNA( X ) ) # no missing values
+    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
+    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
+    
+    # test p_ind
+    expect_equal(nrow(p_ind), m_loci)
+    expect_equal(ncol(p_ind), n_ind)
+    expect_true(all(p_ind >= 0)) # all are non-negative
+    expect_true(all(p_ind <= 1)) # all are smaller or equal than 1
+    
+    # test p_subpops
+    expect_equal(nrow(p_subpops), m_loci)
+    expect_equal(ncol(p_subpops), k_subpops)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+    
+    # test p_anc
+    expect_equal(length(p_anc), m_loci)
+    expect_true(all(p_anc >= 0)) # all are non-negative
+    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
+})
+
+test_that("admix_prop_1d_linear/circular bias_coeff work with tree", {
+    # we don't pass a tree, but rather pass it's coancestry matrix, make sure that works
+
+    # random trees are dangerous here, because minimum bias coeff can vary wildly
+    # so instead pass a fixed, reasonable tree, which has a minimum bias_coeff that has been pretested to be less than the value we ask for below
+    tree_str <- '(S1:0.1,(S2:0.1,(S3:0.1,(S4:0.1,S5:0.1)N3:0.1)N2:0.1)N1:0.1)T;'
+    tree_subpops <- ape::read.tree( text = tree_str )
+    # its true coancestry
+    coanc_subpops <- coanc_tree( tree_subpops )
+    k_subpops <- nrow( coanc_subpops )
+    # other parameters required
+    n_ind <- 10
+    bias_coeff <- 0.6
+    fst <- 0.1
+    
+    # try a successful run
+    expect_silent(
+        obj <- admix_prop_1d_linear(
+            n_ind,
+            k_subpops,
+            bias_coeff = bias_coeff,
+            coanc_subpops = coanc_subpops,
+            fst = fst
+        )
+    )
+    expect_true( is.list( obj ) )
+    expect_equal( names( obj ), names_admix_prop_1d )
+    admix_proportions <- obj$admix_proportions # returns many things in this case, get admix_proportions here
+    expect_equal(nrow(admix_proportions), n_ind) # n rows
+    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
+    expect_true(all(admix_proportions >= 0)) # all are non-negative
+    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
+    expect_equal(rowSums(admix_proportions), rep.int(1, n_ind)) # rows sum to 1, vector length n
+
+    # repeat with circular rather than linear version
+    expect_silent(
+        obj <- admix_prop_1d_circular(
+            n_ind,
+            k_subpops,
+            bias_coeff = bias_coeff,
+            coanc_subpops = coanc_subpops,
+            fst = fst
+        )
+    )
+    expect_true( is.list( obj ) )
+    expect_equal( names( obj ), names_admix_prop_1d )
+    admix_proportions <- obj$admix_proportions # returns many things in this case, get admix_proportions here
+    expect_equal(nrow(admix_proportions), n_ind) # n rows
+    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
+    expect_true(all(admix_proportions >= 0)) # all are non-negative
+    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
+    expect_equal(rowSums(admix_proportions), rep.int(1, n_ind)) # rows sum to 1, vector length n
+})

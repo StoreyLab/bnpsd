@@ -1,13 +1,17 @@
 #' Simulate random allele frequencies and genotypes from the BN-PSD admixture model
 #'
-#' This function returns simulated ancestral, intermediate, and individual-specific allele frequencies and genotypes given the admixture structure, as determined by the admixture proportions and the vector of intermediate subpopulation FST values.
-#' The function is a wrapper around [draw_p_anc()], [draw_p_subpops()], [make_p_ind_admix()], and [draw_genotypes_admix()] with additional features such as requiring polymorphic loci.
+#' This function returns simulated ancestral, intermediate, and individual-specific allele frequencies and genotypes given the admixture structure, as determined by the admixture proportions and the vector or tree of intermediate subpopulation FST values.
+#' The function is a wrapper around [draw_p_anc()], [draw_p_subpops()]/[draw_p_subpops_tree()], [make_p_ind_admix()], and [draw_genotypes_admix()] with additional features such as requiring polymorphic loci.
 #' Importantly, by default fixed loci (where all individuals were homozygous for the same allele) are re-drawn from the start (starting from the ancestral allele frequencies) so no fixed loci are in the output and no biases are introduced by re-drawing genotypes conditional on any of the previous allele frequencies (ancestral, intermediate, or individual-specific).
 #' Below `m_loci` (also `m`) is the number of loci, `n` is the number of individuals, and `k` is the number of intermediate subpopulations.
 #'
 #' @param admix_proportions The `n`-by-`k` matrix of admixture proportions.
 #' @param inbr_subpops The length-`k` vector (or scalar) of intermediate subpopulation FST values.
+#' Either this or `tree_subpops` must be provided (but not both).
 #' @param m_loci The number of loci to draw.
+#' @param tree_subpops The coancestry tree relating the `k` intermediate subpopulations.
+#' Must be a `phylo` object from the `ape` package (see [ape::read.tree()]).
+#' Either this or `inbr_subpops` must be provided (but not both).
 #' @param want_genotypes If `TRUE` (default), includes the matrix of random genotypes in the return list.
 #' @param want_p_ind If `TRUE` (NOT default), includes the matrix of individual-specific allele frequencies in the return list.
 #' Note that by default `p_ind` is not constructed in full at all, instead a fast low-memory algorithm constructs it in parts as needed only; beware that setting `want_p_ind = TRUE` increases memory usage in comparison.
@@ -70,8 +74,9 @@
 #' @export
 draw_all_admix <- function(
                            admix_proportions,
-                           inbr_subpops,
+                           inbr_subpops = NULL,
                            m_loci,
+                           tree_subpops = NULL,
                            want_genotypes = TRUE,
                            want_p_ind = FALSE,
                            want_p_subpops = FALSE,
@@ -82,26 +87,39 @@ draw_all_admix <- function(
                            p_anc = NULL
                            ) {
     # stop if required parameters are missing
-    if (missing(admix_proportions))
-        stop('`admix_proportions` is required!')
-    if (missing(inbr_subpops))
-        stop('`inbr_subpops` is required!')
-    if (missing(m_loci))
-        stop('`m_loci` is required!')
+    if ( missing( admix_proportions ) )
+        stop( '`admix_proportions` is required!' )
+    if ( is.null( inbr_subpops ) && is.null( tree_subpops ) )
+        stop( 'Either `inbr_subpops` or `tree_subpops` is required!' )
+    if ( missing( m_loci ) )
+        stop( '`m_loci` is required!' )
 
-    # ensure that things that should be matrices are so
-    if (!is.matrix(admix_proportions))
-        stop('`admix_proportions` must be a matrix!')
+    # stop if both *_subpops structures were provided
+    if ( !is.null( inbr_subpops ) && !is.null( tree_subpops ) )
+        stop( '`inbr_subpops` and `tree_subpops` cannot both be provided!' )
     
+    # ensure that things that should be matrices are so
+    if ( !is.matrix( admix_proportions ) )
+        stop( '`admix_proportions` must be a matrix!' )
+
     # get dimensions, test coherence
-#    n_ind <- nrow(admix_proportions) # actually not used anywhere!?!
+    #n_ind <- nrow(admix_proportions) # actually not used anywhere!?!
     k_subpops <- ncol(admix_proportions)
-    k_subpops_inbr <- length(inbr_subpops)
-    if (
-        k_subpops_inbr > 1 &&       # it's ok if inbr_subpops is a scalar in this case
-        k_subpops != k_subpops_inbr # but if it's not scalar, it must agree with admix_proportions
-    )
-        stop('`admix_proportions` and `inbr_subpops` are not compatible: ncol(admix_proportions) == ', k_subpops, ' != ', k_subpops_inbr, ' == length(inbr_subpops)')
+    if ( is.null( tree_subpops ) ) {
+        k_subpops_inbr <- length(inbr_subpops)
+        if (
+            k_subpops_inbr > 1 &&       # it's ok if inbr_subpops is a scalar in this case
+            k_subpops != k_subpops_inbr # but if it's not scalar, it must agree with admix_proportions
+        )
+            stop('`admix_proportions` and `inbr_subpops` are not compatible: ncol(admix_proportions) == ', k_subpops, ' != ', k_subpops_inbr, ' == length(inbr_subpops)')
+    } else {
+        # run overall tree validation
+        validate_coanc_tree( tree_subpops )
+        # now check for coherence with `admix_proportions`
+        k_subpops_tree <- length( tree_subpops$tip.label )
+        if ( k_subpops != k_subpops_tree )
+            stop('`admix_proportions` and `tree_subpops` are not compatible: ncol(admix_proportions) == ', k_subpops, ' != ', k_subpops_tree, ' == length( tree_subpops$tip.label )')
+    }
 
     # validate or generate p_anc
     p_anc_in <- p_anc # remember its original value, for later
@@ -130,9 +148,13 @@ draw_all_admix <- function(
     # draw intermediate allele frequencies from Balding-Nichols
     if (verbose)
         message('drawing p_subpops')
-    # pass m_loci for consistency check (required if p_anc is a scalar, otherwise it already ought to match length(p_anc))
-    # pass k_subpops in case inbr_subpops was a scalar (otherwise provides a redundant check)
-    p_subpops <- draw_p_subpops(p_anc, inbr_subpops, m_loci = m_loci, k_subpops = k_subpops)
+    # both cases: pass m_loci for consistency check (required if p_anc is a scalar, otherwise it already ought to match length(p_anc))
+    if ( is.null( tree_subpops ) ) {
+        # pass k_subpops in case inbr_subpops was a scalar (otherwise provides a redundant check)
+        p_subpops <- draw_p_subpops(p_anc, inbr_subpops, m_loci = m_loci, k_subpops = k_subpops)
+    } else {
+        p_subpops <- draw_p_subpops_tree( p_anc, tree_subpops, m_loci = m_loci )
+    }
     
     if (want_p_ind) {
         # this triggers higher-memory path
@@ -177,6 +199,7 @@ draw_all_admix <- function(
             obj <- draw_all_admix(
                 admix_proportions = admix_proportions,
                 inbr_subpops = inbr_subpops,
+                tree_subpops = tree_subpops,
                 m_loci = m_loci_fixed,
                 want_genotypes = want_genotypes,
                 want_p_ind = want_p_ind,

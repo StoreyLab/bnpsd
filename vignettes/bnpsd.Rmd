@@ -26,8 +26,8 @@ knitr::opts_chunk$set(
 # Introduction
 
 The `bnpsd` package simulates the genotypes of an admixed population.
-In the PSD model [@pritchard_inference_2000], admixed individuals draw their alleles with individual-specific probabilities (admixture proportions) from $K$ intermediate subpopulations.
-We impose the BN model [@balding_method_1995] to the intermediate subpopulation allele frequency, which thus evolve independently with subpopulation-specific inbreeding coefficients ($\Fst$ values) from a common ancestral population $T$.
+In the Pritchard-Stephens-Donnelly (PSD) model [@pritchard_inference_2000], admixed individuals draw their alleles with individual-specific probabilities (admixture proportions) from $K$ intermediate subpopulations.
+We impose the Balding-Nichols (BN) model [@balding_method_1995] to the intermediate subpopulation allele frequency, which thus evolve independently with subpopulation-specific inbreeding coefficients ($\Fst$ values) from a common ancestral population $T$.
 The kinship coefficients and generalized $\Fst$ of the admixed individuals were derived in recent work [@Ochoa083915].
 A simulated admixed population generated using this package was used to benchmark kinship and $\Fst$ estimators in the accompanying paper [@ochoa_estimating_2021].
 Here we briefly summarize the notation and intuition behind the key parameters (see [@Ochoa083915] for precise definitions).
@@ -156,7 +156,13 @@ barplot(inbr_subpops, col = col_subpops, names.arg = 1 : k_subpops, ylim = c(0, 
 # visualize the admixture proportions
 # shrink default margins
 par(mar = c(1, 4, 0, 0) + 0.2)
-barplot(t(admix_proportions), col = col_subpops, border = NA, space = 0, ylab = 'Admixture prop.')
+barplot(
+    t(admix_proportions),
+    col = col_subpops,
+    border = NA,
+    space = 0,
+    ylab = 'Admixture prop.'
+)
 mtext('Individuals', 1)
 ```
 
@@ -165,7 +171,8 @@ mtext('Individuals', 1)
 plot_popkin(
     coancestry,
     # zero inner margin (plus padding) because we have no labels
-    mar = 0
+    mar = 0,
+    leg_title = 'Coancestry'
 )
 ```
 
@@ -218,7 +225,7 @@ hist(p_ind, xlab = 'Individual-specific AF', main = '', xlim = c(0, 1))
 barplot(table(X), xlab = 'Genotypes', ylab = 'Frequency', col = 'white')
 ```
 
-Lastly, let's verify that the correlation structure of the genotypes matches the theoretical coancestry matrix we constructed earlier.
+Let's verify that the correlation structure of the genotypes matches the theoretical coancestry matrix we constructed earlier.
 For this we use the `popkin` function of the package with the same name.
 
 ```{r, fig.width = 6, fig.height = 2.8, fig.align = 'center'}
@@ -236,9 +243,36 @@ plot_popkin(
     list( coancestry, coancestry_estimate ),
     titles = c('Truth', 'Estimate'),
     # second value is top margin, for panel titles
-    mar = c(0, 2.5)
+    mar = c(0, 2.5),
+    leg_title = 'Coancestry'
 )
 ```
+
+We can also look at the structure of the two allele frequency matrices, `p_subpops` and `p_ind`, using `popkin_af`, which estimates coancestry from allele frequency matrices (in contrast, `popkin` estimates kinship from genotype matrices, and is prefered when genotypes are available).
+```{r}
+coancestry_subpops_estimate <- popkin_af( p_subpops )
+coancestry_ind_estimate <- popkin_af( p_ind )
+```
+The first coancestry matrix is small, and matches the expectation of independent subpopulations (zero values off-diagonal) with the subpopulation inbreeding coefficients as the diagonal coancestry values:
+```{r, fig.width = 6, fig.height = 2.8, fig.align = 'center'}
+plot_popkin(
+    list( diag( inbr_subpops ), coancestry_subpops_estimate ),
+    titles = c('Truth', 'Estimate'),
+    mar = c(0, 2.5),
+    leg_title = 'Coancestry'
+)
+```
+The second coancestry matrix, estimated from individual-specific allele frequencies, is the same in expectation to the true coancestry matrix of the model:
+```{r, fig.width = 6, fig.height = 2.8, fig.align = 'center'}
+plot_popkin(
+    list( coancestry, coancestry_ind_estimate ),
+    titles = c('Truth', 'Estimate'),
+    mar = c(0, 2.5),
+    leg_title = 'Coancestry'
+)
+```
+The last coancestry matrix also equals in expectation the transformed kinship matrix estimated earlier, but this estimate from allele frequencies is less noisy.
+However, in real data such allele frequencies are not observed, and their estimates can vary in quality and result in biases, so the above is more a validation of the simulation than a practical estimation approach.
 
 
 ## Customizing the allele frequency and genotype pipeline
@@ -272,20 +306,20 @@ It is worth noting that `draw_p_anc` can be used to draw from a Symmetric Beta d
 In the example below, a small shape value of `beta` $< 1$ is used to draw a distribution with more rare minor variants.
 ```{r, fig.width = 4, fig.height = 2, fig.align = 'center'}
 # this increases the proportion of rare alleles
-p_anc <- draw_p_anc(m_loci, beta = 0.1)
+p_anc_beta <- draw_p_anc(m_loci, beta = 0.1)
 # shrink default margins for these figures
 par(mar = c(4, 4, 0, 0) + 0.2)
-hist(p_anc, xlab = 'Ancestral AF', main = '', xlim = c(0, 1))
+hist(p_anc_beta, xlab = 'Ancestral AF', main = '', xlim = c(0, 1))
 ```
 However, if you want any other distribution, that can be implemented at this step.
 For a ridiculous example, the ancestral allele frequencies could be drawn from a (non-symmetric) Beta instead of using `draw_p_anc`:
 
 ```{r, fig.width = 4, fig.height = 2, fig.align = 'center'}
 # this increases the proportion of rare alleles
-p_anc <- rbeta(m_loci, shape1 = 0.1, shape2 = 1)
+p_anc_beta <- rbeta(m_loci, shape1 = 0.1, shape2 = 1)
 # shrink default margins for these figures
 par(mar = c(4, 4, 0, 0) + 0.2)
-hist(p_anc, xlab = 'Ancestral AF', main = '', xlim = c(0, 1))
+hist(p_anc_beta, xlab = 'Ancestral AF', main = '', xlim = c(0, 1))
 ```
 
 You could also draw genotypes from the ancestral population or the intermediate populations:
@@ -294,7 +328,7 @@ You could also draw genotypes from the ancestral population or the intermediate 
 # draw genotypes for one individual from the ancestral population
 # use "cbind" to turn the vector p_anc into a column matrix
 # ("draw_genotypes_admix" expects a matrix)
-X_anc <- draw_genotypes_admix( cbind(p_anc) )
+X_anc <- draw_genotypes_admix( cbind( p_anc ) )
 # returns a column matrix:
 dim(X_anc)
 
@@ -370,7 +404,13 @@ barplot(inbr_subpops, col = col_subpops, names.arg = colnames(admix_proportions)
 # visualize the admixture proportions
 # tweak margins/etc
 par(mar = c(1, 4, 0.4, 0) + 0.2, lab = c(2, 2, 7))
-barplot(t(admix_proportions), col = col_subpops, border = NA, space = 0, ylab = 'Admix prop')
+barplot(
+    t(admix_proportions),
+    col = col_subpops,
+    border = NA,
+    space = 0,
+    ylab = 'Admix prop'
+)
 mtext('Individuals', 1)
 ```
 
@@ -379,7 +419,8 @@ mtext('Individuals', 1)
 plot_popkin(
     coancestry,
     leg_n = 3,
-    mar = c(0, 0.4)
+    mar = c(0, 0.4),
+    leg_title = 'Coancestry'
 )
 ```
 
@@ -450,7 +491,13 @@ barplot(inbr_subpops, col = col_subpops, names.arg = colnames(admix_proportions)
 # visualize the admixture proportions
 # tweak margins/etc
 par(mar = c(1, 4, 0.4, 0) + 0.2, lab = c(2, 2, 7))
-barplot(t(admix_proportions), col = col_subpops, border = NA, space = 0, ylab = 'Admix prop')
+barplot(
+    t(admix_proportions),
+    col = col_subpops,
+    border = NA,
+    space = 0,
+    ylab = 'Admix prop'
+)
 mtext('Individuals', 1)
 ```
 
@@ -459,8 +506,161 @@ mtext('Individuals', 1)
 plot_popkin(
     coancestry,
     leg_n = 3,
-    mar = c(0, 0.4)
+    mar = c(0, 0.4),
+    leg_title = 'Coancestry'
 )
 ```
+
+## Intermediate subpopulations related by a tree
+
+In all of the previous examples we simulated from **independent** subpopulations first, then admixed individuals in various ways (1D linear and 1D circular scenarios, as well as "independent subpopulations" which meant there was no admixture).
+Here we use an extension of the approach to simulate the intermediate subpopulations related by a **tree**, which allows for **correlated** subpopulations.
+
+First let's construct the tree of interest.
+An easy-to-understand example is a serial founder effect, where there are consecutive splits on one branch, which somewhat resembles the human tree.
+For simplicity we model only 5 "tip" subpopulations and shall assume that there is equal inbreeding on every branch, equal to 0.1.
+This tree, in the standard (Newick) character format, is:
+```{r}
+tree_str <- '(S1:0.1,(S2:0.1,(S3:0.1,(S4:0.1,S5:0.1)N3:0.1)N2:0.1)N1:0.1)T;'
+```
+The tips (leaf nodes) are labeled as S1 to S5, the root node is labeled as T, and the (internal) nodes are N1 to N3.
+Before proceeding, we parse and process this tree using the `read.tree` function from the package `ape`, which creates the desired tree object of class `phylo` that the our functions require.
+```{r, fig.width = 4, fig.height = 3.5, fig.align = 'center'}
+# base package for phylogenetics
+library(ape)
+# parses tree, creates object of class "phylo"
+tree_subpops <- read.tree( text = tree_str )
+# plot tree
+par( mar = c(3,0,0,0) + 0.2 )
+plot( tree_subpops, show.node.label = TRUE )
+# add axis and label
+axisPhylo( backward = FALSE )
+mtext( 'Coancestry', side = 1, line = 2 )
+```
+The values of the edges in this tree are taken to be inbreeding values, and we draw allele frequencies for each subpopulation sequentially from its parent population using the Balding-Nichols distribution, which is achieved with the function `draw_p_subpops_tree`:
+```{r}
+p_subpops_tree <- draw_p_subpops_tree(
+    p_anc = p_anc,
+    tree_subpops = tree_subpops
+)
+```
+Let's validate the correlation structure of these allele frequencies:
+```{r, fig.width = 6, fig.height = 2.8, fig.align = 'center'}
+# estimate coancestry
+coancestry_subpops_tree_estimate <- popkin_af( p_subpops_tree )
+# expected coancestry according to model
+coancestry_subpops_tree <- coanc_tree( tree_subpops )
+# plot
+plot_popkin(
+    list( coancestry_subpops_tree, coancestry_subpops_tree_estimate ),
+    titles = c('Truth', 'Estimate'),
+    mar = c(2, 2.5),
+    leg_title = 'Coancestry',
+    names = TRUE
+)
+```
+Note that the coancestry values in the tree are not additive in the final coancestry matrix.
+While the tree edges go up to 0.4 (0.1 added 4 times), the maximum coancestry (equal to the total self-coancestry for node `S5` relative to `T`)  is actually equal to:
+```{r}
+1 - (1 - 0.1)^4
+```
+The discrepancy is that the coancestry values in the matrix are all relative to the root node `T`, while the edges in the plot of the tree are each relative to their parent node (the edge `N3`-`S5` is relative to `N3`).
+The coancestry between a pair of different subpopulations is given by the total coancestry of the most recent common ancestor node of the two subpopulations (so the coancestry of `S4` and `S5` is the self-coancestry of `N3`).
+
+### Admixture with intermediate tree structure
+
+Now we repeat our previous simulation of the admixture of individuals, but this time replacing the independent subpopulation structure with our previous tree structure for the intermediate subpopulations.
+In our previous code, it suffices to replace the previous `inbr_subpops` with `coancestry_subpops_tree` which we estimated from `tree_subpops` in the last section.
+```{r}
+# number of admixed individuals
+n_ind <- 100
+# number of subpopulations, extracted from true coancestry
+k_subpops <- nrow( coancestry_subpops_tree )
+
+# define population structure
+# for simplicity here we set spread parameter `sigma` directly
+# admixture proportions from 1D geography
+admix_proportions <- admix_prop_1d_linear(
+    n_ind = n_ind,
+    k_subpops = k_subpops,
+    sigma = 0.5
+)
+
+# get pop structure parameters of the admixed individuals
+coancestry <- coanc_admix(admix_proportions, coancestry_subpops_tree)
+
+# calculate true FST of simulation
+fst_admix(admix_proportions, coancestry_subpops_tree)
+```
+
+These admixture proportions resemble our previous simulation, except we reduced the number of intermediate subpopulations and the spread parameter `sigma` was picked manually just above:
+```{r, fig.width = 6, fig.height = 1.5, fig.align = 'center'}
+# visualize the admixture proportions
+# colors for these independent subpopulations
+col_subpops <- brewer.pal(k_subpops, "Paired")
+# shrink default margins
+par(mar = c(1, 4, 0, 0) + 0.2)
+barplot(
+    t(admix_proportions),
+    col = col_subpops,
+    border = NA,
+    space = 0,
+    ylab = 'Admixture prop.'
+)
+mtext('Individuals', 1)
+```
+
+The coancestry matrix looks a bit more blocky because there are fewer intermediate subpopulations and there is less spread, and also resembles the coancestry of the tree subpopulations we visualized earlier:
+```{r, fig.width = 4.2, fig.height = 3, fig.align = 'center'}
+# Visualize the coancestry matrix using "popkin"!
+plot_popkin(
+    coancestry,
+    # zero inner margin (plus padding) because we have no labels
+    mar = 0,
+    leg_title = 'Coancestry'
+)
+```
+
+### Draw random allele frequencies and genotypes for admixture with intermediate tree structure 
+
+The function `draw_all_admix` accepts `tree_subpops` in place of `inbr_subpops` to perform the entire simulation of genotypes and intermediate quantities for intermediate subpopulations related by a tree.
+However, unlike functions for the true structure (like `coanc_admix` and `fst_admix` earlier) which accept arbitrary intermediate coancestry matrices, the functions for drawing intermediate subpopulation allele frequencies requires trees or vectors (independent subpopulations) and do not support arbitrary coancestry matrices.
+
+For simplicity we ask for genotypes only and skip analyzing the other allele frequency matrices (`p_subpops` here is simulated from `draw_p_subpops_tree`, which we analyzed earlier).
+```{r}
+# number of loci in simulation (NOTE this is 30x less than in publication!)
+m_loci <- 10000
+# draw all random Allele Freqs (AFs) and genotypes
+# reuse the previous inbr_subpops, admix_proportions
+out <- draw_all_admix(
+    admix_proportions = admix_proportions,
+    tree_subpops = tree_subpops,
+    m_loci = m_loci
+)
+# genotypes
+X <- out$X
+```
+
+Let's verify that the correlation structure of the genotypes matches the theoretical coancestry matrix we constructed earlier.
+```{r, fig.width = 6, fig.height = 2.8, fig.align = 'center'}
+# estimate kinship using popkin
+# here we didn't use subpopulation labels for simplicity
+kinship_estimate <- popkin(X)
+# replace diagonal with inbreeding coeffs. to match coancestry matrix
+coancestry_estimate <- inbr_diag(kinship_estimate)
+
+# Visualize the coancestry matrix using "popkin"!
+plot_popkin(
+    list( coancestry, coancestry_estimate ),
+    titles = c('Truth', 'Estimate'),
+    # second value is top margin, for panel titles
+    mar = c(0, 2.5),
+    leg_title = 'Coancestry'
+)
+```
+
+
+
+
 
 # References

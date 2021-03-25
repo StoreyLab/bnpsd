@@ -28,8 +28,12 @@
 #' This `coanc_subpops` can be in the wrong scale (it cancels out in calculations), which is returned corrected, to result in the desired `fst` (next).
 #' @param fst If `sigma` is `NA`, this FST of the admixed individuals is required.
 #'
-#' @return If `sigma` was provided, the `n_ind`-by-`k_subpops` admixture proportion matrix (`admix_proportions`).
-#' If `sigma` is missing, a named list is returned containing `admix_proportions`, the rescaled `coanc_subpops`, and the `sigma` (which together give the desired `bias_coeff` and `fst`).
+#' @return If `sigma` was provided, returns the `n_ind`-by-`k_subpops` admixture proportion matrix (`admix_proportions`).
+#' If `sigma` is missing, returns a named list containing:
+#' - `admix_proportions`: the `n_ind`-by-`k_subpops` admixture proportion matrix.
+#' - `coanc_subpops`: the input `coanc_subpops` rescaled.
+#' - `sigma`: the fit value of the spread of intermediate subpopulations
+#' - `coanc_factor`: multiplicative factor used to rescale `coanc_subpops`
 #'
 #' @examples
 #' # admixture matrix for 1000 individuals drawing alleles from 10 subpops
@@ -132,13 +136,23 @@ admix_prop_1d_circular <- function(
         }
     }
     # normalize to have rows/coefficients sum to 1!
-    admix_proportions <- admix_proportions / rowSums(admix_proportions)
+    admix_proportions <- admix_proportions / rowSums( admix_proportions )
 
     if (fit_bias_coeff) {
         # this triggers version that fits bias coefficient
-        coanc_subpops <- rescale_coanc_subpops(admix_proportions, coanc_subpops, fst) # let's rescale coanc_subpops now!
-        return( list(admix_proportions = admix_proportions, coanc_subpops = coanc_subpops, sigma = sigma) ) # return all this additional data!
+        # let's rescale coanc_subpops now!
+        obj <- rescale_coanc_subpops(admix_proportions, coanc_subpops, fst)
+        # return all this additional data!
+        return(
+            list(
+                admix_proportions = admix_proportions,
+                coanc_subpops = obj$coanc_subpops,
+                sigma = sigma,
+                coanc_factor = obj$factor
+            )
+        )
     } else {
-        return(admix_proportions) # in direct case, always return admix_proportions
+        # in direct case, always return admix_proportions
+        return(admix_proportions)
     }
 }

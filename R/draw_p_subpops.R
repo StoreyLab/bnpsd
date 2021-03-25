@@ -44,6 +44,9 @@
 #' stopifnot ( nrow( p_subpops ) == 1 )
 #' stopifnot ( ncol( p_subpops ) == 1 )
 #'
+#' @seealso
+#' [draw_p_subpops_tree()] for version for subpopulations related by a tree, which can therefore be non-independent.
+#' 
 #' @export
 draw_p_subpops <- function(p_anc, inbr_subpops, m_loci = NA, k_subpops = NA) {
     # basic param checking
@@ -51,6 +54,17 @@ draw_p_subpops <- function(p_anc, inbr_subpops, m_loci = NA, k_subpops = NA) {
         stop('ancestral allele frequencies `p_anc` are required!')
     if (missing(inbr_subpops))
         stop('`inbr_subpops` (FST) scalar or vector are required!')
+    
+    # look at data ranges
+    # all of these are probabilities so problems happen when they're out of range
+    if ( any( p_anc < 0 ) )
+        stop( '`p_anc` cannot be negative!' )
+    if ( any( p_anc > 1 ) )
+        stop( '`p_anc` cannot exceed 1!' )
+    if ( any( inbr_subpops < 0 ) )
+        stop( '`inbr_subpops` cannot be negative!' )
+    if ( any( inbr_subpops > 1 ) )
+        stop( '`inbr_subpops` cannot exceed 1!' )
     
     # number of loci to simulate
     # allow p_anc to be a scalar, m_loci can be passed separately
@@ -81,7 +95,7 @@ draw_p_subpops <- function(p_anc, inbr_subpops, m_loci = NA, k_subpops = NA) {
     # if this is missing, always set to actual value (even if it is 1)
     if ( is.na( k_subpops ) )
         k_subpops <- k_subpops_inbr
-    
+
     # let's translate parameters for Balding-Nichols case
     nu <- 1 / inbr_subpops - 1 # nu is a vector or a scalar, same as inbr_subpops (whatever that is)
     p_anc_alt <- 1 - p_anc # precompute vector of "alternative" p_anc's, shared by all subpopulations below

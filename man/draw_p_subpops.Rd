@@ -57,3 +57,6 @@ stopifnot ( nrow( p_subpops ) == 1 )
 stopifnot ( ncol( p_subpops ) == 1 )
 
 }
+\seealso{
+\code{\link[=draw_p_subpops_tree]{draw_p_subpops_tree()}} for version for subpopulations related by a tree, which can therefore be non-independent.
+}

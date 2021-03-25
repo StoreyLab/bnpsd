@@ -143,3 +143,12 @@ These loci are not polymorphic so they would normally not be considered in analy
 
 * Documentation updates:
   - Fixed links to functions, in many cases these were broken because of incompatible mixed Rd and markdown syntax (now markdown is used more fully).
+
+# 2021-03-24 - bnpsd 1.3.0.9000
+
+- Added support for intermediate subpopulations related by a tree
+  - New function `draw_p_subpops_tree` is the tree version of `draw_p_subpops`.
+  - New function `coanc_tree` calculates the true coancestry matrix corresponding to the subpopulations related by a tree.
+  - Function `draw_all_admix` has new argument `tree_subpops` that can be used in place of `inbr_subpops` (to simulated subpopulation allele frequencies using `draw_p_subpops_tree` instead of `draw_p_subpops`).
+  - Note: These other functions work for trees (without change) because they accept arbitrary coancestry matrices (param `coanc_subpops`) as input, so they work if they are passed the matrix that `coanc_tree` returns: `coanc_admix`, `fst_admix`, `admix_prop_1d_linear`, `admix_prop_1d_circular`.
+- Functions `admix_prop_1d_linear` and `admix_prop_1d_circular`, when `sigma` is missing (and therefore fit to a desired `coanc_subpops`, `fst`, and `bias_coeff`), now additionally return multiplicative `factor` used to rescale `coanc_subpops`.

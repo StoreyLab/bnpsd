@@ -77,6 +77,41 @@ p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
 X <- draw_genotypes_admix(p_ind)
 ```
 
+## Examples with a tree for intermediate subpopulations
+
+This tree allows for **correlated** subpopulations (previous examples had **independent** subpopulations).
+
+```R
+# best to start by specifying tree in Newick string format
+tree_str <- '(S1:0.1,(S2:0.1,S3:0.1)N1:0.1)T;'
+# and turn it into `phylo` object using the `ape` package
+library(ape)
+tree_subpops <- read.tree( text = tree_str )
+# true coancestry matrix corresponding to this tree
+coanc_subpops <- coanc_tree( tree_subpops )
+
+# admixture proportions from 1D geography
+# (constructed again but for k=3 tree)
+k_subpops <- nrow( coanc_subpops )
+admix_proportions <- admix_prop_1d_linear( n_ind, k_subpops, sigma = 0.5 )
+
+# get pop structure parameters of the admixed individuals
+# the coancestry matrix
+coancestry <- coanc_admix( admix_proportions, coanc_subpops )
+# FST of admixed individuals
+Fst <- fst_admix( admix_proportions, coanc_subpops )
+
+# draw all random allele freqs and genotypes, tree version
+out <- draw_all_admix( admix_proportions, tree_subpops = tree_subpops, m_loci = m_loci )
+# genotypes
+X <- out$X
+# ancestral allele frequencies (AFs)
+p_anc <- out$p_anc
+
+# OR... draw tree subpops (intermediate) AFs separately
+p_subpops_tree <- draw_p_subpops_tree( p_anc, tree_subpops )
+```
+
 ## Citations
 
 Alejandro Ochoa, John D Storey.  2021.  "Estimating FST and kinship for arbitrary population structures." PLoS Genet 17(1): e1009241. PubMed ID 33465078. [doi:10.1371/journal.pgen.1009241](https://doi.org/10.1371/journal.pgen.1009241). bioRxiv [doi:10.1101/083923](https://doi.org/10.1101/083923) 2016-10-27.

@@ -6,8 +6,9 @@
 \usage{
 draw_all_admix(
   admix_proportions,
-  inbr_subpops,
+  inbr_subpops = NULL,
   m_loci,
+  tree_subpops = NULL,
   want_genotypes = TRUE,
   want_p_ind = FALSE,
   want_p_subpops = FALSE,
@@ -21,9 +22,14 @@ draw_all_admix(
 \arguments{
 \item{admix_proportions}{The \code{n}-by-\code{k} matrix of admixture proportions.}
 
-\item{inbr_subpops}{The length-\code{k} vector (or scalar) of intermediate subpopulation FST values.}
+\item{inbr_subpops}{The length-\code{k} vector (or scalar) of intermediate subpopulation FST values.
+Either this or \code{tree_subpops} must be provided (but not both).}
 
 \item{m_loci}{The number of loci to draw.}
+
+\item{tree_subpops}{The coancestry tree relating the \code{k} intermediate subpopulations.
+Must be a \code{phylo} object from the \code{ape} package (see \code{\link[ape:read.tree]{ape::read.tree()}}).
+Either this or \code{inbr_subpops} must be provided (but not both).}
 
 \item{want_genotypes}{If \code{TRUE} (default), includes the matrix of random genotypes in the return list.}
 
@@ -59,8 +65,8 @@ Included if \code{want_p_ind = TRUE}.
 }
 }
 \description{
-This function returns simulated ancestral, intermediate, and individual-specific allele frequencies and genotypes given the admixture structure, as determined by the admixture proportions and the vector of intermediate subpopulation FST values.
-The function is a wrapper around \code{\link[=draw_p_anc]{draw_p_anc()}}, \code{\link[=draw_p_subpops]{draw_p_subpops()}}, \code{\link[=make_p_ind_admix]{make_p_ind_admix()}}, and \code{\link[=draw_genotypes_admix]{draw_genotypes_admix()}} with additional features such as requiring polymorphic loci.
+This function returns simulated ancestral, intermediate, and individual-specific allele frequencies and genotypes given the admixture structure, as determined by the admixture proportions and the vector or tree of intermediate subpopulation FST values.
+The function is a wrapper around \code{\link[=draw_p_anc]{draw_p_anc()}}, \code{\link[=draw_p_subpops]{draw_p_subpops()}}/\code{\link[=draw_p_subpops_tree]{draw_p_subpops_tree()}}, \code{\link[=make_p_ind_admix]{make_p_ind_admix()}}, and \code{\link[=draw_genotypes_admix]{draw_genotypes_admix()}} with additional features such as requiring polymorphic loci.
 Importantly, by default fixed loci (where all individuals were homozygous for the same allele) are re-drawn from the start (starting from the ancestral allele frequencies) so no fixed loci are in the output and no biases are introduced by re-drawing genotypes conditional on any of the previous allele frequencies (ancestral, intermediate, or individual-specific).
 Below \code{m_loci} (also \code{m}) is the number of loci, \code{n} is the number of individuals, and \code{k} is the number of intermediate subpopulations.
 }
