@@ -116,28 +116,43 @@ admix_prop_1d_linear <- function(
     mus <- 1 : k_subpops
     
     # construct the coefficients of each person now!
-    admix_proportions <- matrix( nrow = n_ind, ncol = k_subpops )
+    admix_proportions <- matrix( 0, nrow = n_ind, ncol = k_subpops )
     for ( i in 1 : n_ind ) {
-        if (sigma == 0) {
-            # let's handle this special case, the limit of which is the island model
-            # compute distances to the subpopulations
-            distances <- (xs[i] - mus)^2
-            # find the minimum distance
-            min_distance <- min( distances )
-            # ok to set to booleans (normalization will turn numeric)
-            # the minima will be TRUE (1), the rest FALSE (0)
-            # this ensures ties get admix_proportions split evenly (after normalizing at the end)
-            admix_proportions[i,] <- distances == min_distance
-        } else {
+        # this is the "normal" way (pun intended)
+        if ( sigma > 0 ) {
             # collect the density values for each intermediate subpopulation at individual i's position
             # line implements super fast Normal without constant factors (which only involve constant sigma)
             # NOTE: sigma2 has negative sign built into it!
             # NOTE: sigma = Inf is correctly handled here (gives all admix_proportions == 1 before normalizing)
             admix_proportions[i,] <- exp( (xs[i] - mus)^2 / sigma2 )
         }
+        
+        # if sigma was zero, the entire row is still at zero
+        # if the normal way failed, the row will also be all zeroes
+        # so test for that and apply a discrete clustering either way
+        if ( sigma == 0 || sum( admix_proportions[ i, ] ) == 0 ) {
+            # let's handle this special case, the limit of which is the island model
+            # compute distances to the subpopulations
+            distances <- (xs[i] - mus)^2
+            # find the minimum distance
+            min_distance <- min( distances )
+            # ok to set to booleans (turns numeric upon saving to matrix, or if sigma==0, upon normalization)
+            # the minima will be TRUE (1), the rest FALSE (0)
+            # this ensures ties get admix_proportions split evenly (after normalizing at the end)
+            admix_proportions[i,] <- distances == min_distance
+        }
     } 
     # normalize to have rows/coefficients sum to 1!
-    admix_proportions <- admix_proportions / rowSums( admix_proportions )
+    admix_proportions_row_sums <- rowSums( admix_proportions )
+    # in some extreme examples a whole row is zero, resulting in NAs
+    # we should have handled that already, but check anyway
+    if ( any( admix_proportions_row_sums == 0 ) )
+        stop( 'Resulting `admix_proportions` had rows with zero sums, cannot normalize!  sigma = ', sigma )
+    admix_proportions <- admix_proportions / admix_proportions_row_sums
+    
+    # check for issues so far
+    if ( anyNA( admix_proportions ) )
+        stop( '`admix_proportions` had NAs!  sigma = ', sigma )
 
     if (fit_bias_coeff) {
         # this triggers version that fits bias coefficient

@@ -152,3 +152,17 @@ These loci are not polymorphic so they would normally not be considered in analy
   - Function `draw_all_admix` has new argument `tree_subpops` that can be used in place of `inbr_subpops` (to simulated subpopulation allele frequencies using `draw_p_subpops_tree` instead of `draw_p_subpops`).
   - Note: These other functions work for trees (without change) because they accept arbitrary coancestry matrices (param `coanc_subpops`) as input, so they work if they are passed the matrix that `coanc_tree` returns: `coanc_admix`, `fst_admix`, `admix_prop_1d_linear`, `admix_prop_1d_circular`.
 - Functions `admix_prop_1d_linear` and `admix_prop_1d_circular`, when `sigma` is missing (and therefore fit to a desired `coanc_subpops`, `fst`, and `bias_coeff`), now additionally return multiplicative `factor` used to rescale `coanc_subpops`.
+
+# 2021-04-17 - bnpsd 1.3.1.9000
+
+It's Fangorn Forest around here with all the tree updates!
+
+- Added these functions:
+  - `fit_tree` for fitting trees to coancestry matrices!
+  - `scale_tree` to easily scale coancestry trees and check for out-of-bounds values.
+  - `tree_additive` for calculating "additive" edges for probabilistic edge coancestry trees, and also the reverse function .
+    - This already existed as an internal, unexported function used mainly by `coanc_tree`, but now it's renamed, exported, and well documented!
+- Added support of `$root.edge` to tree `phylo` objects passed to these functions:
+  - `coanc_tree`: edge is a shared covariance value affecting all subpopulations.
+  - `draw_all_admix` and `draw_p_subpops_tree`: if root edge is present, functions warn that it will be ignored.
+- Functions `admix_prop_1d_linear` and `admix_prop_1d_circular`: debugged an edge case where `sigma` is small but not zero and numerically-calculated densities all come out to zero in a given row of the `admix_proportions` matrix (for `admix_prop_1d_circular` infinite values also arise), which used to lead to NAs upon row normalization; now for those rows, the closest ancestry (by coordinate distance) gets assigned the full admixture fraction (just as for independent subpopulations/`sigma = 0`).

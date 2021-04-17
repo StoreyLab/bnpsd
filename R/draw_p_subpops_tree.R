@@ -1,4 +1,4 @@
-#' Draw allele frequencies for independent subpopulations
+#' Draw allele frequencies for subpopulations related by a tree
 #'
 #' The allele frequency matrix `P` for `m_loci` loci (rows) and `k_subpops` subpopulations (columns) are drawn from the Balding-Nichols distribution.
 #' If the allele frequency in the parent node is `p` and the FST parameter of the child node from the parent node is `F`, then the allele frequency in the child node is drawn from
@@ -9,6 +9,7 @@
 #' @param p_anc The scalar or length-`m_loci` vector of ancestral allele frequencies per locus.
 #' @param tree_subpops The coancestry tree relating the `k_subpops` subpopulations.
 #' Must be a `phylo` object from the `ape` package (see [ape::read.tree()]).
+#' The edge lengths of this tree must be the FST parameters relating parent and child subpopulations.
 #' @param m_loci If `p_anc` is scalar, optionally provide the desired number of loci (lest only one locus be simulated).
 #' Stops if both `length(p_anc) > 1` and `m_loci` is not `NA` and they disagree.
 #' @param nodes  If `FALSE` (default), returns allele frequencies of "tips" subpopulations only; otherwise returns all allele frequencies, including internal nodes
@@ -55,6 +56,9 @@ draw_p_subpops_tree <- function(
     # run through special tree validator
     validate_coanc_tree( tree_subpops, name = 'tree_subpops' )
 
+    if ( !is.null( tree_subpops$root.edge ) )
+        warning( 'Input `tree_subpops` has a root edge (`tree_subpops$root.edge = ', tree_subpops$root.edge, '`) that will be ignored by function `draw_p_subpops_tree`!' )
+    
     # look at data ranges
     # all of these are probabilities so problems happen when they're out of range
     if ( any( p_anc < 0 ) )

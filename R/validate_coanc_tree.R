@@ -1,4 +1,3 @@
-# NOTE: tree$root.edge is ignored (BN will draw from the root node, not before it)
 validate_coanc_tree <- function( tree, name = 'tree' ) {
     if ( missing( tree ) )
         stop( '`', name, '` is required!' )
@@ -26,6 +25,14 @@ validate_coanc_tree <- function( tree, name = 'tree' ) {
     # might as well check for negatives
     if ( any( tree$edge.length < 0 ) )
         stop( '`', name, '` edge lengths must all be non-negative!  Bad values observed: ', toString( tree$edge.length[ tree$edge.length < 0 ] ) )
+
+    # if root edge is present, it must also satisfy bounds
+    if ( !is.null( tree$root.edge ) ) {
+        if ( tree$root.edge > 1 )
+            stop( '`', name, '` root edge length must be smaller than 1!  Observed: ', tree$root.edge )
+        if ( tree$root.edge < 0 )
+            stop( '`', name, '` root edge length must be non-negative!  Observed: ', tree$root.edge )
+    }
     
     # check overall dimensions consistency
     # edges should always have two columns only, check that immediately to catch most egregious errors

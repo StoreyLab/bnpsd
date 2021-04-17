@@ -90,7 +90,7 @@ bias_coeff_admix_fit <- function(
     )
     bias_coeff_min <- bias_coeff_admix(admix_prop_bias_coeff_min, coanc_subpops)
     if (bias_coeff < bias_coeff_min)
-        stop('Desired `bias_coeff` must be greater than ', bias_coeff_min, ' (the minimum achievable with `sigma = 0`), passed ', bias_coeff)
+        stop('Desired `bias_coeff` must be greater than ', bias_coeff_min, ' (the minimum achievable with `sigma = 0`), passed ', bias_coeff, '.  Tip: This minimum depends most strongly on the input `coanc_subpops`, so the main alternative to increasing `bias_coeff` is to change the shape of `coanc_subpops` (its overall scale does not change the minimum value)')
 
     # tolerance should be precision-dependent, but when configured with --disable-long-double the value of .Machine$double.eps doesn't change!
     # so here we test for that config difference (by testing if .Machine$sizeof.longdouble is zero) and reduce the tolerance accordingly

@@ -8,7 +8,8 @@ coanc_tree(tree)
 }
 \arguments{
 \item{tree}{The coancestry tree relating the \code{k_subpops} subpopulations.
-Must be a \code{phylo} object from the \code{ape} package (see \code{\link[ape:read.tree]{ape::read.tree()}}).}
+Must be a \code{phylo} object from the \code{ape} package (see \code{\link[ape:read.tree]{ape::read.tree()}}).
+This tree may have a valid root edge (non-NULL \code{tree$root.edge} between 0 and 1), which is incorporated in the output calculations.}
 }
 \value{
 The \code{k_subpops}-by-\code{k_subpops} coancestry matrix.
@@ -18,11 +19,8 @@ This function calculates the coancestry matrix of the subpopulations which are t
 The edges of this tree are coancestry values relative to the parent node of each child node.
 }
 \details{
-The calculation takes into account that total coancestries are non-linear combinations of the per-edge coancestries.
-For example, if the root node is \code{A}, and subpopulation \code{C} is connected to \code{A} only through an internal node \code{B}, then its total self-coancestry \code{coanc_A_C} relative to \code{A} is given by \code{coanc_A_B} (the coancestry between \code{A} and \code{B}) and \code{coanc_B_C} (the coancestry between \code{B} and \code{C}) by
-\code{coanc_A_C = coanc_A_B + coanc_B_C * ( 1 - coanc_A_B )}.
-This transformation ensures that the total coancestry is a probability that does not exceed one even when the per-edge coancestries sum to a value greater than one.
-This transformation is iterated for all nodes in the tree.
+The calculation takes into account that total coancestries are non-linear functions of the per-edge coancestries.
+Interestingly, the calculation can be simplified by a simple transformation performed by \code{\link[=tree_additive]{tree_additive()}}, see that for more information.
 The self-coancestry (diagonal values) are the total coancestries of the tip nodes.
 The coancestry between different subpopulations is the total coancestry of their last common ancestor node.
 }
@@ -38,4 +36,8 @@ tree_subpops <- rtree( k_subpops )
 # coancestry matrix of subpopulations
 coancestry <- coanc_tree( tree_subpops )
 
+}
+\seealso{
+\code{\link[=tree_additive]{tree_additive()}} for calculating the additive edges.
+This function is called internally by \code{coanc_tree} but the additive edges are not returned here, so call \code{\link[=tree_additive]{tree_additive()}} if you desired them.
 }

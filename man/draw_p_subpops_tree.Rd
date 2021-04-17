@@ -2,7 +2,7 @@
 % Please edit documentation in R/draw_p_subpops_tree.R
 \name{draw_p_subpops_tree}
 \alias{draw_p_subpops_tree}
-\title{Draw allele frequencies for independent subpopulations}
+\title{Draw allele frequencies for subpopulations related by a tree}
 \usage{
 draw_p_subpops_tree(p_anc, tree_subpops, m_loci = NA, nodes = FALSE)
 }
@@ -10,7 +10,8 @@ draw_p_subpops_tree(p_anc, tree_subpops, m_loci = NA, nodes = FALSE)
 \item{p_anc}{The scalar or length-\code{m_loci} vector of ancestral allele frequencies per locus.}
 
 \item{tree_subpops}{The coancestry tree relating the \code{k_subpops} subpopulations.
-Must be a \code{phylo} object from the \code{ape} package (see \code{\link[ape:read.tree]{ape::read.tree()}}).}
+Must be a \code{phylo} object from the \code{ape} package (see \code{\link[ape:read.tree]{ape::read.tree()}}).
+The edge lengths of this tree must be the FST parameters relating parent and child subpopulations.}
 
 \item{m_loci}{If \code{p_anc} is scalar, optionally provide the desired number of loci (lest only one locus be simulated).
 Stops if both \code{length(p_anc) > 1} and \code{m_loci} is not \code{NA} and they disagree.}
