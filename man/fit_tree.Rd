@@ -15,6 +15,7 @@ A \code{phylo} object from the \code{ape} package (see \code{\link[ape:read.tree
 \item \code{edge}: (standard \code{phylo}.)  A matrix describing the tree topology, listing parent and child node indexes.
 \item \code{Nnode}: (standard \code{phylo}.)  Number of internal (non-leaf) nodes.
 \item \code{tip.label}: (standard \code{phylo}.)  Labels for tips (leaf nodes), in order of index as in \code{edge} matrix above.
+These match the row names of the input \code{coancestry} matrix, or if names are missing, the row indexes of this matrix are used (in both cases, labels may be reordered compared to \code{rownames( coancestry )}).
 \item \code{edge.length}: (standard \code{phylo}.)  Values of edge lengths in same order as rows of \code{edge} matrix above.
 \item \code{root.edge}: (standard \code{phylo}.)  Value of root edge length.
 \item \code{rss}:  The residual sum of squares of the model coancestry versus the input coancestry.

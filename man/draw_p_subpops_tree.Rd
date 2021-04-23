@@ -16,13 +16,15 @@ The edge lengths of this tree must be the FST parameters relating parent and chi
 \item{m_loci}{If \code{p_anc} is scalar, optionally provide the desired number of loci (lest only one locus be simulated).
 Stops if both \code{length(p_anc) > 1} and \code{m_loci} is not \code{NA} and they disagree.}
 
-\item{nodes}{If \code{FALSE} (default), returns allele frequencies of "tips" subpopulations only; otherwise returns all allele frequencies, including internal nodes}
+\item{nodes}{If \code{FALSE} (default), returns allele frequencies of "tip" subpopulations only; otherwise returns all allele frequencies, including internal nodes.}
 }
 \value{
 The \code{m_loci}-by-\code{k_subpops} matrix of independent subpopulation allele frequencies.
-If \code{nodes = FALSE}, columsn include only tip subpopulations.
+If \code{nodes = FALSE}, columns include only tip subpopulations.
 If \code{nodes = TRUE}, internal node subpopulations are also included (in this case the input \code{p_anc} is returned in the column corresponding to the root node).
 In all cases subpopulations are ordered as indexes in the tree, which normally implies the tip nodes are listed first, followed by the internal nodes (as in \code{tree_subpops$edge} matrix, see \code{\link[ape:read.tree]{ape::read.tree()}} for details).
+The \code{tree_subpops} tip and node names are copied to the column names of this output matrix (individual names may be blank if missing in tree (such as for internal nodes); column names are \code{NULL} if all \code{tree_subpops} tip labels were blank, regardless of internal node labels).
+If \code{p_anc} is length-\code{m_loci} with names, these names are copied to the row names of this output matrix.
 }
 \description{
 The allele frequency matrix \code{P} for \code{m_loci} loci (rows) and \code{k_subpops} subpopulations (columns) are drawn from the Balding-Nichols distribution.

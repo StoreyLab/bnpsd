@@ -166,3 +166,18 @@ It's Fangorn Forest around here with all the tree updates!
   - `coanc_tree`: edge is a shared covariance value affecting all subpopulations.
   - `draw_all_admix` and `draw_p_subpops_tree`: if root edge is present, functions warn that it will be ignored.
 - Functions `admix_prop_1d_linear` and `admix_prop_1d_circular`: debugged an edge case where `sigma` is small but not zero and numerically-calculated densities all come out to zero in a given row of the `admix_proportions` matrix (for `admix_prop_1d_circular` infinite values also arise), which used to lead to NAs upon row normalization; now for those rows, the closest ancestry (by coordinate distance) gets assigned the full admixture fraction (just as for independent subpopulations/`sigma = 0`).
+
+# 2021-04-22 - bnpsd 1.3.2.9000
+
+- Updated various functions to transfer names between inputs and outputs as it makes sense
+  - Functions `admix_prop_1d_linear`, `admix_prop_1d_circular` now copy names from the input `coanc_subpops` (vector and matrix versions, only required when fitting `bias_coeff`) to the columns of the output `admix_proportions` matrix.
+  - Function `draw_genotypes_admix` now copies row and column names from input matrix `p_ind` (or rownames from `p_ind` and column names from the rownames of `admix_proportions` when the latter is provided) to output genotype matrix
+  - Function `draw_p_subpops` now copies names from `p_anc` to rows, names from `inbr_subpops` to columns, when present and of the right dimensions.
+  - Function `draw_p_subpops_tree` now copies names from `p_anc` to rows.  Names from `tree_subpops` were already copied to columns before.
+  - All other functions already transfered names as desired/appropriate.  Tests were added for these functions to ensure that this is so.
+- Updated various functions to stop if there are paired names for two objects that are both non-NULL and disagree, as this suggests that the data is misaligned or incompatible.
+  - Functions `coanc_admix` and `fst_admix` stop if the column names of `admix_proportions` and the names of `coanc_subpops` disagree.
+  - Function `draw_all_admix` stops if the column names of `admix_proportions` and the names of either `inbr_subpops` or `tree_subpops` disagree.
+  - Function `draw_genotypes_admix`, when `admix_proportions` is passed, stops if the column names of `admix_proportions` and `p_ind` disagree.
+  - Function `make_p_ind_admix` stops if the column names of `admix_proportions` and `p_subpops` disagree.
+- Function `tree_additive` now has option `force`, which when `TRUE` simply proceeds without stopping if additive edges were already present (in `tree$edge.length.add`, which is ignored and overwritten).

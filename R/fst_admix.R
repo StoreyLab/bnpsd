@@ -4,6 +4,8 @@
 #' This FST equals the weighted mean of the diagonal of the coancestry matrix (see [coanc_admix()]).
 #' Below there are `n` individuals and `k` intermediate subpopulations.
 #' 
+#' As a precaution, function stops if both inputs have names and the column names of `admix_proportions` and the names in `coanc_subpops` disagree, which might be because these two matrices are not aligned or there is some other inconsistency.
+#'
 #' @param admix_proportions The `n`-by-`k` admixture proportion matrix
 #' @param coanc_subpops Either the `k`-by-`k` intermediate subpopulation coancestry matrix (for the complete admixture model), or the length-`k` vector of intermediate subpopulation FST values (for the BN-PSD model; assumes zero coancestries between subpopulations), or a scalar FST value shared by all intermediate subpopulations (also assumes zero coancestry between subpopulations).
 #' @param weights Optional length-`n` vector of weights for individuals that define their generalized FST (default uniform weights)

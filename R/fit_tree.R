@@ -15,6 +15,7 @@
 #' - `edge`: (standard `phylo`.)  A matrix describing the tree topology, listing parent and child node indexes.
 #' - `Nnode`: (standard `phylo`.)  Number of internal (non-leaf) nodes.
 #' - `tip.label`: (standard `phylo`.)  Labels for tips (leaf nodes), in order of index as in `edge` matrix above.
+#'   These match the row names of the input `coancestry` matrix, or if names are missing, the row indexes of this matrix are used (in both cases, labels may be reordered compared to `rownames( coancestry )`).
 #' - `edge.length`: (standard `phylo`.)  Values of edge lengths in same order as rows of `edge` matrix above.
 #' - `root.edge`: (standard `phylo`.)  Value of root edge length.
 #' - `rss`:  The residual sum of squares of the model coancestry versus the input coancestry.

@@ -3,6 +3,8 @@
 #' The `n`-by-`n` coancestry matrix `Theta` of admixed individuals is determined by the `n`-by-`k` admixture proportion matrix `Q` and the `k`-by-`k` intermediate subpopulation coancestry matrix `Psi`, given by `Theta = Q %*% Psi %*% t(Q)`.
 #' In the more restricted BN-PSD model, `Psi` is a diagonal matrix (with FST values for the intermediate subpopulations along the diagonal, zero values off-diagonal).
 #'
+#' As a precaution, function stops if both inputs have names and the column names of `admix_proportions` and the names in `coanc_subpops` disagree, which might be because these two matrices are not aligned or there is some other inconsistency.
+#'
 #' @param admix_proportions The `n`-by-`k` admixture proportion matrix
 #' @param coanc_subpops The intermediate subpopulation coancestry, given either as a `k`-by-`k` matrix (for the complete admixture model), or the length-`k` vector of intermediate subpopulation FST values (for the BN-PSD model; implies zero coancestry between subpopulations), or a scalar FST value shared by all intermediate subpopulations (also implies zero coancestry between subpopulations).
 #'
@@ -43,11 +45,23 @@ coanc_admix <- function(admix_proportions, coanc_subpops) {
     if (!is.matrix(admix_proportions))
         stop('`admix_proportions` must be a matrix!')
     
+    # if both inputs have names, let's stop if they don't agree, explain if it appears that they are not aligned in particular
+    compare_names(
+        names_coanc( coanc_subpops ),  # works for all types supported!
+        colnames( admix_proportions ),
+        'coanc_subpops',
+        'admix_proportions'
+    )
+    
     # behavior depends on dimensions of coanc_subpops:
     k <- ncol(admix_proportions) # dimension that matters the most
     if (is.matrix(coanc_subpops)) {
         
         # case 1 - coanc_subpops square matrix
+
+        # this checks for actual symmetry of values, and col/row names, etc
+        if ( !isSymmetric( coanc_subpops ) )
+            stop( '`coanc_subpops` must be symmetric!' )
         
         # check dimensions
         if (nrow(coanc_subpops) != k)
@@ -56,18 +70,22 @@ coanc_admix <- function(admix_proportions, coanc_subpops) {
             stop('`admix_proportions` and `coanc_subpops` are not compatible: ncol(coanc_subpops) == ', ncol(coanc_subpops), ' != ', k, ' == ncol(admix_proportions)')
 
         # compute in most general form!
-        tcrossprod(admix_proportions %*% coanc_subpops, admix_proportions)
+        coancestry <- tcrossprod(admix_proportions %*% coanc_subpops, admix_proportions)
         
     } else if (length(coanc_subpops) == k) {
         
         # case 2 - coanc_subpops vector
-        tcrossprod(admix_proportions %*% diag(coanc_subpops), admix_proportions)
+        coancestry <- tcrossprod(admix_proportions %*% diag(coanc_subpops), admix_proportions)
         
     } else if (length(coanc_subpops) == 1) {
         
         # case 3 - coanc_subpops scalar
-        tcrossprod(admix_proportions) * coanc_subpops
+        coancestry <- tcrossprod(admix_proportions) * coanc_subpops
         
     } else
         stop('`admix_proportions` and `coanc_subpops` are not compatible: length(coanc_subpops) = ', length(coanc_subpops), ' != ', k, ' == ncol(admix_proportions)')
+
+    # NOTE: tcrossprod automatically transfers rownames from `admix_proportions` to rows and column names of `coancestry`, so we don't need to take extra steps to get names inherited as desired
+    
+    return( coancestry )
 }

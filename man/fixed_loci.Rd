@@ -11,6 +11,7 @@ fixed_loci(X)
 }
 \value{
 A length-\code{m} boolean vector where the \code{i} element is \code{TRUE} if locus \code{i} is fixed or completely missing, \code{FALSE} otherwise.
+If \code{X} had row names, they are copied to the names of this output vector.
 }
 \description{
 A locus is "fixed" if the non-missing sub-vector contains all 0's or all 2's (the locus is completely homozygous for one allele or completely homozygous for the other allele).

@@ -13,6 +13,7 @@
 #' This tree may have a valid root edge (non-NULL `tree$root.edge` between 0 and 1), which is incorporated in the output calculations.
 #'
 #' @return The `k_subpops`-by-`k_subpops` coancestry matrix.
+#' The tip labels of the tree are copied to the row and column names of this matrix.
 #'
 #' @examples
 #' # for simulating a tree with `rtree`
@@ -51,6 +52,7 @@ coanc_tree <- function( tree ) {
     tree$edge.length <- tree$edge.length.add
 
     # calculate coancestry matrix from the tree with the modified edges
+    # NOTE: this function transfers names from `tree` to `coanc`, as desired
     coanc <- ape::vcv( tree )
 
     # add root edge to all elements, if present

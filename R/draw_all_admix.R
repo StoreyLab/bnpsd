@@ -5,6 +5,8 @@
 #' Importantly, by default fixed loci (where all individuals were homozygous for the same allele) are re-drawn from the start (starting from the ancestral allele frequencies) so no fixed loci are in the output and no biases are introduced by re-drawing genotypes conditional on any of the previous allele frequencies (ancestral, intermediate, or individual-specific).
 #' Below `m_loci` (also `m`) is the number of loci, `n` is the number of individuals, and `k` is the number of intermediate subpopulations.
 #'
+#' As a precaution, function stops if both the column names of `admix_proportions` and the names in `inbr_subpops` or `tree_subpops` exist and disagree, which might be because these two data are not aligned or there is some other inconsistency.
+#'
 #' @param admix_proportions The `n`-by-`k` matrix of admixture proportions.
 #' @param inbr_subpops The length-`k` vector (or scalar) of intermediate subpopulation FST values.
 #' Either this or `tree_subpops` must be provided (but not both).
@@ -112,6 +114,14 @@ draw_all_admix <- function(
             k_subpops != k_subpops_inbr # but if it's not scalar, it must agree with admix_proportions
         )
             stop('`admix_proportions` and `inbr_subpops` are not compatible: ncol(admix_proportions) == ', k_subpops, ' != ', k_subpops_inbr, ' == length(inbr_subpops)')
+
+        # if both inputs have names, let's stop if they don't agree, explain if it appears that they are not aligned in particular
+        compare_names(
+            names( inbr_subpops ),
+            colnames( admix_proportions ),
+            'inbr_subpops',
+            'admix_proportions'
+        )
     } else {
         # run overall tree validation
         validate_coanc_tree( tree_subpops )
@@ -119,6 +129,14 @@ draw_all_admix <- function(
         k_subpops_tree <- length( tree_subpops$tip.label )
         if ( k_subpops != k_subpops_tree )
             stop('`admix_proportions` and `tree_subpops` are not compatible: ncol(admix_proportions) == ', k_subpops, ' != ', k_subpops_tree, ' == length( tree_subpops$tip.label )')
+
+        # if both inputs have names, let's stop if they don't agree, explain if it appears that they are not aligned in particular
+        compare_names(
+            names_coanc( tree_subpops ),
+            colnames( admix_proportions ),
+            'tree_subpops',
+            'admix_proportions'
+        )
     }
 
     # validate or generate p_anc
@@ -152,6 +170,10 @@ draw_all_admix <- function(
     if ( is.null( tree_subpops ) ) {
         # pass k_subpops in case inbr_subpops was a scalar (otherwise provides a redundant check)
         p_subpops <- draw_p_subpops(p_anc, inbr_subpops, m_loci = m_loci, k_subpops = k_subpops)
+        # if inbr_subpops was a scalar, then p_subpops will not have column names
+        # try to get them from admix_proportions in this case (ok if this ends up being NULL anyway)
+        if ( length( inbr_subpops ) == 1 )
+            colnames( p_subpops ) <- colnames( admix_proportions )
     } else {
         p_subpops <- draw_p_subpops_tree( p_anc, tree_subpops, m_loci = m_loci )
     }

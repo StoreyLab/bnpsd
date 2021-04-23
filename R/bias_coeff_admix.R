@@ -1,3 +1,4 @@
+# internal function only used by `bias_coeff_admix_fit`, intended to be fast so assumes some checking has already been performed outside of here
 bias_coeff_admix <- function(admix_proportions, coanc_subpops, weights = NULL) {
     # die if things are missing
     if (missing(admix_proportions))
@@ -14,7 +15,7 @@ bias_coeff_admix <- function(admix_proportions, coanc_subpops, weights = NULL) {
         stop( '`admix_proportions` has NA values!' )
     if( anyNA( coanc_subpops ) )
         stop( '`coanc_subpops` has NA values!' )
-    
+
     # in the interest of speed, does not validate matrix dimensions
     # (this is an internal function, so validations ought to happen earlier)
     

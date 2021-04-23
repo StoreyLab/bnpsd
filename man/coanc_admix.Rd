@@ -18,6 +18,9 @@ The \code{n}-by-\code{n} coancestry matrix.
 The \code{n}-by-\code{n} coancestry matrix \code{Theta} of admixed individuals is determined by the \code{n}-by-\code{k} admixture proportion matrix \code{Q} and the \code{k}-by-\code{k} intermediate subpopulation coancestry matrix \code{Psi}, given by \code{Theta = Q \%*\% Psi \%*\% t(Q)}.
 In the more restricted BN-PSD model, \code{Psi} is a diagonal matrix (with FST values for the intermediate subpopulations along the diagonal, zero values off-diagonal).
 }
+\details{
+As a precaution, function stops if both inputs have names and the column names of \code{admix_proportions} and the names in \code{coanc_subpops} disagree, which might be because these two matrices are not aligned or there is some other inconsistency.
+}
 \examples{
 # a trivial case: unadmixed individuals from independent subpopulations
 # number of individuals and subpops

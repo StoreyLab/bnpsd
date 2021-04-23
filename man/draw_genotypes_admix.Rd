@@ -7,12 +7,15 @@
 draw_genotypes_admix(p_ind, admix_proportions = NULL)
 }
 \arguments{
-\item{p_ind}{The \code{m}-by-\code{n} IAF matrix (if \code{admix_proportions} is missing) or the \code{m}-by-\code{k} intermediate subpopulation allele frequency matrix (if \code{admix_proportions} is present)}
+\item{p_ind}{The \code{m}-by-\code{n} IAF matrix (if \code{admix_proportions} is missing) or the \code{m}-by-\code{k} intermediate subpopulation allele frequency matrix (if \code{admix_proportions} is present).}
 
-\item{admix_proportions}{The optional \code{n}-by-\code{k} admixture proportion matrix (to draw data from the admixture model using reduced memory, by not fully forming the IAF matrix)}
+\item{admix_proportions}{The optional \code{n}-by-\code{k} admixture proportion matrix (to draw data from the admixture model using reduced memory, by not fully forming the IAF matrix).
+If provided, and if both \code{admix_proportions} and \code{p_ind} have column names, and if they disagree, the function stops as a precaution, as this suggests the data is misaligned or inconsistent in some way.}
 }
 \value{
-The \code{m}-by-\code{n} genotype matrix
+The \code{m}-by-\code{n} genotype matrix.
+If \code{admix_proportions} is missing, the row and column names of \code{p_ind} are copied to this output.
+If \code{admix_proportions} is present, the row names of the output are the row names of \code{p_ind}, while the column names of the output are the row names of \code{admix_proportions}.
 }
 \description{
 Given the Individual-specific Allele Frequency (IAF) matrix \code{p_ind} for \code{m} loci (rows) and \code{n} individuals (columns), the genotype matrix \code{X} (same dimensions as \code{p_ind}) is drawn from the Binomial distribution equivalent to

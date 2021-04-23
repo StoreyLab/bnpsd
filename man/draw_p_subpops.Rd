@@ -9,7 +9,7 @@ draw_p_subpops(p_anc, inbr_subpops, m_loci = NA, k_subpops = NA)
 \arguments{
 \item{p_anc}{The scalar or length-\code{m_loci} vector of ancestral allele frequencies per locus.}
 
-\item{inbr_subpops}{The length-\code{k_subpops} vector of subpopulation FST values.}
+\item{inbr_subpops}{The scalar or length-\code{k_subpops} vector of subpopulation FST values.}
 
 \item{m_loci}{If \code{p_anc} is scalar, optionally provide the desired number of loci (lest only one locus be simulated).
 Stops if both \code{length(p_anc) > 1} and \code{m_loci} is not \code{NA} and they disagree.}
@@ -18,7 +18,9 @@ Stops if both \code{length(p_anc) > 1} and \code{m_loci} is not \code{NA} and th
 Stops if both \code{length(inbr_subpops) > 1} and \code{k_subpops} is not \code{NA} and they disagree.}
 }
 \value{
-The \code{m_loci}-by-\code{k_subpops} matrix of independent subpopulation allele frequencies
+The \code{m_loci}-by-\code{k_subpops} matrix of independent subpopulation allele frequencies.
+If \code{p_anc} is length-\code{m_loci} with names, these are copied to the row names of this output matrix.
+If \code{inbr_subpops} is length-\code{k_subpops} with names, these are copied to the column names of this output matrix.
 }
 \description{
 The allele frequency matrix \code{P} for \code{m_loci} loci (rows) and \code{k_subpops} independent subpopulations (columns) are drawn from the Balding-Nichols distribution with ancestral allele frequencies \code{p_anc} and FST parameters \code{inbr_subpops} equivalent to

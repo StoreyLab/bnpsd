@@ -70,6 +70,9 @@ The function is a wrapper around \code{\link[=draw_p_anc]{draw_p_anc()}}, \code{
 Importantly, by default fixed loci (where all individuals were homozygous for the same allele) are re-drawn from the start (starting from the ancestral allele frequencies) so no fixed loci are in the output and no biases are introduced by re-drawing genotypes conditional on any of the previous allele frequencies (ancestral, intermediate, or individual-specific).
 Below \code{m_loci} (also \code{m}) is the number of loci, \code{n} is the number of individuals, and \code{k} is the number of intermediate subpopulations.
 }
+\details{
+As a precaution, function stops if both the column names of \code{admix_proportions} and the names in \code{inbr_subpops} or \code{tree_subpops} exist and disagree, which might be because these two data are not aligned or there is some other inconsistency.
+}
 \examples{
 # dimensions
 # number of loci

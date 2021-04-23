@@ -4,7 +4,7 @@
 \alias{tree_additive}
 \title{Calculate additive edges for a coancestry tree, or viceversa}
 \usage{
-tree_additive(tree, rev = FALSE)
+tree_additive(tree, rev = FALSE, force = FALSE)
 }
 \arguments{
 \item{tree}{The coancestry tree with either probabilistic edges (if \code{rev = FALSE}) or additive edges (if \code{rev = TRUE}) as the main edges (stored in \code{tree$edge.length}).
@@ -12,11 +12,13 @@ Must be a \code{phylo} object from the \code{ape} package (see \code{\link[ape:r
 This tree may have a valid root edge (non-NULL \code{tree$root.edge} between 0 and 1), which is incorporated in the output calculations.
 Function stops if the input data is not valid.
 Probabilistic edges are valid if and only if they are all between zero and one.
-Additive edges are valid if and only if they are all non-negative and the sum of edges between the root and each tip (leaf node) does not exceed 1.
-Function stops if \code{tree$edge.length.add} is not \code{NULL}.}
+Additive edges are valid if and only if they are all non-negative and the sum of edges between the root and each tip (leaf node) does not exceed 1.}
 
 \item{rev}{If \code{FALSE} (default), assumes the main edges are probabilistic values, and calculates additive values.
 If \code{TRUE}, assumes main edges are additive values, and calculates probabilistic values.}
+
+\item{force}{If \code{FALSE} (default), function stops if input tree already has additive edges (if \code{tree$edge.length.add} is not \code{NULL}).
+If \code{TRUE}, these values are ignored and overwritten.}
 }
 \value{
 The input \code{phylo} object extended so that the main edges (\code{tree$edge.length}) are probabilistic edges, and the additive edges are stored in \code{tree$edge.length.add}.

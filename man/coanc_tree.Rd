@@ -13,6 +13,7 @@ This tree may have a valid root edge (non-NULL \code{tree$root.edge} between 0 a
 }
 \value{
 The \code{k_subpops}-by-\code{k_subpops} coancestry matrix.
+The tip labels of the tree are copied to the row and column names of this matrix.
 }
 \description{
 This function calculates the coancestry matrix of the subpopulations which are tip nodes in the input tree.

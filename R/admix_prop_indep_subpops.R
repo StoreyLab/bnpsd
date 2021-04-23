@@ -34,17 +34,25 @@ admix_prop_indep_subpops <- function(
                                      labs,
                                      subpops = sort( unique( labs ) )
                                      ) {
+    # this argument is mandatory
+    if ( missing( labs ) )
+        stop( '`labs` is required!' )
+    
     # check if subpops is provided but was inconsistent with labs
     if ( !all( labs %in% subpops ) )
         stop("provided `subpops` does not contain all labels in `labs`!")
-    
+
+    # get dimensions from inputs
     n_ind <- length(labs) # number of individuals
     k_subpops <- length(subpops) # number of subpopulations
+    
     admix_proportions <- matrix(0, nrow = n_ind, ncol = k_subpops) # initialize the desired admixture matrix
     colnames(admix_proportions) <- subpops # return subpopulation names in admixture matrix column names
+    
     # fill in admix_proportions, navigating each subpopulation
     for (i in 1 : k_subpops) {
         admix_proportions[, i] <- labs == subpops[i] # indicator for whether the labels were of subpopulation i or not
     }
-    admix_proportions # return!
+    
+    return( admix_proportions )
 }

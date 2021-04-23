@@ -12,12 +12,14 @@
 #' The edge lengths of this tree must be the FST parameters relating parent and child subpopulations.
 #' @param m_loci If `p_anc` is scalar, optionally provide the desired number of loci (lest only one locus be simulated).
 #' Stops if both `length(p_anc) > 1` and `m_loci` is not `NA` and they disagree.
-#' @param nodes  If `FALSE` (default), returns allele frequencies of "tips" subpopulations only; otherwise returns all allele frequencies, including internal nodes
+#' @param nodes  If `FALSE` (default), returns allele frequencies of "tip" subpopulations only; otherwise returns all allele frequencies, including internal nodes.
 #'
 #' @return The `m_loci`-by-`k_subpops` matrix of independent subpopulation allele frequencies.
-#' If `nodes = FALSE`, columsn include only tip subpopulations.
+#' If `nodes = FALSE`, columns include only tip subpopulations.
 #' If `nodes = TRUE`, internal node subpopulations are also included (in this case the input `p_anc` is returned in the column corresponding to the root node).
 #' In all cases subpopulations are ordered as indexes in the tree, which normally implies the tip nodes are listed first, followed by the internal nodes (as in `tree_subpops$edge` matrix, see [ape::read.tree()] for details).
+#' The `tree_subpops` tip and node names are copied to the column names of this output matrix (individual names may be blank if missing in tree (such as for internal nodes); column names are `NULL` if all `tree_subpops` tip labels were blank, regardless of internal node labels).
+#' If `p_anc` is length-`m_loci` with names, these names are copied to the row names of this output matrix.
 #'
 #' @examples
 #' # for simulating a tree with `rtree`
@@ -112,6 +114,10 @@ draw_p_subpops_tree <- function(
         # add names to matrix
         colnames( p_subpops ) <- names_subpops
     }
+    # now transfer `p_anc` names if possible
+    # p_anc can be scalar, so this only makes sense if the length matches (and names are defined)
+    if ( !is.null( names( p_anc ) ) && length( p_anc ) == m_loci )
+        rownames( p_subpops ) <- names( p_anc )
     
     # initialize the root AFs
     # this is its column

@@ -42,6 +42,7 @@ If \code{sigma} was provided, returns the \code{n_ind}-by-\code{k_subpops} admix
 If \code{sigma} is missing, returns a named list containing:
 \itemize{
 \item \code{admix_proportions}: the \code{n_ind}-by-\code{k_subpops} admixture proportion matrix.
+If \code{coanc_subpops} had names, they are copied to the columns of this matrix.
 \item \code{coanc_subpops}: the input \code{coanc_subpops} rescaled.
 \item \code{sigma}: the fit value of the spread of intermediate subpopulations
 \item \code{coanc_factor}: multiplicative factor used to rescale \code{coanc_subpops}

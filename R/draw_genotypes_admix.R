@@ -8,10 +8,13 @@
 #' However, in this case the function computes the IAF matrix in parts only, never stored in full, greatly reducing memory usage.
 #' If `admix_proportions` is missing, then `p_ind` is treated as the IAF matrix.
 #' 
-#' @param p_ind The `m`-by-`n` IAF matrix (if `admix_proportions` is missing) or the `m`-by-`k` intermediate subpopulation allele frequency matrix (if `admix_proportions` is present)
-#' @param admix_proportions The optional `n`-by-`k` admixture proportion matrix (to draw data from the admixture model using reduced memory, by not fully forming the IAF matrix)
+#' @param p_ind The `m`-by-`n` IAF matrix (if `admix_proportions` is missing) or the `m`-by-`k` intermediate subpopulation allele frequency matrix (if `admix_proportions` is present).
+#' @param admix_proportions The optional `n`-by-`k` admixture proportion matrix (to draw data from the admixture model using reduced memory, by not fully forming the IAF matrix).
+#' If provided, and if both `admix_proportions` and `p_ind` have column names, and if they disagree, the function stops as a precaution, as this suggests the data is misaligned or inconsistent in some way.
 #'
-#' @return The `m`-by-`n` genotype matrix
+#' @return The `m`-by-`n` genotype matrix.
+#' If `admix_proportions` is missing, the row and column names of `p_ind` are copied to this output.
+#' If `admix_proportions` is present, the row names of the output are the row names of `p_ind`, while the column names of the output are the row names of `admix_proportions`.
 #'
 #' @examples
 #' # dimensions
@@ -75,7 +78,10 @@ draw_genotypes_admix <- function(p_ind, admix_proportions = NULL) {
             nrow = m_loci,
             ncol = n_ind
         )
-
+        # copy both row and column names from p_ind to X, as they are given
+        # (works when either or both are null)
+        dimnames( X ) <- dimnames( p_ind )
+        
     } else {
         
         # ensure that things that should be matrices are so
@@ -87,11 +93,27 @@ draw_genotypes_admix <- function(p_ind, admix_proportions = NULL) {
         if ( ncol( p_ind ) != ncol( admix_proportions ) )
             stop('`p_ind` and `admix_proportions` are not compatible: ncol( p_ind ) == ', ncol( p_ind ), ' != ', ncol( admix_proportions ), ' == ncol( admix_proportions )')
         
+        # if both inputs have names, let's stop if they don't agree, explain if it appears that they are not aligned in particular
+        compare_names(
+            colnames( p_ind ),
+            colnames( admix_proportions ),
+            'p_ind',
+            'admix_proportions'
+        )
+        
         # This version handles larger numbers of individuals by avoiding having p_ind * admix_proportions in memory the whole time
         # In fact, we don't save p_ind * admix_proportions either!
         # Since p_ind and admix_proportions are the percursors and may be fairly low-memory (for small k), we can draw genotypes more slowly, making the IAF vector one SNP at the time.
         # For some simulations this is acceptable, if we don't care about the IAFs p_ind*admix_proportions (we can still construct it outside given B and admix_proportions!)
         X <- matrix(0, nrow = m_loci, ncol = n_ind) # initialize the big matrix!
+
+        # copy names, which in this case come from both matrices
+        # avoid setting, especially if both were null
+        if ( !is.null( rownames( p_ind ) ) )
+            rownames( X ) <- rownames( p_ind )
+        if ( !is.null( rownames( admix_proportions ) ) )
+            colnames( X ) <- rownames( admix_proportions )
+        
         # fill by whichever is the smallest dimension (vectorizes the most)
         if ( n_ind <= m_loci ) {
             # navigate each individual
@@ -130,5 +152,5 @@ draw_genotypes_admix <- function(p_ind, admix_proportions = NULL) {
     }
 
     # return for all cases
-    X
+    return( X )
 }

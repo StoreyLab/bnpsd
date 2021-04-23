@@ -8,6 +8,7 @@
 #' @param X The `m`-by-`n` genotype matrix
 #'
 #' @return A length-`m` boolean vector where the `i` element is `TRUE` if locus `i` is fixed or completely missing, `FALSE` otherwise.
+#' If `X` had row names, they are copied to the names of this output vector.
 #'
 #' @examples
 #' # here's a toy genotype matrix
@@ -38,8 +39,10 @@ fixed_loci <- function(X) {
     # is this too slow? (what if we did it using Rcpp?)
     # main step is calculating allele frequencies per row, which automatically handles missingness
     # this returns NaN for completely missing rows
+    # NOTE: if X had rownames, they become the names of p_anc_hat!
     p_anc_hat <- rowMeans(X, na.rm = TRUE) / 2
     
     # this is the return value we want
+    # NOTE: rownames are again inherited into the output automatically!
     is.na(p_anc_hat) | p_anc_hat == 0 | p_anc_hat == 1
 }

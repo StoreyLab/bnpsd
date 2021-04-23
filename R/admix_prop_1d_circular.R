@@ -31,6 +31,7 @@
 #' @return If `sigma` was provided, returns the `n_ind`-by-`k_subpops` admixture proportion matrix (`admix_proportions`).
 #' If `sigma` is missing, returns a named list containing:
 #' - `admix_proportions`: the `n_ind`-by-`k_subpops` admixture proportion matrix.
+#'   If `coanc_subpops` had names, they are copied to the columns of this matrix.
 #' - `coanc_subpops`: the input `coanc_subpops` rescaled.
 #' - `sigma`: the fit value of the spread of intermediate subpopulations
 #' - `coanc_factor`: multiplicative factor used to rescale `coanc_subpops`
@@ -157,6 +158,12 @@ admix_prop_1d_circular <- function(
         # this triggers version that fits bias coefficient
         # let's rescale coanc_subpops now!
         obj <- rescale_coanc_subpops(admix_proportions, coanc_subpops, fst)
+
+        # get names from `coanc_subpops`, inherit into `admix_proportions` if non-NULL
+        names_coanc_subpops <- names_coanc( coanc_subpops )
+        if ( !is.null( names_coanc_subpops ) )
+            colnames( admix_proportions ) <- names_coanc_subpops
+        
         # return all this additional data!
         return(
             list(
@@ -168,6 +175,7 @@ admix_prop_1d_circular <- function(
         )
     } else {
         # in direct case, always return admix_proportions
+        # colnames are always NULL in this case
         return(admix_proportions)
     }
 }

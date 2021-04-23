@@ -19,9 +19,10 @@
 #' Function stops if the input data is not valid.
 #' Probabilistic edges are valid if and only if they are all between zero and one.
 #' Additive edges are valid if and only if they are all non-negative and the sum of edges between the root and each tip (leaf node) does not exceed 1.
-#' Function stops if `tree$edge.length.add` is not `NULL`.
 #' @param rev If `FALSE` (default), assumes the main edges are probabilistic values, and calculates additive values.
 #' If `TRUE`, assumes main edges are additive values, and calculates probabilistic values.
+#' @param force If `FALSE` (default), function stops if input tree already has additive edges (if `tree$edge.length.add` is not `NULL`).
+#' If `TRUE`, these values are ignored and overwritten.
 #'
 #' @return The input `phylo` object extended so that the main edges (`tree$edge.length`) are probabilistic edges, and the additive edges are stored in `tree$edge.length.add`.
 #' This is so for both values of `rev`
@@ -68,7 +69,7 @@
 #' [coanc_tree()], the key application facilitated by additive edges.
 #' 
 #' @export
-tree_additive <- function( tree, rev = FALSE ) {
+tree_additive <- function( tree, rev = FALSE, force = FALSE ) {
     if ( missing( tree ) )
         stop( '`tree` is required!' )
     # run through validator for additional checks
@@ -76,8 +77,14 @@ tree_additive <- function( tree, rev = FALSE ) {
     validate_coanc_tree( tree )
     
     # input tree shouldn't have additive data calculated already (either way it means there's nothing to do)
-    if ( !is.null( tree$edge.length.add ) )
-        stop( '`tree$edge.length.add` is not `NULL`, suggests this tree already has probabilistic and additive edges!' )
+    if ( !is.null( tree$edge.length.add ) ) {
+        if ( force ) {
+            # just pretend we didn't have them
+            # set to NULL for safety, though code isn't supposed to use this anyway (it ought to just get ovewritten later)
+            tree$edge.length.add <- NULL
+        } else 
+            stop( '`tree$edge.length.add` is not `NULL`, suggests this tree already has probabilistic and additive edges!  Tip: if you want to ignore these values, use option `force = TRUE`!' )
+    }
     
     # number of edges
     n_edges <- nrow( tree$edge )
