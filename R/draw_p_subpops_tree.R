@@ -84,7 +84,7 @@ draw_p_subpops_tree <- function(
         m_loci <- m_loci_p
     
     # number of subpopulations to simulate
-    k_subpops <- length( tree_subpops$tip.label )
+    k_subpops <- ape::Ntip( tree_subpops )
 
     # and total number of nodes (initially we keep them all in the output matrix
     k_subpops_all <- max( tree_subpops$edge )
@@ -119,9 +119,14 @@ draw_p_subpops_tree <- function(
     if ( !is.null( names( p_anc ) ) && length( p_anc ) == m_loci )
         rownames( p_subpops ) <- names( p_anc )
     
+    # algorithm is sensitive to edge ordering
+    # assumption is that we move from the root up, which is the reverse of postorder
+    order_edges <- rev( ape::postorder( tree_subpops ) )
+    
     # initialize the root AFs
-    # this is its column
-    j_root <- tree_subpops$edge[ 1, 1 ]
+    # determine root node
+    # it is very first parent node (in reverse postorder)
+    j_root <- tree_subpops$edge[ order_edges[ 1 ], 1 ]
     # make sure we got it right, should be 1 + the number of leaf nodes
     # the code doesn't really depend on this assumption exactly, although it'd be very bad if j_root <= k_subpops
     if ( j_root != k_subpops + 1 )
@@ -138,8 +143,8 @@ draw_p_subpops_tree <- function(
     # make sure "edge lengths" vector has right length
     if ( length( tree_subpops$edge.length ) != n_edges )
         stop( 'Length of `tree_subpops$edge.length` (', length( tree_subpops$edge.length ), ') does not match number of rows of `tree_subpops$edge` (', n_edges, ')!  Is `tree_subpops` object malformed?' )
-    # start navigating
-    for ( e in 1 : n_edges ) {
+    # start navigating (in reverse postorder!)
+    for ( e in order_edges ) {
         # get parent and child nodes for this edge
         j_parent <- tree_subpops$edge[ e, 1 ]
         j_child <- tree_subpops$edge[ e, 2 ]

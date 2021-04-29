@@ -86,10 +86,15 @@ tree_additive <- function( tree, rev = FALSE, force = FALSE ) {
             stop( '`tree$edge.length.add` is not `NULL`, suggests this tree already has probabilistic and additive edges!  Tip: if you want to ignore these values, use option `force = TRUE`!' )
     }
     
+    # algorithm is sensitive to edge ordering
+    # assumption is that we move from the root up, which is the reverse of postorder
+    order_edges <- rev( ape::postorder( tree ) )
+    
     # number of edges
-    n_edges <- nrow( tree$edge )
+    n_edges <- ape::Nedge( tree )
     # determine root node
-    j_root <- tree$edge[ 1, 1 ]
+    # it is very first parent node (in reverse postorder)
+    j_root <- tree$edge[ order_edges[ 1 ], 1 ]
     # keep track of additive or probability edges for each child from the root as it becomes a parent
     # a list in parallel to the normal list of edges for each node to its parent only
     if ( rev ) {
@@ -102,9 +107,9 @@ tree_additive <- function( tree, rev = FALSE, force = FALSE ) {
     node_edge_from_root <- rep.int( NA, max( tree$edge ) )
     # only root node is pre-set to zero, or to value of root edge if present
     node_edge_from_root[ j_root ] <- if ( is.null( tree$root.edge ) ) 0 else tree$root.edge
-    
-    # navigate all edges
-    for ( e in 1 : n_edges ) {
+
+    # navigate all edges in reverse postorder!
+    for ( e in order_edges ) {
         # get parent and child nodes for this edge
         j_parent <- tree$edge[ e, 1 ]
         j_child <- tree$edge[ e, 2 ]

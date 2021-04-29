@@ -1,4 +1,3 @@
-# new algorithm for tree fitting assuming data is truly from a tree (with little noise)
 #' Fit a tree structure to a coancestry matrix
 #'
 #' Implements a heuristic algorithm to find the optimal tree topology based on joining pairs of subpopulations with the highest between-coancestry values, and averaging parent coancestries for the merged nodes.
@@ -7,7 +6,7 @@
 #' 
 #' The tree is bifurcating by construction, but edges may equal zero if needed, effectively resulting in multifurcation, although this code makes no attempt to merge nodes with zero edges.
 #' For best fit to arbitrary data, the root edge is always fit to the data (may also be zero).
-#' Data fit may be poor if the coancestry does not correspond to a tree, particularly if there is admixture.
+#' Data fit may be poor if the coancestry does not correspond to a tree, particularly if there is admixture between subpopulations.
 #'
 #' @param coancestry The coancestry matrix to fit a tree to.
 #'
@@ -16,6 +15,7 @@
 #' - `Nnode`: (standard `phylo`.)  Number of internal (non-leaf) nodes.
 #' - `tip.label`: (standard `phylo`.)  Labels for tips (leaf nodes), in order of index as in `edge` matrix above.
 #'   These match the row names of the input `coancestry` matrix, or if names are missing, the row indexes of this matrix are used (in both cases, labels may be reordered compared to `rownames( coancestry )`).
+#'   Tips are ordered as they appear in the above `edge` matrix (ensuring visual agreement in plots between the tree and its resulting coancestry matrix via [coanc_tree()]), and in an order that matches the input `coancestry`'s subpopulation order as much as possible (tree constraints do not permit arbitrary tip orders, but a heuristic implemented in [tree_reorder()] is used to determine a reasonable order when an exact match is not possible).
 #' - `edge.length`: (standard `phylo`.)  Values of edge lengths in same order as rows of `edge` matrix above.
 #' - `root.edge`: (standard `phylo`.)  Value of root edge length.
 #' - `rss`:  The residual sum of squares of the model coancestry versus the input coancestry.
@@ -35,6 +35,8 @@
 #'
 #' @seealso
 #' [coanc_tree()]) for the inverse function (when the coancestry corresponds exactly to a tree).
+#' 
+#' [tree_reorder()] for reordering tree structure so that tips appear in a particular desired order.
 #' 
 #' @export
 fit_tree <- function( coancestry ) {
@@ -110,10 +112,19 @@ fit_tree <- function( coancestry ) {
     tree_str <- paste0( tree_str, ';' )
     # convert to tree
     tree <- ape::read.tree( text = tree_str )
-    
+
     # fit edges that minimize squared error
     # (here we go back to the original coancestry, not coanc_tmp!)
     tree <- fit_tree_single( coancestry, tree )
+    # NOTE: do before `tree_reorder` because that one, in validation, requires `tree$edge.length` to be present!
+    
+    # now perform a more elaborate reordering of edges and tips
+    # trees in the previous step are not guaranteed to be in the same order as the input coancestry
+    # in general, it's not be possible for trees to be reordered to match arbitrary tip orders, but this code tries its best to give a best-match fit, in a sense, by greedily rotating nodes in "postorder"
+    # the output tree has tip labels in matching order with plot (clade) order
+    labels <- rownames( coancestry )
+    tree <- tree_reorder( tree, labels )
+    
     # expand from linear to probabilistic scale!
     tree <- tree_additive( tree, rev = TRUE )
     
@@ -171,7 +182,7 @@ fit_tree_single <- function( coancestry, tree ) {
     # separated into another function
     edge_to_tips <- edges_to_tips( tree )
     # create indicator block matrices now
-    n_tips <- length( tree$tip.label )
+    n_tips <- ape::Ntip( tree )
     ## edge_to_blocks <- lapply( edge_to_tips, tips_to_block, n_tips ) # list-of-matrices version
     X <- sapply( edge_to_tips, tips_to_block, n_tips ) # direct to matrix-of-vectors version
 
@@ -238,16 +249,23 @@ edges_to_tips <- function( tree ) {
     # first step is really to know which are the tips and which ones are children to each internal edge
     
     # number of edges
-    n_edges <- nrow( tree$edge )
+    n_edges <- ape::Nedge( tree )
     # number of tips
-    n_tips <- length( tree$tip.label )
+    n_tips <- ape::Ntip( tree )
+    # number of internal nodes
+    n_nodes <- ape::Nnode( tree )
     # edge to tips
     edge_to_tips <- vector( 'list', n_edges )
     # and a separate list of internal nodes to tips (similar info but it is organized differently)
     # this is an intermediate structure, ultimately not of interest
-    node_to_tips <- vector( 'list', n_edges + 1 )
-    # navigate all edges backwards
-    for ( e in n_edges : 1 ) {
+    node_to_tips <- vector( 'list', n_nodes + n_tips )
+    
+    # algorithm is sensitive to edge ordering
+    # assumption is that we move from the tips down, which is postorder
+    order_edges <- ape::postorder( tree )
+    
+    # navigate all edges in postorder!
+    for ( e in order_edges ) {
         # get parent and child nodes for this edge
         j_parent <- tree$edge[ e, 1 ]
         j_child <- tree$edge[ e, 2 ]

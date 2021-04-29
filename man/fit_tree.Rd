@@ -16,6 +16,7 @@ A \code{phylo} object from the \code{ape} package (see \code{\link[ape:read.tree
 \item \code{Nnode}: (standard \code{phylo}.)  Number of internal (non-leaf) nodes.
 \item \code{tip.label}: (standard \code{phylo}.)  Labels for tips (leaf nodes), in order of index as in \code{edge} matrix above.
 These match the row names of the input \code{coancestry} matrix, or if names are missing, the row indexes of this matrix are used (in both cases, labels may be reordered compared to \code{rownames( coancestry )}).
+Tips are ordered as they appear in the above \code{edge} matrix (ensuring visual agreement in plots between the tree and its resulting coancestry matrix via \code{\link[=coanc_tree]{coanc_tree()}}), and in an order that matches the input \code{coancestry}'s subpopulation order as much as possible (tree constraints do not permit arbitrary tip orders, but a heuristic implemented in \code{\link[=tree_reorder]{tree_reorder()}} is used to determine a reasonable order when an exact match is not possible).
 \item \code{edge.length}: (standard \code{phylo}.)  Values of edge lengths in same order as rows of \code{edge} matrix above.
 \item \code{root.edge}: (standard \code{phylo}.)  Value of root edge length.
 \item \code{rss}:  The residual sum of squares of the model coancestry versus the input coancestry.
@@ -30,7 +31,7 @@ This algorithm recovers the true tree when the input coancestry truly belongs to
 \details{
 The tree is bifurcating by construction, but edges may equal zero if needed, effectively resulting in multifurcation, although this code makes no attempt to merge nodes with zero edges.
 For best fit to arbitrary data, the root edge is always fit to the data (may also be zero).
-Data fit may be poor if the coancestry does not correspond to a tree, particularly if there is admixture.
+Data fit may be poor if the coancestry does not correspond to a tree, particularly if there is admixture between subpopulations.
 }
 \examples{
 # create a random tree
@@ -47,4 +48,6 @@ tree2 <- fit_tree( coanc )
 }
 \seealso{
 \code{\link[=coanc_tree]{coanc_tree()}}) for the inverse function (when the coancestry corresponds exactly to a tree).
+
+\code{\link[=tree_reorder]{tree_reorder()}} for reordering tree structure so that tips appear in a particular desired order.
 }

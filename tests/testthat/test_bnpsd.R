@@ -1635,6 +1635,24 @@ test_that( "draw_p_subpops_tree works", {
     expect_equal( colnames( p_subpops )[ ( k_subpops + 1 ) : ( 2 * k_subpops - 1 ) ], tree_subpops_full_names$node.label )
     # no names from p_anc
     expect_true( is.null( rownames( p_subpops ) ) )
+
+    # a successful run with randomized edges (used to cause problems due to assumption that this wasn't allowed)
+    tree_subpops_rand <- tree_subpops
+    tree_subpops_rand$edge <- tree_subpops_rand$edge[ sample( ape::Nedge( tree_subpops_rand ) ), ]
+    expect_silent(
+        p_subpops <- draw_p_subpops_tree(
+            p_anc = p_anc,
+            tree_subpops = tree_subpops_rand
+        )
+    )
+    expect_equal(nrow(p_subpops), m_loci)
+    expect_equal(ncol(p_subpops), k_subpops)
+    expect_true(all(p_subpops >= 0)) # all are non-negative
+    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
+    # names are inherited from tree
+    expect_equal( colnames( p_subpops ), tree_subpops_rand$tip.label )
+    # no names from p_anc
+    expect_true( is.null( rownames( p_subpops ) ) )
     
 })
 
@@ -1660,6 +1678,7 @@ test_that( "tree_additive works", {
     expect_true( !is.null( tree2$edge.length.add ) )
     expect_equal( length( tree2$edge.length.add ), length( tree2$edge.length ) )
     expect_true( all( tree2$edge.length.add >= 0 ) )
+    expect_true( all( tree2$edge.length.add <= 1 ) )
 
     # a successful run with an extreme but valid root edge
     tree$root.edge <- 0.9
@@ -1674,8 +1693,25 @@ test_that( "tree_additive works", {
     expect_true( !is.null( tree2$edge.length.add ) )
     expect_equal( length( tree2$edge.length.add ), length( tree2$edge.length ) )
     expect_true( all( tree2$edge.length.add >= 0 ) )
+    expect_true( all( tree2$edge.length.add <= 1 ) )
     # root edge doesn't change
     expect_equal( tree$root.edge, tree2$root.edge )
+
+    # a successful run with randomized edges (used to cause problems due to assumption that this wasn't allowed)
+    tree_rand <- tree
+    # reorder edges fully so output tree matches last tree2 (upon the same reordering)
+    indexes <- sample( ape::Nedge( tree_rand ) )
+    tree_rand$edge <- tree_rand$edge[ indexes, ]
+    tree_rand$edge.length <- tree_rand$edge.length[ indexes ]
+    expect_silent(
+        tree_rand2 <- tree_additive( tree_rand )
+    )
+    # if we reorder previous output, we expect to have the same exact tree
+    tree_rand2_exp <- tree2
+    tree_rand2_exp$edge <- tree_rand2_exp$edge[ indexes, ]
+    tree_rand2_exp$edge.length <- tree_rand2_exp$edge.length[ indexes ]
+    tree_rand2_exp$edge.length.add <- tree_rand2_exp$edge.length.add[ indexes ] # additive edges too!
+    expect_equal( tree_rand2, tree_rand2_exp )
 })
 
 
@@ -1730,6 +1766,22 @@ test_that( "tree_additive rev works", {
         tree_prob2 <- tree_additive( tree_add, rev = TRUE )
     )
     expect_equal( tree_prob, tree_prob2 )
+
+    # a successful run with randomized edges (used to cause problems due to assumption that this wasn't allowed)
+    # redraw tree to have a clean slate
+    tree_prob <- ape::rtree( k_subpops )
+    # randomize right away
+    tree_prob$edge <- tree_prob$edge[ sample( ape::Nedge( tree_prob ) ), ]
+    # repeat other steps
+    tree_prob <- tree_additive( tree_prob )
+    tree_add <- tree_prob
+    tree_add$edge.length <- tree_add$edge.length.add
+    tree_add$edge.length.add <- NULL
+    # actual test
+    expect_silent(
+        tree_prob2 <- tree_additive( tree_add, rev = TRUE )
+    )
+    expect_equal( tree_prob, tree_prob2 )
 })
 
 test_that( "coanc_tree works", {
@@ -1754,6 +1806,7 @@ test_that( "coanc_tree works", {
     expect_true( isSymmetric( coanc_mat ) )
     expect_true( all( coanc_mat >= 0 ) )
     expect_true( all( coanc_mat <= 1 ) ) # because in additive scale everything should be below 1
+    expect_equal( rownames( coanc_mat ), tree$tip.label ) # earlier isSymmetric ensures colnames is the same, not testing again
     # answer should also be positive-semidefinite at least, but meh we don't test that here
 
     # repeat with a tree with an extreme but valid root edge
@@ -1769,6 +1822,20 @@ test_that( "coanc_tree works", {
     expect_true( isSymmetric( coanc_mat ) )
     expect_true( all( coanc_mat >= 0 ) )
     expect_true( all( coanc_mat <= 1 ) )
+    expect_equal( rownames( coanc_mat ), tree$tip.label ) # earlier isSymmetric ensures colnames is the same, not testing again
+
+    # repeat with randomized edges (don't expect errors, but let's just check)
+    # keep root edge, meh
+    tree_rand <- tree
+    indexes <- sample( ape::Nedge( tree_rand ) )
+    # to expect equality to previous run, `$edge` and `$edge.length` have to be reordered together
+    tree_rand$edge <- tree_rand$edge[ indexes, ]
+    tree_rand$edge.length <- tree_rand$edge.length[ indexes ]
+    expect_silent(
+        coanc_mat_rand <- coanc_tree( tree_rand )
+    )
+    # should match last output (makes things easy!)
+    expect_equal( coanc_mat_rand, coanc_mat )
 })
 
 test_that("draw_all_admix works with a tree", {
@@ -1808,7 +1875,7 @@ test_that("draw_all_admix works with a tree", {
     )
     expect_equal( names(out), draw_all_admix_names_ret_default )
 
-    # now rerun with all outpts, so we can test them all
+    # now rerun with all outputs, so we can test them all
     expect_silent( 
         out <- draw_all_admix(admix_proportions, tree_subpops = tree_subpops, m_loci = m_loci, want_p_ind = TRUE, want_p_subpops = TRUE)
     )
@@ -1856,6 +1923,33 @@ test_that("draw_all_admix works with a tree", {
     # p_anc was simulated inside function (not passed) so loci don't have names
     expect_true( is.null( names( p_anc ) ) )
 
+    # repeat tests with randomized edges
+    tree_rand <- tree_subpops
+    tree_rand$edge <- tree_rand$edge[ sample( ape::Nedge( tree_rand )), ]
+    # test default outputs only
+    expect_silent( 
+        out <- draw_all_admix(admix_proportions, tree_subpops = tree_rand, m_loci = m_loci)
+    )
+    expect_equal( names(out), draw_all_admix_names_ret_default )
+    X <- out$X # genotypes
+    p_anc <- out$p_anc # Ancestral AFs
+    # test X
+    expect_equal(nrow(X), m_loci)
+    expect_equal(ncol(X), n_ind)
+    expect_true( !anyNA( X ) ) # no missing values
+    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
+    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
+    # p_anc was simulated inside function (not passed) so loci don't have names
+    expect_true( is.null( rownames( X ) ) )
+    # individuals do have names
+    expect_equal( colnames( X ), rownames( admix_proportions ) )
+    # test p_anc
+    expect_equal(length(p_anc), m_loci)
+    expect_true(all(p_anc >= 0)) # all are non-negative
+    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
+    # p_anc was simulated inside function (not passed) so loci don't have names
+    expect_true( is.null( names( p_anc ) ) )
+    
     # expect a warning if there's a root edge
     tree_subpops_warn <- tree_subpops
     tree_subpops_warn$root.edge <- 0.5
@@ -1876,6 +1970,7 @@ test_that("draw_all_admix works with a tree", {
 
 test_that("admix_prop_1d_linear/circular bias_coeff work with tree", {
     # we don't pass a tree, but rather pass it's coancestry matrix, make sure that works
+    # NOTE: no need to test trees with randomized edge orders, since that was already tested for `coanc_tree` and it doesn't come up otherwise
 
     # random trees are dangerous here, because minimum bias coeff can vary wildly
     # so instead pass a fixed, reasonable tree, which has a minimum bias_coeff that has been pretested to be less than the value we ask for below
@@ -1941,6 +2036,130 @@ test_that("admix_prop_1d_linear/circular bias_coeff work with tree", {
 
 })
 
+test_that( "is_ordered_tips_edges, tree_reindex_tips work", {
+    # create a random tree
+    # these always have ordered tips by construction
+    k_subpops <- 5
+    tree <- ape::rtree( k_subpops )
+
+    # only one mandatory argument (both functions)
+    expect_error( is_ordered_tips_edges() )
+    expect_error( tree_reindex_tips() )
+
+    # a succesful run
+    expect_silent(
+        test <- is_ordered_tips_edges( tree )
+    )
+    expect_true( test )
+
+    # tree reindexing should not change the tree in this case
+    expect_silent(
+        tree2 <- tree_reindex_tips( tree )
+    )
+    expect_equal( tree2, tree )
+
+    # purposefully reverse order
+    tree_rev <- tree
+    tree_rev$edge <- tree_rev$edge[ ape::Nedge( tree_rev ) : 1, ]
+    # this should be false
+    expect_silent(
+        test <- is_ordered_tips_edges( tree_rev )
+    )
+    expect_false( test )
+
+    # reindex reversed tree
+    expect_silent(
+        tree_rev <- tree_reindex_tips( tree_rev )
+    )
+    # now this should pass "ordered" test
+    expect_silent(
+        test <- is_ordered_tips_edges( tree_rev )
+    )
+    expect_true( test )
+    # and because the reordering was exact reversal, then we should see that in the tip labels
+    expect_equal( tree_rev$tip.label, rev( tree$tip.label ) )
+
+    # test reordering under additive edges
+    tree <- tree_additive( tree )
+    # tree reindexing should not change the tree in this case
+    expect_silent(
+        tree2 <- tree_reindex_tips( tree )
+    )
+    expect_equal( tree2, tree )
+    # purposefully reverse order
+    tree_rev <- tree
+    tree_rev$edge <- tree_rev$edge[ ape::Nedge( tree_rev ) : 1, ]
+    # not sure what values to expect exactly for additive edges in this case, we just want non-failure
+    expect_silent(
+        tree_rev <- tree_reindex_tips( tree_rev )
+    )
+    expect_silent(
+        test <- is_ordered_tips_edges( tree_rev )
+    )
+    expect_true( test )
+    expect_equal( tree_rev$tip.label, rev( tree$tip.label ) )
+
+    # make sure code doesn't die under complete random edge reorderings
+    tree_rand <- tree
+    indexes <- sample( ape::Nedge( tree_rand ) )
+    tree_rand$edge <- tree_rand$edge[ indexes, ]
+    # this should work, but by random chance we might get tips in the right order, so this could be true or false
+    expect_silent(
+        test <- is_ordered_tips_edges( tree_rand )
+    )
+    expect_true( is.logical( test ) )
+    # reindexing should also work
+    expect_silent(
+        tree_rand <- tree_reindex_tips( tree_rand )
+    )
+    # this time tips must be ordered
+    expect_silent(
+        test <- is_ordered_tips_edges( tree_rand )
+    )
+    expect_true( test )
+})
+
+test_that( "tree_reorder works", {
+    # create a random tree
+    # these always have ordered tips by construction
+    k_subpops <- 10
+    tree <- ape::rtree( k_subpops )
+    # get true labels, set as desired ones
+    labels <- tree$tip.label
+    # scramble tree
+    tree_scrambled <- tree
+    indexes <- sample( ape::Nedge( tree ) )
+    tree_scrambled$edge <- tree_scrambled$edge[ indexes, ]
+    tree_scrambled$edge.length <- tree_scrambled$edge.length[ indexes ]
+
+    # check for missing arguments
+    expect_error( tree_reorder( ) )
+    expect_error( tree_reorder( tree ) )
+    expect_error( tree_reorder( labels = labels ) )
+    # pass invalid tree
+    expect_error( tree_reorder( 1:10, labels ) )
+    # invalid labels (wrong length)
+    expect_error( tree_reorder( tree, labels[-1] ) )
+    # invalid labels (wrong content)
+    labels_bad <- labels
+    labels_bad[1] <- 'WRONG!'
+    expect_error( tree_reorder( tree, labels_bad ) )
+    
+    # a successful run
+    # this one ought to not change tree
+    expect_silent(
+        tree2 <- tree_reorder( tree, labels )
+    )
+    expect_equal( tree2, tree )
+
+    # now see if we can unscramble tree!
+    expect_silent(
+        tree2 <- tree_reorder( tree_scrambled, labels )
+    )
+    expect_equal( tree2, tree )
+    
+})
+
 test_that( "edges_to_tips works", {
     # error if tree is missing
     expect_error( edges_to_tips() )
@@ -1970,6 +2189,20 @@ test_that( "edges_to_tips works", {
         edge_to_tips_exp
     )
 
+    # randomly reorder edges, which messes with calculations in older versions
+    indexes <- sample( ape::Nedge( tree ) )
+    tree_rand <- tree
+    tree_rand$edge <- tree_rand$edge[ indexes, ]
+    # NOTE: no edge lengths here to worry about (they're all the same values anyway), plus the output ignores these values
+    expect_silent(
+        edge_to_tips_rand_obs <- edges_to_tips( tree_rand )
+    )
+    # compare outputs
+    expect_equal(
+        edge_to_tips_rand_obs,
+        edge_to_tips_exp[ indexes ] # this reorders list!
+    )
+    
     # now try the same on a random tree
     # we won't know exactly what to expect but there are some patterns we do expect
     k_subpops <- 5
@@ -2012,6 +2245,20 @@ test_that( "fit_tree_single works", {
     # remove that element, the rest should be the same tree
     tree_fit$rss <- NULL
     expect_equal( tree_fit, tree )
+
+    # make sure this works with scrambled tree edges
+    indexes <- sample( ape::Nedge( tree ) )
+    tree_rand <- tree
+    tree_rand$edge <- tree_rand$edge[ indexes, ]
+    # reorder edge lengths too for validation
+    tree_rand$edge.length <- tree_rand$edge.length[ indexes ]
+    expect_silent(
+        tree_rand_fit <- fit_tree_single( coancestry, tree_rand )
+    )
+    # expect again a perfect fit!
+    expect_equal( tree_rand_fit$rss, 0 )
+    tree_rand_fit$rss <- NULL
+    expect_equal( tree_rand_fit, tree_rand )
 
     # cause a warning when tree and coancestry labels don't agree, even though matrices are aligned by construction
     tree2 <- tree
@@ -2146,3 +2393,4 @@ test_that( "scale_tree works", {
     )
     expect_equal( tree_obs, tree_exp )
 })
+

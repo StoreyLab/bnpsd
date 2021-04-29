@@ -181,3 +181,21 @@ It's Fangorn Forest around here with all the tree updates!
   - Function `draw_genotypes_admix`, when `admix_proportions` is passed, stops if the column names of `admix_proportions` and `p_ind` disagree.
   - Function `make_p_ind_admix` stops if the column names of `admix_proportions` and `p_subpops` disagree.
 - Function `tree_additive` now has option `force`, which when `TRUE` simply proceeds without stopping if additive edges were already present (in `tree$edge.length.add`, which is ignored and overwritten).
+
+# 2021-04-29 - bnpsd 1.3.3.9000
+
+New functions and bug fixes dealing with reordering tree edges and tips.
+
+- Added function `tree_reindex_tips` for ensuring that tip order agrees in both the internal labels vector and the edge matrix.
+  Such lack of agreement is generally possible (technically the tree is the same for arbitrary orders of edges in the edge matrix).
+  However, such a disagreement causes visual disagreement in plots (for example, trees are plotted in the order of the edge matrix, versus coancestry matrices are ordered as in the tip labels vector instead), which can now be fixed in general.
+- Added function `tree_reorder` for reordering tree edges and tips to agree as much as possible with a desired tip order.
+  The heuristic finds the exact solution if it exists, otherwise returns a reasonable order close to the desired order.
+  Tip order in labels and edge matrix agree (via `tree_reindex_tips`).
+- Function `fit_tree` now outputs trees with tip order that better agrees with the input data, and tip order in labels vector and edge matrix now agree (via `tree_reorder`).
+- Several functions now work with trees whose edges are arbitrarily ordered, particularly when they do not move out from the root (i.e. reverse postorder):
+  - Function `tree_additive`.
+    Before this bug fix, some trees could trigger the error message "Error: Node index 6 was not assigned coancestry from root! (unexpected)", where "6" could be other numbers.
+  - Function `draw_p_subpops_tree`.
+	Before this bug fix, some trees could trigger the error message "Error: The root node index in `tree_subpops$edge` (9) does not match `k_subpops + 1` (6) where `k_subpops` is the number of tips!  Is the `tree_subpops` object malformed?", where "9" and "6" could be other numbers.  Other possible error messages contain "Parent node index 6 has not yet been processed ..." or "Child" instead of "Parent", where "6" could be other numbers.
+  - Internal functions used by `fit_tree` had related fixes, but overall `fit_tree` appears to have had no bugs because users cannot provide trees, and the tree-building algorithm does not produce scrambled edges that would have caused problems.

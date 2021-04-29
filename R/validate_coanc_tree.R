@@ -38,16 +38,16 @@ validate_coanc_tree <- function( tree, name = 'tree' ) {
     # edges should always have two columns only, check that immediately to catch most egregious errors
     if ( ncol( tree$edge ) != 2 )
         stop( '`tree$edge` does not have 2 columns (actual: ', ncol( tree$edge ), ')!' )
-    n_tips <- length( tree$tip.label )
-    n_nodes <- tree$Nnode
+    n_tips <- ape::Ntip( tree )
+    n_nodes <- ape::Nnode( tree )
     # edges according to the first two counts
     # subtract one because root node is counted but has no edge
     n_edges <- n_tips + n_nodes - 1
     # now the other matrices/vectors must match this count
     if ( length( tree$edge.length ) != n_edges )
         stop( 'Number of edges in `', name, '$edge.length` (', length( tree$edge.length ), ') disagrees with expected number of edges (', n_edges, ') based on number of tips (', n_tips, ') and internal nodes excluding root (', n_nodes - 1, ')!' )
-    if ( nrow( tree$edge ) != n_edges )
-        stop( 'Number of edges in `', name, '$edge` (', nrow( tree$edge ), ' rows) and `', name, '$edge.length` (', n_edges, ') disagrees!' )
+    if ( ape::Nedge( tree ) != n_edges ) # count from edge matrix
+        stop( 'Number of edges in `', name, '$edge` (', ape::Nedge( tree ), ' rows) and `', name, '$edge.length` (', n_edges, ') disagrees!' )
     # test contents of tree$edge
     # these are node indexes
     i_max <- max( tree$edge )
