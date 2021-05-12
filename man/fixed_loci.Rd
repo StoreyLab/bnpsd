@@ -4,10 +4,14 @@
 \alias{fixed_loci}
 \title{Identify fixed loci}
 \usage{
-fixed_loci(X)
+fixed_loci(X, maf_min = 0)
 }
 \arguments{
 \item{X}{The \code{m}-by-\code{n} genotype matrix}
+
+\item{maf_min}{The minimum minor allele frequency (default zero), to extend the working definition of "fixed" to include rare variants.
+Loci with minor allele frequencies less than or \emph{equal} to this value are marked as fixed.
+Must be a scalar between 0 and 0.5.}
 }
 \value{
 A length-\code{m} boolean vector where the \code{i} element is \code{TRUE} if locus \code{i} is fixed or completely missing, \code{FALSE} otherwise.
@@ -17,6 +21,7 @@ If \code{X} had row names, they are copied to the names of this output vector.
 A locus is "fixed" if the non-missing sub-vector contains all 0's or all 2's (the locus is completely homozygous for one allele or completely homozygous for the other allele).
 This function tests each locus, returning a vector that is \code{TRUE} for each fixed locus, \code{FALSE} otherwise.
 Loci with only missing elements (\code{NA}) are treated as fixed.
+The parameter \code{maf_min} extends the "fixed" definition to loci whose minor allele frequency is smaller or equal than this value.
 Below \code{m} is the number of loci, and \code{n} is the number of individuals.
 }
 \examples{
@@ -27,13 +32,19 @@ X <- matrix(
               0, NA, 0,  # another fixed locus, for opposite allele
               1, 1, 1,   # NOT fixed (heterozygotes are not considered fixed)
               0, 1, 2,   # a completely variable locus
+              0, 0, 1,   # a somewhat "rare" variant
               NA, NA, NA # completely missing locus (will be treated as fixed)
              ),
        ncol = 3, byrow = TRUE)
 
 # test that we get the desired values
 stopifnot(
-  fixed_loci(X) == c(TRUE, TRUE, FALSE, FALSE, TRUE)
+  fixed_loci(X) == c(TRUE, TRUE, FALSE, FALSE, FALSE, TRUE)
+)
+
+# the "rare" variant gets marked as "fixed" if we set `maf_min` to its frequency
+stopifnot(
+  fixed_loci(X, maf_min = 1/6) == c(TRUE, TRUE, FALSE, FALSE, TRUE, TRUE)
 )
 
 }

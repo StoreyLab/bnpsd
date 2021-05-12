@@ -15,6 +15,7 @@ draw_all_admix(
   want_p_anc = TRUE,
   verbose = FALSE,
   require_polymorphic_loci = TRUE,
+  maf_min = 0,
   beta = NA,
   p_anc = NULL
 )
@@ -42,7 +43,12 @@ Note that by default \code{p_ind} is not constructed in full at all, instead a f
 
 \item{verbose}{If \code{TRUE}, prints messages for every stage in the algorithm.}
 
-\item{require_polymorphic_loci}{If TRUE (default), returned genotype matrix will not include any fixed loci (loci that happened to be fixed are drawn again, starting from their ancestral allele frequencies, and checked iteratively until no fixed loci remain, so that the final number of polymorphic loci is exactly \code{m_loci}).}
+\item{require_polymorphic_loci}{If \code{TRUE} (default), returned genotype matrix will not include any fixed loci (loci that happened to be fixed are drawn again, starting from their ancestral allele frequencies, and checked iteratively until no fixed loci remain, so that the final number of polymorphic loci is exactly \code{m_loci}).}
+
+\item{maf_min}{The minimum minor allele frequency (default zero), to extend the working definition of "fixed" above to include rare variants.
+This helps simulate a frequency-based locus ascertainment bias.
+Loci with minor allele frequencies less than or \emph{equal} to this value are treated as fixed (passed to \code{\link[=fixed_loci]{fixed_loci()}}).
+This parameter has no effect if \code{require_polymorphic_loci} is \code{FALSE}.}
 
 \item{beta}{Shape parameter for a symmetric Beta for ancestral allele frequencies \code{p_anc}.
 If \code{NA} (default), \code{p_anc} is uniform with range in [0.01, 0.5].

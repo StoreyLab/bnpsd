@@ -10,12 +10,13 @@ test_that("fixed_loci works in toy cases", {
             0, NA, 0, # another fixed locus, for opposite allele
             1, 1, 1, # NOT fixed (heterozygotes are not considered fixed)
             0, 1, 2, # a completely variable locus
+            0, 0, 1, # a somewhat "rare" variant
             NA, NA, NA # completely missing locus (will be treated as fixed)
         ),
         ncol = 3,
         byrow = TRUE
     )
-    indexes_expected <- c(TRUE, TRUE, FALSE, FALSE, TRUE)
+    indexes_expected <- c(TRUE, TRUE, FALSE, FALSE, FALSE, TRUE)
     expect_silent(
         indexes <- fixed_loci( X )   
     )
@@ -35,6 +36,24 @@ test_that("fixed_loci works in toy cases", {
     # test that we get the desired values
     # includes names test implicitly
     expect_equal( indexes, indexes_expected )
+
+    # a version with non-trivial `maf_min`
+    maf_min <- 1 / 6 # marks only one more locus as fixed, noting that equality marks things too
+    indexes_expected[ 5 ] <- TRUE # this one
+    # repeat test
+    expect_silent(
+        indexes <- fixed_loci( X, maf_min = maf_min )   
+    )
+    # test that we get the desired values
+    # includes names test implicitly
+    expect_equal( indexes, indexes_expected )
+
+    # cause errors on purpose by passing bad values of `maf_min`
+    expect_error( fixed_loci( X, maf_min = 'a' ) )
+    expect_error( fixed_loci( X, maf_min = (1:10)/20 ) )
+    expect_error( fixed_loci( X, maf_min = NA ) )
+    expect_error( fixed_loci( X, maf_min = -1 ) )
+    expect_error( fixed_loci( X, maf_min = 0.6 ) )
 })
 
 test_that( "names_coanc works", {
@@ -1120,6 +1139,54 @@ test_that("draw_all_admix works", {
     # p_anc was simulated inside function (not passed) so loci don't have names
     expect_true( is.null( names( p_anc ) ) )
     
+})
+
+test_that("draw_all_admix with `maf_min > 0` works", {
+    # let's use names by default, these were tested in separate parts before but let's just add a test for the "all" version
+    m_loci <- 10
+    inbr_subpops <- c(0.1, 0.2, 0.3)
+    k_subpops <- length(inbr_subpops)
+    names( inbr_subpops ) <- paste0( 'S', 1 : k_subpops )
+    admix_proportions <- diag(rep.int(1, k_subpops)) # island model for test...
+    # repeat so we have multiple people per island
+    admix_proportions <- rbind(admix_proportions, admix_proportions, admix_proportions)
+    n_ind <- nrow(admix_proportions) # number of individuals (3*k_subpops)
+    colnames( admix_proportions ) <- names( inbr_subpops )
+    rownames( admix_proportions ) <- paste0( 'i', 1 : n_ind )
+
+    # here's the key parameter
+    # there's only 9 individuals, so minimum non-zero freq is 1/18.
+    # let's pick something larger to make test non-trivial
+    maf_min <- 1/5
+    
+    # run draw_all_admix
+    # only test default (p_ind and p_subpops not returned)
+    # only X should be different anyway
+    expect_silent(
+        out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, maf_min = maf_min)
+    )
+    expect_equal( names(out), draw_all_admix_names_ret_default )
+
+    X <- out$X # genotypes
+    p_anc <- out$p_anc # Ancestral AFs
+    
+    # test X
+    expect_equal(nrow(X), m_loci)
+    expect_equal(ncol(X), n_ind)
+    expect_true( !anyNA( X ) ) # no missing values
+    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
+    expect_true(!any(fixed_loci( X, maf_min = maf_min ))) # we don't expect any loci to be fixed (use same MAF threshold here!)
+    # p_anc was simulated inside function (not passed) so loci don't have names
+    expect_true( is.null( rownames( X ) ) )
+    # individuals do have names
+    expect_equal( colnames( X ), rownames( admix_proportions ) )
+    
+    # test p_anc
+    expect_equal(length(p_anc), m_loci)
+    expect_true(all(p_anc >= 0)) # all are non-negative
+    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
+    # p_anc was simulated inside function (not passed) so loci don't have names
+    expect_true( is.null( names( p_anc ) ) )
 })
 
 test_that("draw_all_admix beta works", {

@@ -199,3 +199,8 @@ New functions and bug fixes dealing with reordering tree edges and tips.
   - Function `draw_p_subpops_tree`.
 	Before this bug fix, some trees could trigger the error message "Error: The root node index in `tree_subpops$edge` (9) does not match `k_subpops + 1` (6) where `k_subpops` is the number of tips!  Is the `tree_subpops` object malformed?", where "9" and "6" could be other numbers.  Other possible error messages contain "Parent node index 6 has not yet been processed ..." or "Child" instead of "Parent", where "6" could be other numbers.
   - Internal functions used by `fit_tree` had related fixes, but overall `fit_tree` appears to have had no bugs because users cannot provide trees, and the tree-building algorithm does not produce scrambled edges that would have caused problems.
+
+# 2021-05-12 - bnpsd 1.3.4.9000
+
+- Functions `fixed_loci` and `draw_all_admix` have a new parameter `maf_min` that, when greater than zero, allows for treating rare variants as fixed.
+  In `draw_all_admix`, this now allows for simulating loci with frequency-based ascertainment bias.

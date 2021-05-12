@@ -20,7 +20,11 @@
 #' @param want_p_subpops If `TRUE` (NOT default), includes the matrix of random intermediate subpopulation allele frequencies in the return list.
 #' @param want_p_anc If `TRUE` (default), includes the vector of random ancestral allele frequencies in the return list.
 #' @param verbose If `TRUE`, prints messages for every stage in the algorithm.
-#' @param require_polymorphic_loci If TRUE (default), returned genotype matrix will not include any fixed loci (loci that happened to be fixed are drawn again, starting from their ancestral allele frequencies, and checked iteratively until no fixed loci remain, so that the final number of polymorphic loci is exactly `m_loci`).
+#' @param require_polymorphic_loci If `TRUE` (default), returned genotype matrix will not include any fixed loci (loci that happened to be fixed are drawn again, starting from their ancestral allele frequencies, and checked iteratively until no fixed loci remain, so that the final number of polymorphic loci is exactly `m_loci`).
+#' @param maf_min The minimum minor allele frequency (default zero), to extend the working definition of "fixed" above to include rare variants.
+#' This helps simulate a frequency-based locus ascertainment bias.
+#' Loci with minor allele frequencies less than or *equal* to this value are treated as fixed (passed to [fixed_loci()]).
+#' This parameter has no effect if `require_polymorphic_loci` is `FALSE`.
 #' @param beta Shape parameter for a symmetric Beta for ancestral allele frequencies `p_anc`.
 #' If `NA` (default), `p_anc` is uniform with range in \[0.01, 0.5\].
 #' Otherwise, `p_anc` has a symmetric Beta distribution with range in \[0, 1\].
@@ -85,6 +89,7 @@ draw_all_admix <- function(
                            want_p_anc = TRUE,
                            verbose = FALSE,
                            require_polymorphic_loci = TRUE,
+                           maf_min = 0,
                            beta = NA,
                            p_anc = NULL
                            ) {
@@ -203,7 +208,7 @@ draw_all_admix <- function(
     if (require_polymorphic_loci && want_genotypes) {
         # check for fixed loci, draw them again if needed
         # Note this only applies to want_genotypes==TRUE, since p_ind and p_subpops are continuous and therefore practically never truly fixed
-        fixed_loci_indexes <- fixed_loci(X) # boolean vector identifies fixed loci
+        fixed_loci_indexes <- fixed_loci( X, maf_min = maf_min ) # boolean vector identifies fixed loci
         m_loci_fixed <- sum(fixed_loci_indexes) # number of cases
         if (m_loci_fixed > 0) {
             # p_anc is tricky here
@@ -229,6 +234,7 @@ draw_all_admix <- function(
                 want_p_anc = want_p_anc,
                 verbose = FALSE, # don't show more messages for additional iterations
                 require_polymorphic_loci = require_polymorphic_loci,
+                maf_min = maf_min,
                 beta = beta,
                 p_anc = p_anc_redo
             )
