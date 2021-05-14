@@ -210,7 +210,7 @@ draw_all_admix <- function(
         # Note this only applies to want_genotypes==TRUE, since p_ind and p_subpops are continuous and therefore practically never truly fixed
         fixed_loci_indexes <- fixed_loci( X, maf_min = maf_min ) # boolean vector identifies fixed loci
         m_loci_fixed <- sum(fixed_loci_indexes) # number of cases
-        if (m_loci_fixed > 0) {
+        while ( m_loci_fixed > 0 ) {
             # p_anc is tricky here
             # this is what we'll pass below
             p_anc_redo <- p_anc_in
@@ -233,7 +233,7 @@ draw_all_admix <- function(
                 want_p_subpops = want_p_subpops,
                 want_p_anc = want_p_anc,
                 verbose = FALSE, # don't show more messages for additional iterations
-                require_polymorphic_loci = require_polymorphic_loci,
+                require_polymorphic_loci = FALSE, # loop here, avoid recursion in function, which in extreme cases leads to "node stack overflow" errors!
                 maf_min = maf_min,
                 beta = beta,
                 p_anc = p_anc_redo
@@ -248,6 +248,10 @@ draw_all_admix <- function(
             # otherwise p_anc doesn't change, it is what we wanted it to be
             if ( want_p_anc && is.null( p_anc_in ) )
                 p_anc[fixed_loci_indexes] <- obj$p_anc
+            
+            # for next iteration, look for cases that remain fixed
+            fixed_loci_indexes <- fixed_loci( X, maf_min = maf_min ) # boolean vector identifies fixed loci
+            m_loci_fixed <- sum(fixed_loci_indexes) # number of cases
         }
     }
     

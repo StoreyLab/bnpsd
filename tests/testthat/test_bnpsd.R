@@ -1187,6 +1187,45 @@ test_that("draw_all_admix with `maf_min > 0` works", {
     expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
     # p_anc was simulated inside function (not passed) so loci don't have names
     expect_true( is.null( names( p_anc ) ) )
+
+    # repeat test with more stringent threshold
+    # here we force our code to redraw most loci lots of times, which in a specific real case (with very rare variants `p_anc`, though `maf_min = 0`, we just want to force large numbers of redraws) resulted in a "node stack overflow".
+    # there's only 9 individuals, so minimum non-zero freq is 1/18.
+    # pick something large but must be below 0.5 = 9/18
+    # this combination reliably triggered the error in the original version, yet it has a good runtime in the fixed version (the crazy number of iterations is still super fast for toy example).
+    maf_min <- 8/18
+    p_anc <- 0.1
+    # actual errors produced in this test prior to fix:
+    # "Error: C stack usage  7971780 is too close to the limit"
+    
+    # run draw_all_admix
+    # only test default (p_ind and p_subpops not returned)
+    # only X should be different anyway
+    expect_silent(
+        out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, maf_min = maf_min, p_anc = p_anc)
+    )
+    expect_equal( names(out), draw_all_admix_names_ret_default )
+
+    X <- out$X # genotypes
+    p_anc <- out$p_anc # Ancestral AFs
+    
+    # test X
+    expect_equal(nrow(X), m_loci)
+    expect_equal(ncol(X), n_ind)
+    expect_true( !anyNA( X ) ) # no missing values
+    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
+    expect_true(!any(fixed_loci( X, maf_min = maf_min ))) # we don't expect any loci to be fixed (use same MAF threshold here!)
+    # p_anc was simulated inside function (not passed) so loci don't have names
+    expect_true( is.null( rownames( X ) ) )
+    # individuals do have names
+    expect_equal( colnames( X ), rownames( admix_proportions ) )
+    
+    # test p_anc
+    expect_equal(length(p_anc), m_loci)
+    expect_true(all(p_anc >= 0)) # all are non-negative
+    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
+    # p_anc was simulated inside function (not passed) so loci don't have names
+    expect_true( is.null( names( p_anc ) ) )
 })
 
 test_that("draw_all_admix beta works", {

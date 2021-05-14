@@ -204,3 +204,9 @@ New functions and bug fixes dealing with reordering tree edges and tips.
 
 - Functions `fixed_loci` and `draw_all_admix` have a new parameter `maf_min` that, when greater than zero, allows for treating rare variants as fixed.
   In `draw_all_admix`, this now allows for simulating loci with frequency-based ascertainment bias.
+
+# 2021-05-14 - bnpsd 1.3.5.9000
+
+- Fixed a rare bug in `draw_all_admix` that could cause a "stack overflow" error.
+  The function used to call itself recursively if `require_polymorphic_loci = TRUE`, and in cases where there are very rare allele frequencies or high `maf_min` the number of recursions could be so large that it triggered this error.
+  Now the function has a `while` loop, and does not recurse more than one level at the time; there is no limit to the number of iterations and no errors occur inherently due to large numbers of iterations.
