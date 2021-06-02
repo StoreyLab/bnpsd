@@ -4,10 +4,13 @@
 \alias{fit_tree}
 \title{Fit a tree structure to a coancestry matrix}
 \usage{
-fit_tree(coancestry)
+fit_tree(coancestry, method = "mcquitty")
 }
 \arguments{
 \item{coancestry}{The coancestry matrix to fit a tree to.}
+
+\item{method}{The hierarchical clustering method (passed to \code{\link[stats:hclust]{stats::hclust()}}).
+While all \code{\link[stats:hclust]{stats::hclust()}} methods are supported, only two really make sense for this application: "mcquitty" (i.e. WPGMA, default) and "average" (UPGMA).}
 }
 \value{
 A \code{phylo} object from the \code{ape} package (see \code{\link[ape:read.tree]{ape::read.tree()}}), with two additional list elements at the end:
@@ -24,7 +27,7 @@ Tips are ordered as they appear in the above \code{edge} matrix (ensuring visual
 }
 }
 \description{
-Implements a heuristic algorithm to find the optimal tree topology based on joining pairs of subpopulations with the highest between-coancestry values, and averaging parent coancestries for the merged nodes.
+Implements a heuristic algorithm to find the optimal tree topology based on joining pairs of subpopulations with the highest between-coancestry values, and averaging parent coancestries for the merged nodes (a variant of WPGMA hierarchical clustering \code{\link[stats:hclust]{stats::hclust()}}).
 Branch lengths are optimized using the non-negative least squares approach \code{\link[nnls:nnls]{nnls::nnls()}}, which minimize the residual square error between the given coancestry matrix and the model coancestry implied by the tree.
 This algorithm recovers the true tree when the input coancestry truly belongs to this tree and there is no estimation error (i.e. it is the inverse function of \code{\link[=coanc_tree]{coanc_tree()}}), and performs well for coancestry estimates (i.e. the result of simulating genotypes from the true tree, i.e. from \code{\link[=draw_all_admix]{draw_all_admix()}}, and estimating the coancestry using \code{\link[popkin:popkin]{popkin::popkin()}} followed by \code{\link[popkin:inbr_diag]{popkin::inbr_diag()}}).
 }

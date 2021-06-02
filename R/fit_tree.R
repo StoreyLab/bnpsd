@@ -1,6 +1,6 @@
 #' Fit a tree structure to a coancestry matrix
 #'
-#' Implements a heuristic algorithm to find the optimal tree topology based on joining pairs of subpopulations with the highest between-coancestry values, and averaging parent coancestries for the merged nodes.
+#' Implements a heuristic algorithm to find the optimal tree topology based on joining pairs of subpopulations with the highest between-coancestry values, and averaging parent coancestries for the merged nodes (a variant of WPGMA hierarchical clustering [stats::hclust()]).
 #' Branch lengths are optimized using the non-negative least squares approach [nnls::nnls()], which minimize the residual square error between the given coancestry matrix and the model coancestry implied by the tree.
 #' This algorithm recovers the true tree when the input coancestry truly belongs to this tree and there is no estimation error (i.e. it is the inverse function of [coanc_tree()]), and performs well for coancestry estimates (i.e. the result of simulating genotypes from the true tree, i.e. from [draw_all_admix()], and estimating the coancestry using [popkin::popkin()] followed by [popkin::inbr_diag()]).
 #' 
@@ -9,6 +9,8 @@
 #' Data fit may be poor if the coancestry does not correspond to a tree, particularly if there is admixture between subpopulations.
 #'
 #' @param coancestry The coancestry matrix to fit a tree to.
+#' @param method The hierarchical clustering method (passed to [stats::hclust()]).
+#' While all [stats::hclust()] methods are supported, only two really make sense for this application: "mcquitty" (i.e. WPGMA, default) and "average" (UPGMA).
 #'
 #' @return A `phylo` object from the `ape` package (see [ape::read.tree()]), with two additional list elements at the end:
 #' - `edge`: (standard `phylo`.)  A matrix describing the tree topology, listing parent and child node indexes.
@@ -39,9 +41,7 @@
 #' [tree_reorder()] for reordering tree structure so that tips appear in a particular desired order.
 #' 
 #' @export
-fit_tree <- function( coancestry ) {
-    # this is a recursive/iterative algorithm, reminds me of hclust/nj but a special version for this exact data
-
+fit_tree <- function( coancestry, method = 'mcquitty' ) {
     if ( missing( coancestry ) )
         stop( '`coancestry` is required!' )
     # coancestry should be symmetric, etc
@@ -59,62 +59,21 @@ fit_tree <- function( coancestry ) {
         colnames( coancestry ) <- names
     }
     # NOTE: isSymmetric tested earlier guarantees that names are the same in both dimensions
-
-    # make a copy to edit, but need to remember original too
-    coanc_tmp <- coancestry
     
-    # in all cases diagonal isn't used, code works best if it's set to missing values
-    # actually let's delete entire lower triangle too
-    coanc_tmp[ lower.tri( coanc_tmp, diag = TRUE ) ] <- NA
+    # hclust requires a distance matrix
+    # hack distance that agrees with our algorithm
+    coanc_dist <- max( coancestry ) - coancestry
+    # normal distances are zero for self, hack that into this too (won't matter otherwise)
+    diag( coanc_dist ) <- 0
+    # turn into proper distance object (doesn't change values)
+    coanc_dist <- stats::as.dist( coanc_dist )
+
+    # this corresponds exactly to my original algorithm!
+    tree <- stats::hclust( coanc_dist, method = method )
+    # turn hclust obtect into a phylo object
+    tree <- ape::as.phylo( tree )
     
-    while ( k_subpops > 1 ) {
-        # find current closest pair, which here means largest off-diagonal value
-        c_max <- max( coanc_tmp, na.rm = TRUE )
-        coords <- which( coanc_tmp == c_max, arr.ind = TRUE )
-        # use the first one if there's ties
-        coords <- coords[ 1, ]
-        i <- coords[1]
-        j <- coords[2]
-        
-        # next step (averaging entries for merged entry) fails unless we copy some values, needed in some cases
-        # note that since upper triangle only is used, then i < j always
-        # edits are needed when the gap is larger than 1
-        if ( j - i > 1 ) {
-            range_copy <- ( i + 1 ) : ( j - 1 )
-            # row j is used when averaging below, but it is removed subsequently (so we can make these permanent edits that just get tossed later)
-            coanc_tmp[ j, range_copy ] <- coanc_tmp[ range_copy , j ]
-        }
-
-        # now create merged entry
-        # average rows and columns and place on i'th position
-        coanc_tmp[ i, ] <- colMeans( coanc_tmp[ coords, ] )
-        coanc_tmp[ , i ] <- rowMeans( coanc_tmp[ , coords ] )
-        # create merged name
-        # NOTE: uses Newick tree notation!  Will work as we advance recursively
-        rownames( coanc_tmp )[ i ] <- paste0(
-            '(',
-            rownames( coanc_tmp )[ i ],
-            ',',
-            rownames( coanc_tmp )[ j ],
-            ')'
-        )
-        # NOTE: only row names are edited, meh, just ignore columns!!!
-        # now we remove j'th row and column
-        coanc_tmp <- coanc_tmp[ -j, , drop = FALSE ]
-        coanc_tmp <- coanc_tmp[ , -j, drop = FALSE ]
-        # update dimension
-        k_subpops <- k_subpops - 1
-    }
-
-    # upon convergence, there is only one row and its name is the tree we want!
-    tree_str <- rownames( coanc_tmp )
-    # to finish Newick format, must end in a semicolon
-    tree_str <- paste0( tree_str, ';' )
-    # convert to tree
-    tree <- ape::read.tree( text = tree_str )
-
     # fit edges that minimize squared error
-    # (here we go back to the original coancestry, not coanc_tmp!)
     tree <- fit_tree_single( coancestry, tree )
     # NOTE: do before `tree_reorder` because that one, in validation, requires `tree$edge.length` to be present!
     
@@ -296,32 +255,3 @@ edges_to_tips <- function( tree ) {
     # done, return this list!
     return( edge_to_tips )
 }
-
-# use hierarchical clustering to infer topology and fits branch lenghts
-# NOTE: used as internal comparator, but it does not perform well even in ideal settings
-fit_tree_hclust <- function( coancestry, ... ) {
-    if ( missing( coancestry ) )
-        stop( '`coancestry` is required!' )
-    # coancestry should be symmetric, etc
-    if ( !isSymmetric( coancestry ) )
-        stop( '`coancestry` must be symmetric!' )
-
-    # hclust requires a distance matrix
-    # this "dist" function is very naive, can probably do better!
-    # HOWEVER: popkin::pwfst() performs worse!!!
-    coanc_dist <- stats::dist( coancestry )
-    
-    # throw hierarchical clustering at this data
-    tree <- stats::hclust( coanc_dist, ... )
-    # turn hclust obtect into a phylo object
-    tree <- ape::as.phylo( tree )
-    # fit edges that minimize squared error
-    tree <- fit_tree_single( coancestry, tree )
-    # expand from linear to probabilistic scale!
-    # NOTE: root edge is ignored here!
-    tree <- tree_additive( tree, rev = TRUE )
-    
-    # done, return!
-    return( tree )
-}
-

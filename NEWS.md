@@ -210,3 +210,11 @@ New functions and bug fixes dealing with reordering tree edges and tips.
 - Fixed a rare bug in `draw_all_admix` that could cause a "stack overflow" error.
   The function used to call itself recursively if `require_polymorphic_loci = TRUE`, and in cases where there are very rare allele frequencies or high `maf_min` the number of recursions could be so large that it triggered this error.
   Now the function has a `while` loop, and does not recurse more than one level at the time; there is no limit to the number of iterations and no errors occur inherently due to large numbers of iterations.
+
+# 2021-06-02 - bnpsd 1.3.6.9000
+
+- Function `fit_tree` internally simplified to use `stats::hclust`, which also results in a small runtime gain.
+  The new code (when `method = "mcquitty"`, which is default) gives the same answers as before (in other words, the original algorithm was a special case of hierarchical clustering).
+  - New option `method` is passed to `hclust`.
+    Although all `hclust` methods are allowed, for this application the only ones that make sense are "mcquitty" (WPGMA) and "average" (UPGMA).
+	In internal evaluations, both algorithms had similar accuracy and runtime, but only "mcquitty" exactly recapitulates the original algorithm.
