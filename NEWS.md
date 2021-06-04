@@ -218,3 +218,7 @@ New functions and bug fixes dealing with reordering tree edges and tips.
   - New option `method` is passed to `hclust`.
     Although all `hclust` methods are allowed, for this application the only ones that make sense are "mcquitty" (WPGMA) and "average" (UPGMA).
 	In internal evaluations, both algorithms had similar accuracy and runtime, but only "mcquitty" exactly recapitulates the original algorithm.
+
+# 2021-06-04 - bnpsd 1.3.7.9000
+
+- Updated citations in `inst/CITATION` (missed last time I updated them in other locations).
