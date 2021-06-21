@@ -1,35 +1,35 @@
-# 2017-09-11 - bnpsd 1.0.0.9000
+# bnpsd 1.0.0.9000 (2017-09-11)
 
 * Public release!
 
-# 2018-01-15 - bnpsd 1.0.1
+# bnpsd 1.0.1 (2018-01-15)
 
 * Minor non-code changes for first CRAN submission.
 
-# 2018-02-01 - bnpsd 1.0.1.9000
+# bnpsd 1.0.1.9000 (2018-02-01)
 
 * README.md now contains instructions for installing from CRAN as well as from GitHub.
 
-# 2019-02-06 - bnpsd 1.0.2.9000
+# bnpsd 1.0.2.9000 (2019-02-06)
 
 * Added option `noFixed` to function `rbnpsd` to redraw loci that were drawn fixed for a single allele.
 These loci are not polymorphic so they would normally not be considered in analyses.
 
 * Added function `fixed_loci` to test for fixed loci within rbnpsd.
 
-# 2019-02-07 - bnpsd 1.0.3.9000
+# bnpsd 1.0.3.9000 (2019-02-07)
 
 * Added function `coanc_to_kinship` to easily obtain kinship matrices from coancestry matrices.
 
-# 2019-02-11 - bnpsd 1.0.4
+# bnpsd 1.0.4 (2019-02-11)
 
 * Second CRAN submission.
 
-# 2019-02-13 - bnpsd 1.0.4.9000
+# bnpsd 1.0.4.9000 (2019-02-13)
 
 * Converted the vignette from PDF to HTML
 
-# 2019-04-11 - bnpsd 1.0.5.9000
+# bnpsd 1.0.5.9000 (2019-04-11)
 
 * `qis` now returns a numeric admixture proportions matrix (used to be logical).
 * `q1d` and `q1dc` now handle `sigma = 0` special case.
@@ -38,7 +38,7 @@ These loci are not polymorphic so they would normally not be considered in analy
   * Removed arguments `interval` and `tol` from both `q1d` and `q1dc` (users would never need to set them now that procedure is more robust).
 * Updated coding style, renamed some internal functions and variables.
 
-# 2019-04-16 - bnpsd 1.1.0.9000
+# bnpsd 1.1.0.9000 (2019-04-16)
 
 * Renamed most functions for clarity:
   * `coanc` -> `coanc_admix`
@@ -74,20 +74,20 @@ These loci are not polymorphic so they would normally not be considered in analy
 * Added more input checks to functions, informative error messages.
 * Updated documentation, particularly on whether intermediate subpopulation coancestries are accepted generally (`coanc_subpops`) or if the diagonal matrix case is required (specified as vector or scalar `inbr_subpops`).
 
-# 2019-05-15 - bnpsd 1.1.1
+# bnpsd 1.1.1 (2019-05-15)
 
 * Third CRAN submission.
 * Added ORCIDs to authors.
 * Corrected doc typos.
 * Adjusted layout of subpopulations and individuals (default limits) for circular 1D geography (`admix_prop_1d_circular`) to prevent overlapping individuals on the edges, and to better agree visually with the linear version (`admix_prop_1d_linear`).
 
-# 2019-06-05 - bnpsd 1.1.2
+# bnpsd 1.1.2 (2019-06-05)
 
 * Non-code changes:
   * Edited .Rbuildignore to stop ignoring README; also removed non-existent files from list
   * Removed unused .travis.yml and bnpsd.Rproj files
 
-# 2019-08-13 - bnpsd 1.1.2.9000
+# bnpsd 1.1.2.9000 (2019-08-13)
 
 * Improved memory efficiency of default `draw_genotypes_admix`
   * Old approach was by default very memory-hungry (created IAF matrix whole when admixture proportions were provided).
@@ -99,36 +99,36 @@ These loci are not polymorphic so they would normally not be considered in analy
 * Updated documentation to use RMarkdown
 * Other code tidying
 
-# 2019-09-06 - bnpsd 1.1.3.9000
+# bnpsd 1.1.3.9000 (2019-09-06)
 
 * Added option `beta` in function `draw_p_anc` to trigger a symmetric Beta distribution for the ancestral allele frequencies, with the desired shape parameter.
   The `beta` option can also be set on the wrapper function `draw_all_admix`.
   This option allows simulation of a distribution heavier on rare variants (when `beta` is much smaller than 1), more similar to real human data.
 
-# 2019-12-17 - bnpsd 1.2.0
+# bnpsd 1.2.0 (2019-12-17)
 
 * Fourth CRAN submission.
 * Removed deprecated function names: `q1dc`, `q1d`, `qis`, `coanc`, `rbnpsd`, `rgeno`, `rpanc`, `rpint`, `rpiaf`.
 * Moved logo to `man/figures/`
 * Minor Roxygen-related updates.
 
-# 2020-01-08 - bnpsd 1.2.1
+# bnpsd 1.2.1 (2020-01-08)
 
 * Fourth CRAN submission, second attempt.
 * Fixed a rare bug in `bias_coeff_admix_fit`, which caused it to die if the desired bias coefficient was an extreme value (particularly `1`).
   The error message was: `f() values at end points not of opposite sign`.
   The actual bug was not observed in the regular R build, but rather in a limited precision setting where R was configured with `--disable-long-double`.
 
-# 2020-01-08 - bnpsd 1.2.1.9000
+# bnpsd 1.2.1.9000 (2020-01-08)
 
 * Added option `p_anc` to function `draw_all_admix`, to specify desired ancestral allele frequencies instead of having the code generate it randomly (default).
 * Added details for documentation of function `draw_p_subpops.R`, clarifying that input `p_anc` can be scalar.
 
-# 2021-01-21 - bnpsd 1.2.2.9000
+# bnpsd 1.2.2.9000 (2021-01-21)
 
 * Function `draw_all_admix`: when option `p_anc` is provided as scalar and `want_p_anc = TRUE`, now the return value is always a vector (in this case the input scalar value repeated `m_loci` times).  The previous behavior was to return `p_anc` as scalar if that was the input, which could be problematic for downstream applications.
 
-# 2021-02-11 - bnpsd 1.2.3
+# bnpsd 1.2.3 (2021-02-11)
 
 * 5th CRAN submission
 * Functions `admix_prop_1d_linear` and `admix_prop_1d_circular` had these changes:
@@ -139,12 +139,12 @@ These loci are not polymorphic so they would normally not be considered in analy
 * Simplified documentation (most functions) by clarifying language, using markdown roxygen, and replacing all LaTeX equations with simpler code equations.
 * Updated paper citations in `DESCRIPTION`, `README.md` and the vignette, to point to the published method in PLoS Genetics.
 
-# 2021-02-16 - bnpsd 1.2.3.9000
+# bnpsd 1.2.3.9000 (2021-02-16)
 
 * Documentation updates:
   - Fixed links to functions, in many cases these were broken because of incompatible mixed Rd and markdown syntax (now markdown is used more fully).
 
-# 2021-03-24 - bnpsd 1.3.0.9000
+# bnpsd 1.3.0.9000 (2021-03-24)
 
 - Added support for intermediate subpopulations related by a tree
   - New function `draw_p_subpops_tree` is the tree version of `draw_p_subpops`.
@@ -153,7 +153,7 @@ These loci are not polymorphic so they would normally not be considered in analy
   - Note: These other functions work for trees (without change) because they accept arbitrary coancestry matrices (param `coanc_subpops`) as input, so they work if they are passed the matrix that `coanc_tree` returns: `coanc_admix`, `fst_admix`, `admix_prop_1d_linear`, `admix_prop_1d_circular`.
 - Functions `admix_prop_1d_linear` and `admix_prop_1d_circular`, when `sigma` is missing (and therefore fit to a desired `coanc_subpops`, `fst`, and `bias_coeff`), now additionally return multiplicative `factor` used to rescale `coanc_subpops`.
 
-# 2021-04-17 - bnpsd 1.3.1.9000
+# bnpsd 1.3.1.9000 (2021-04-17)
 
 It's Fangorn Forest around here with all the tree updates!
 
@@ -167,7 +167,7 @@ It's Fangorn Forest around here with all the tree updates!
   - `draw_all_admix` and `draw_p_subpops_tree`: if root edge is present, functions warn that it will be ignored.
 - Functions `admix_prop_1d_linear` and `admix_prop_1d_circular`: debugged an edge case where `sigma` is small but not zero and numerically-calculated densities all come out to zero in a given row of the `admix_proportions` matrix (for `admix_prop_1d_circular` infinite values also arise), which used to lead to NAs upon row normalization; now for those rows, the closest ancestry (by coordinate distance) gets assigned the full admixture fraction (just as for independent subpopulations/`sigma = 0`).
 
-# 2021-04-22 - bnpsd 1.3.2.9000
+# bnpsd 1.3.2.9000 (2021-04-22)
 
 - Updated various functions to transfer names between inputs and outputs as it makes sense
   - Functions `admix_prop_1d_linear`, `admix_prop_1d_circular` now copy names from the input `coanc_subpops` (vector and matrix versions, only required when fitting `bias_coeff`) to the columns of the output `admix_proportions` matrix.
@@ -182,7 +182,7 @@ It's Fangorn Forest around here with all the tree updates!
   - Function `make_p_ind_admix` stops if the column names of `admix_proportions` and `p_subpops` disagree.
 - Function `tree_additive` now has option `force`, which when `TRUE` simply proceeds without stopping if additive edges were already present (in `tree$edge.length.add`, which is ignored and overwritten).
 
-# 2021-04-29 - bnpsd 1.3.3.9000
+# bnpsd 1.3.3.9000 (2021-04-29)
 
 New functions and bug fixes dealing with reordering tree edges and tips.
 
@@ -200,18 +200,18 @@ New functions and bug fixes dealing with reordering tree edges and tips.
 	Before this bug fix, some trees could trigger the error message "Error: The root node index in `tree_subpops$edge` (9) does not match `k_subpops + 1` (6) where `k_subpops` is the number of tips!  Is the `tree_subpops` object malformed?", where "9" and "6" could be other numbers.  Other possible error messages contain "Parent node index 6 has not yet been processed ..." or "Child" instead of "Parent", where "6" could be other numbers.
   - Internal functions used by `fit_tree` had related fixes, but overall `fit_tree` appears to have had no bugs because users cannot provide trees, and the tree-building algorithm does not produce scrambled edges that would have caused problems.
 
-# 2021-05-12 - bnpsd 1.3.4.9000
+# bnpsd 1.3.4.9000 (2021-05-12)
 
 - Functions `fixed_loci` and `draw_all_admix` have a new parameter `maf_min` that, when greater than zero, allows for treating rare variants as fixed.
   In `draw_all_admix`, this now allows for simulating loci with frequency-based ascertainment bias.
 
-# 2021-05-14 - bnpsd 1.3.5.9000
+# bnpsd 1.3.5.9000 (2021-05-14)
 
 - Fixed a rare bug in `draw_all_admix` that could cause a "stack overflow" error.
   The function used to call itself recursively if `require_polymorphic_loci = TRUE`, and in cases where there are very rare allele frequencies or high `maf_min` the number of recursions could be so large that it triggered this error.
   Now the function has a `while` loop, and does not recurse more than one level at the time; there is no limit to the number of iterations and no errors occur inherently due to large numbers of iterations.
 
-# 2021-06-02 - bnpsd 1.3.6.9000
+# bnpsd 1.3.6.9000 (2021-06-02)
 
 - Function `fit_tree` internally simplified to use `stats::hclust`, which also results in a small runtime gain.
   The new code (when `method = "mcquitty"`, which is default) gives the same answers as before (in other words, the original algorithm was a special case of hierarchical clustering).
@@ -219,6 +219,12 @@ New functions and bug fixes dealing with reordering tree edges and tips.
     Although all `hclust` methods are allowed, for this application the only ones that make sense are "mcquitty" (WPGMA) and "average" (UPGMA).
 	In internal evaluations, both algorithms had similar accuracy and runtime, but only "mcquitty" exactly recapitulates the original algorithm.
 
-# 2021-06-04 - bnpsd 1.3.7.9000
+# bnpsd 1.3.7.9000 (2021-06-04)
 
 - Updated citations in `inst/CITATION` (missed last time I updated them in other locations).
+
+# bnpsd 1.3.8.9000 (2021-06-21)
+
+- Added function `undiff_af` for creating "undifferentiated" allele frequency distributions based on real data but with a lower variance (more concentrated around 0.5) according to a given FST, useful for simulating data trying to match real data.
+- Added `LICENSE.md`.
+- Reformatted this `NEWS.md` slightly to improve its automatic parsing.

@@ -2500,3 +2500,139 @@ test_that( "scale_tree works", {
     expect_equal( tree_obs, tree_exp )
 })
 
+test_that( "diff_af works", {
+    # an internal function for these tests only
+    m <- 100
+    p <- runif( m )
+    F <- 0.3 # choose something large for a large effect
+    # differentiate distribution!
+    expect_silent(
+        p2 <- diff_af( p, F )
+    )
+    # boring requirements
+    expect_equal( length( p2 ), m )
+    expect_true( !anyNA( p2 ) )
+    expect_true( min( p2 ) >= 0 )
+    expect_true( max( p2 ) <= 1 )
+    # the real test is that variance has indeed increased
+    V1 <- mean( ( p - 0.5 )^2 )
+    V2 <- mean( ( p2 - 0.5 )^2 )
+    expect_true( V2 >= V1 )
+})
+
+test_that( "undiff_af works", {
+    # start by differentiating some data, to know we're starting from something reasonable
+    m <- 100
+    p <- runif( m ) # original
+    V1 <- mean( ( p - 0.5 )^2 ) # a statistic we use for tests
+    F <- 0.2 # choose something large for a large effect
+    p2 <- diff_af( p, F ) # differentiated
+    V2 <- mean( ( p2 - 0.5 )^2 ) # a statistic we use a lot for tests
+    F2 <- 0.05 # something smaller for avoiding edge cases where uniform mixing variance is too high
+
+    # cause errors on purpose
+    expect_error( undiff_af( p2 ) )
+    expect_error( undiff_af( F = F ) )
+    expect_error( undiff_af( p2, F, distr = 'madeup-nomatch' ) )
+
+    # uniform works well when F2 isn't too large
+    expect_silent(
+        obj <- undiff_af( p2, F2, distr = 'uniform' )
+    )
+    p3 <- obj$p
+    # boring requirements
+    expect_equal( length( p3 ), m )
+    expect_true( !anyNA( p3 ) )
+    expect_true( min( p3 ) >= 0 )
+    expect_true( max( p3 ) <= 1 )
+    # the real test is that variance has indeed decreased
+    V3 <- mean( ( p3 - 0.5 )^2 )
+    expect_true( V2 >= V3 )
+    # test weights too
+    w <- obj$w
+    expect_equal( length( w ), 1 )
+    expect_true( !is.na( w ) )
+    expect_true( w >= 0 )
+    expect_true( w <= 1 )
+
+    # point always succeeds, so use original (large) F here
+    expect_silent(
+        obj <- undiff_af( p2, F, distr = 'point' )
+    )
+    p3 <- obj$p
+    # boring requirements
+    expect_equal( length( p3 ), m )
+    expect_true( !anyNA( p3 ) )
+    expect_true( min( p3 ) >= 0 )
+    expect_true( max( p3 ) <= 1 )
+    # the real test is that variance has indeed decreased
+    V3 <- mean( ( p3 - 0.5 )^2 )
+    expect_true( V2 >= V3 )
+    # test weights too
+    w <- obj$w
+    expect_equal( length( w ), 1 )
+    expect_true( !is.na( w ) )
+    expect_true( w >= 0 )
+    expect_true( w <= 1 )
+
+    # beta also more likely than uniform to succeed (when more concentrated than unif), so use original (large) F here
+    expect_silent(
+        obj <- undiff_af( p2, F, distr = 'beta', alpha = 2 )
+    )
+    p3 <- obj$p
+    # boring requirements
+    expect_equal( length( p3 ), m )
+    expect_true( !anyNA( p3 ) )
+    expect_true( min( p3 ) >= 0 )
+    expect_true( max( p3 ) <= 1 )
+    # the real test is that variance has indeed decreased
+    V3 <- mean( ( p3 - 0.5 )^2 )
+    expect_true( V2 >= V3 )
+    # test weights too
+    w <- obj$w
+    expect_equal( length( w ), 1 )
+    expect_true( !is.na( w ) )
+    expect_true( w >= 0 )
+    expect_true( w <= 1 )
+
+    # finally, "auto" hacks a beta, which always succeeds, so use original (large) F here
+    expect_silent(
+        obj <- undiff_af( p2, F, distr = 'auto' )
+    )
+    p3 <- obj$p
+    # boring requirements
+    expect_equal( length( p3 ), m )
+    expect_true( !anyNA( p3 ) )
+    expect_true( min( p3 ) >= 0 )
+    expect_true( max( p3 ) <= 1 )
+    # the real test is that variance has indeed decreased
+    V3 <- mean( ( p3 - 0.5 )^2 )
+    expect_true( V2 >= V3 )
+    # test weights too
+    w <- obj$w
+    expect_equal( length( w ), 1 )
+    expect_true( !is.na( w ) )
+    expect_true( w >= 0 )
+    expect_true( w <= 1 )
+
+    # finally, "auto" hacks a beta, which always succeeds, so use original (large) F here
+    # here a more extrmeme case: undifferentiate uniform inputs!
+    expect_silent(
+        obj <- undiff_af( p, F, distr = 'auto' )
+    )
+    p3 <- obj$p
+    # boring requirements
+    expect_equal( length( p3 ), m )
+    expect_true( !anyNA( p3 ) )
+    expect_true( min( p3 ) >= 0 )
+    expect_true( max( p3 ) <= 1 )
+    # the real test is that variance has indeed decreased
+    V3 <- mean( ( p3 - 0.5 )^2 )
+    expect_true( V1 >= V3 )
+    # test weights too
+    w <- obj$w
+    expect_equal( length( w ), 1 )
+    expect_true( !is.na( w ) )
+    expect_true( w >= 0 )
+    expect_true( w <= 1 )
+})
