@@ -228,3 +228,9 @@ New functions and bug fixes dealing with reordering tree edges and tips.
 - Added function `undiff_af` for creating "undifferentiated" allele frequency distributions based on real data but with a lower variance (more concentrated around 0.5) according to a given FST, useful for simulating data trying to match real data.
 - Added `LICENSE.md`.
 - Reformatted this `NEWS.md` slightly to improve its automatic parsing.
+
+# bnpsd 1.3.9.9000 (2021-06-22)
+
+- Function `undiff_af`:
+  - Added several useful informative statistics to return list: `Fmax`, `V_in`, `V_out`, `V_mix`, and `alpha`.
+  - Debugged `distr = "auto"` cases where mixing variance ended up being smaller than required due to roundoff errors (`alpha` is now larger than given in direct formula by `eps = 10 * .Machine$double.eps`, which is also a new option.

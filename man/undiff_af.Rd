@@ -4,7 +4,13 @@
 \alias{undiff_af}
 \title{Undifferentiate an allele distribution}
 \usage{
-undiff_af(p, F, distr = c("auto", "uniform", "beta", "point"), alpha = 1)
+undiff_af(
+  p,
+  F,
+  distr = c("auto", "uniform", "beta", "point"),
+  alpha = 1,
+  eps = 10 * .Machine$double.eps
+)
 }
 \arguments{
 \item{p}{A vector of observed allele frequencies.}
@@ -15,17 +21,24 @@ undiff_af(p, F, distr = c("auto", "uniform", "beta", "point"), alpha = 1)
 \itemize{
 \item "auto" picks a symmetric Beta distribution with parameters that ensure a small enough variance to succeed.
 \item "beta" is a symmetric Beta distribution with parameter \code{alpha} as provided below.
-\item "uniform" is a uniform distribution (same as "beta" with \code{alpha = beta = 1}).
-\item "point" is a distribution fully concentrated/fixed at 0.5 (same as the limit of "beta" with \code{alpha = beta = Inf}, which has zero variance).
+\item "uniform" is a uniform distribution (same as "beta" with \code{alpha = 1}).
+\item "point" is a distribution fully concentrated/fixed at 0.5 (same as the limit of "beta" with \code{alpha = Inf}, which has zero variance).
 }}
 
 \item{alpha}{Shape parameter for \code{distr = "beta"}, ignored otherwise.}
+
+\item{eps}{If \code{distr = "auto"}, this small value is added to the calculated \code{alpha} to avoid roundoff errors and ensuring that the mixing variance is smaller than the maximum allowed.}
 }
 \value{
-A list with two named elements:
+A list with the new distribution and several other informative statistics, which are named elements:
 \itemize{
-\item \code{p}: A new vector of allele frequencies with the same length as \code{p}, with the desired variance (see below) obtained by weighing the input \code{p} with new random data from distribution \code{distr}.
+\item \code{p}: A new vector of allele frequencies with the same length as input \code{p}, with the desired variance (see details) obtained by weighing the input \code{p} with new random data from distribution \code{distr}.
 \item \code{w}: The weight used for the input data (\code{1-w} for the mixing distribution).
+\item \code{F_max}: The maximum FST possible for undifferentiating this data (equals four times the input variance (see details), which results in zero output variance).
+\item \code{V_in}: sample variance of input \code{p}, assuming its expectation is 0.5.
+\item \code{V_out}: target variance of output \code{p}.
+\item \code{V_mix}: variance of mixing distribution.
+\item \code{alpha}: the value of \code{alpha} used for symmetric Beta mixing distribution, informative if \code{distr = "auto"}.
 }
 }
 \description{
@@ -45,10 +58,10 @@ Thus, given \code{V1} and \code{F}, the goal is to construct a new distribution 
 An error is thrown if \code{V1 < F/4} in input data, which is inconsistent with this assumed model.
 
 Construction of "undifferentiated" allele frequencies:
-\code{p3 = w*p + (1-w)*p2}, where \code{p} is the input with sample variance \code{V1} and \code{p2} is a random draw from the mixing distribution \code{distr} with expectation 0.5 and known variance \code{V2}.
-The output variance is \code{V3 = w^2*V1 + (1-w)^2*V2}, which we set to the desired \code{V0 = (V1-F/4)/(1-F)} and solve for \code{w} (the largest of the two quadratic roots is used).
-An error is thrown if \code{V2 > V0} (the output variance must be larger than the mixing variance).
-This error is avoided by manually adjusting choice of \code{distr} and \code{alpha} (for \code{distr = "beta"}), or preferably with \code{distr = "auto"} (default), which selects a Beta distribution with \code{alpha = (1/(4*V0)-1)/2} that is guaranteed to work for any valid \code{V0} (assuming \code{V1 < F/4}).
+\code{p_out = w*p_in + (1-w)*p_mix}, where \code{p_in} is the input with sample variance \code{V_in} (\code{V1} in above model) and \code{p_mix} is a random draw from the mixing distribution \code{distr} with expectation 0.5 and known variance \code{V_mix}.
+The output variance is \code{V_out = w^2*V_in + (1-w)^2*V_mix}, which we set to the desired \code{V_out = (V_in-F/4)/(1-F)} (\code{V0} in above model) and solve for \code{w} (the largest of the two quadratic roots is used).
+An error is thrown if \code{V_mix > V_out} (the output variance must be larger than the mixing variance).
+This error is avoided by manually adjusting choice of \code{distr} and \code{alpha} (for \code{distr = "beta"}), or preferably with \code{distr = "auto"} (default), which selects a Beta distribution with \code{alpha = (1/(4*V_out)-1)/2 + eps} that is guaranteed to work for any valid \code{V_out} (assuming \code{V_in < F/4}).
 }
 \examples{
 # create random uniform data for these many loci
@@ -64,7 +77,7 @@ p2 <- rbeta( m, p * nu, (1 - p) * nu )
 # (avoids possible errors for specific distributions)
 p3 <- undiff_af( p2, F )$p
 
-# note p3 does not equal p (original is unrecoverable)
+# note p3 does not equal p exactly (original is unrecoverable)
 # but variances (assuming expectation is 0.5 for all) should be close to each other,
 # and both be lower than p2's variance:
 V1 <- mean( ( p - 0.5 )^2 )

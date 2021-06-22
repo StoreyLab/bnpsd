@@ -15,10 +15,10 @@
 #' An error is thrown if `V1 < F/4` in input data, which is inconsistent with this assumed model.
 #' 
 #' Construction of "undifferentiated" allele frequencies:
-#' `p3 = w*p + (1-w)*p2`, where `p` is the input with sample variance `V1` and `p2` is a random draw from the mixing distribution `distr` with expectation 0.5 and known variance `V2`.
-#' The output variance is `V3 = w^2*V1 + (1-w)^2*V2`, which we set to the desired `V0 = (V1-F/4)/(1-F)` and solve for `w` (the largest of the two quadratic roots is used).
-#' An error is thrown if `V2 > V0` (the output variance must be larger than the mixing variance).
-#' This error is avoided by manually adjusting choice of `distr` and `alpha` (for `distr = "beta"`), or preferably with `distr = "auto"` (default), which selects a Beta distribution with `alpha = (1/(4*V0)-1)/2` that is guaranteed to work for any valid `V0` (assuming `V1 < F/4`).
+#' `p_out = w*p_in + (1-w)*p_mix`, where `p_in` is the input with sample variance `V_in` (`V1` in above model) and `p_mix` is a random draw from the mixing distribution `distr` with expectation 0.5 and known variance `V_mix`.
+#' The output variance is `V_out = w^2*V_in + (1-w)^2*V_mix`, which we set to the desired `V_out = (V_in-F/4)/(1-F)` (`V0` in above model) and solve for `w` (the largest of the two quadratic roots is used).
+#' An error is thrown if `V_mix > V_out` (the output variance must be larger than the mixing variance).
+#' This error is avoided by manually adjusting choice of `distr` and `alpha` (for `distr = "beta"`), or preferably with `distr = "auto"` (default), which selects a Beta distribution with `alpha = (1/(4*V_out)-1)/2 + eps` that is guaranteed to work for any valid `V_out` (assuming `V_in < F/4`).
 #' 
 #'
 #' @param p A vector of observed allele frequencies.
@@ -26,13 +26,19 @@
 #' @param distr Name of the mixing distribution to use.
 #' - "auto" picks a symmetric Beta distribution with parameters that ensure a small enough variance to succeed.
 #' - "beta" is a symmetric Beta distribution with parameter `alpha` as provided below.
-#' - "uniform" is a uniform distribution (same as "beta" with `alpha = beta = 1`).
-#' - "point" is a distribution fully concentrated/fixed at 0.5 (same as the limit of "beta" with `alpha = beta = Inf`, which has zero variance).
+#' - "uniform" is a uniform distribution (same as "beta" with `alpha = 1`).
+#' - "point" is a distribution fully concentrated/fixed at 0.5 (same as the limit of "beta" with `alpha = Inf`, which has zero variance).
 #' @param alpha Shape parameter for `distr = "beta"`, ignored otherwise.
+#' @param eps If `distr = "auto"`, this small value is added to the calculated `alpha` to avoid roundoff errors and ensuring that the mixing variance is smaller than the maximum allowed.
 #'
-#' @return A list with two named elements:
-#' - `p`: A new vector of allele frequencies with the same length as `p`, with the desired variance (see below) obtained by weighing the input `p` with new random data from distribution `distr`.
+#' @return A list with the new distribution and several other informative statistics, which are named elements:
+#' - `p`: A new vector of allele frequencies with the same length as input `p`, with the desired variance (see details) obtained by weighing the input `p` with new random data from distribution `distr`.
 #' - `w`: The weight used for the input data (`1-w` for the mixing distribution).
+#' - `F_max`: The maximum FST possible for undifferentiating this data (equals four times the input variance (see details), which results in zero output variance).
+#' - `V_in`: sample variance of input `p`, assuming its expectation is 0.5.
+#' - `V_out`: target variance of output `p`.
+#' - `V_mix`: variance of mixing distribution.
+#' - `alpha`: the value of `alpha` used for symmetric Beta mixing distribution, informative if `distr = "auto"`.
 #'
 #' @examples
 #' # create random uniform data for these many loci
@@ -48,7 +54,7 @@
 #' # (avoids possible errors for specific distributions)
 #' p3 <- undiff_af( p2, F )$p
 #' 
-#' # note p3 does not equal p (original is unrecoverable)
+#' # note p3 does not equal p exactly (original is unrecoverable)
 #' # but variances (assuming expectation is 0.5 for all) should be close to each other,
 #' # and both be lower than p2's variance:
 #' V1 <- mean( ( p - 0.5 )^2 )
@@ -57,7 +63,13 @@
 #' # so p3 is stochastically consistent with p as far as the variance is concerned
 #' 
 #' @export
-undiff_af <- function( p, F, distr = c('auto', 'uniform', 'beta', 'point'), alpha = 1 ) {
+undiff_af <- function(
+                      p,
+                      F,
+                      distr = c('auto', 'uniform', 'beta', 'point'),
+                      alpha = 1,
+                      eps = 10 * .Machine$double.eps
+                      ) {
     # check inputs
     if ( missing( p ) )
         stop( '`p` is required!' )
@@ -94,62 +106,67 @@ undiff_af <- function( p, F, distr = c('auto', 'uniform', 'beta', 'point'), alph
     
     # variance of observed MAF distribution (assuming symmetry)
     # satisfied by construction:
-    # 0 <= Vp <= 1/4
-    Vp <- mean( ( p - 0.5 )^2 )
-    # for assumed model to be correct, `Vp >= F / 4` is required!
+    # 0 <= V_in <= 1/4
+    V_in <- mean( ( p - 0.5 )^2 )
+    # for assumed model to be correct, `V_in >= F / 4` is required!
     # make sure a higher `F` value wasn't passed, that has no solution
-    if ( F > 4 * Vp )
-        stop( '`F` (', F, ') cannot be larger than 4 times the observed MAF variance (', 4 * Vp, ')!  This violates model assumptions and results in negative output variance.  Please select a lower value for `F`!' )
+    F_max <- 4 * V_in # return too, useful info
+    if ( F > F_max )
+        stop( '`F` (', F, ') cannot be larger than 4 times the observed MAF variance (', F_max, ')!  This violates model assumptions and results in negative output variance.  Please select a lower value for `F`!' )
     # desired output variance:
-    Vo <- ( Vp - F / 4 ) / ( 1 - F )
+    V_out <- ( V_in - F / 4 ) / ( 1 - F )
     # assuming F is correct, this now satisfies
-    # 0 <= Vo <= Vp <= 1/4
-    # F / 4 <= Vp
+    # 0 <= V_out <= V_in <= 1/4
+    # F / 4 <= V_in
 
     # "auto" is a hack where a Beta that is guaranteed to work is chosen, avoiding errors!
     if ( distr == 'auto' ) {
-        # this is beta with `alpha` such that V2 == Vo
-        alpha <- ( 1 / ( 4 * Vo ) - 1 ) / 2
+        # this is beta with `alpha` such that V_mix == V_out.
+        # to avoid roundoff errors, it is best to choose a slightly larger alpha
+        # (more concentrated around 0.5, i.e. lower V_mix; V_mix <= V_out is strictly required!)
+        alpha <- ( 1 / ( 4 * V_out ) - 1 ) / 2 + eps
         distr <- 'beta' # treat as this case from now on
     }
 
     # define second distribution's known variance
     # needed for calculating weight
     if ( distr == 'point' ) {
-        V2 <- 0
+        V_mix <- 0
+        alpha <- Inf
     } else if ( distr == 'uniform' ) {
-        V2 <- 1/12
+        V_mix <- 1/12
+        alpha <- 1
     } else if ( distr == 'beta' ) {
         # beta-specific validations
         if ( alpha < 0 )
             stop( '`alpha` must be non-negative!' )
         # now actual variance formula
-        V2 <- 1 / ( 4 * ( 2 * alpha + 1 ) )
+        V_mix <- 1 / ( 4 * ( 2 * alpha + 1 ) )
     } else
         stop( 'Unimplemented distribution: ', distr )
 
     # catch an early issue if `F` is so large that the mixing distribution doesn't work
     # in other words, output variance must be at least as large as mixing variance
-    if ( Vo < V2 )
-        stop( 'Output variance (', Vo, ') is smaller than mixing variance (', V2, ')!  This violates model assumptions and can result in imaginary weights.  This can be fixed by either reducing `F` (to increase output variance) or by picking a mixing distribution with a lower variance than the desired output variance.' )
+    if ( V_out < V_mix )
+        stop( 'Output variance (', V_out, ') is smaller than mixing variance (', V_mix, ')!  This violates model assumptions and can result in imaginary weights.  This can be fixed by either reducing `F` (to increase output variance) or by picking a mixing distribution with a lower variance than the desired output variance.' )
     # now we're at
-    # 0 <= V2 <= Vo <= Vp <= 1/4
-    # F / 4 <= Vp
+    # 0 <= V_mix <= V_out <= V_in <= 1/4
+    # F / 4 <= V_in
     
-    # normalize all variances by Vp now:
-    Vo <- Vo / Vp
-    V2 <- V2 / Vp
+    # normalize all variances by V_in now:
+    V_out <- V_out / V_in
+    V_mix <- V_mix / V_in
 
     # after this normalization, the inequalities satisfied are
-    # 0 <= V2 <= Vo <= 1 <= 1/4 / Vp <= 1 / F
+    # 0 <= V_mix <= V_out <= 1 <= 1/4 / V_in <= 1 / F
     
     # want to find `w` that solves:
-    # Vo = w^2 + ( 1 - w )^2 * V2
-    # Vo = w^2 + ( 1 + w^2 - 2 *w ) * V2
-    # w^2 * ( 1 + V2 ) - 2 * w * V2 + (V2 - Vo) = 0
-    ## a <- 1 + V2
-    ## b <- - 2 * V2
-    ## c <- V2 - Vo
+    # V_out = w^2 + ( 1 - w )^2 * V_mix
+    # V_out = w^2 + ( 1 + w^2 - 2 *w ) * V_mix
+    # w^2 * ( 1 + V_mix ) - 2 * w * V_mix + (V_mix - V_out) = 0
+    ## a <- 1 + V_mix
+    ## b <- - 2 * V_mix
+    ## c <- V_mix - V_out
     ## # manual quadratic solution
     ## det <- b^2 - 4 * a * c
     ## if ( det < 0 )
@@ -160,44 +177,49 @@ undiff_af <- function( p, F, distr = c('auto', 'uniform', 'beta', 'point'), alph
     # NOTES:
     # - this root gives weights in [0,1], the other root is mostly negative
     # - (this det is actually det/4, meh)
-    # we have already required Vo >= V2, so determinant is guaranteed to be non-negative!
-    ## det <- V2^2 - (1 + V2) * (V2 - Vo)
-    det <- Vo - V2 * ( 1 - Vo )
-    #det <- Vo * ( 1 + V2 ) - V2
-    w <- ( V2 + sqrt( det ) ) / ( 1 + V2 )
+    # we have already required V_out >= V_mix, so determinant is guaranteed to be non-negative!
+    ## det <- V_mix^2 - (1 + V_mix) * (V_mix - V_out)
+    det <- V_out - V_mix * ( 1 - V_out )
+    #det <- V_out * ( 1 + V_mix ) - V_mix
+    w <- ( V_mix + sqrt( det ) ) / ( 1 + V_mix )
     # more inequalities:
-    # Vo^2 <= det <= Vo
-    # (min attained at `V2 = Vo`)
-    # (max attained at `V2 = 0`)
-    # plots suggest w(V2) is overall strictly decreasing (V2 decreases `det`, but increases the other bound otherwise, so it's not obvious)
-    # if so, then upper bound is at V2 = 0, and lower bound is at V2 = Vo:
-    # 0 <= 2 * Vo / ( 1 + Vo ) <= w <= sqrt( Vo ) <= 1
+    # V_out^2 <= det <= V_out
+    # (min attained at `V_mix = V_out`)
+    # (max attained at `V_mix = 0`)
+    # plots suggest w(V_mix) is overall strictly decreasing (V_mix decreases `det`, but increases the other bound otherwise, so it's not obvious)
+    # if so, then upper bound is at V_mix = 0, and lower bound is at V_mix = V_out:
+    # 0 <= 2 * V_out / ( 1 + V_out ) <= w <= sqrt( V_out ) <= 1
     # verified correctness empirically!
     # these are tightest bounds!
     
-    # I'm a bit surprised when `V2 = Vo` we don't just have `w = 0`
+    # I'm a bit surprised when `V_mix = V_out` we don't just have `w = 0`
     # saw other root has this behavior, but otherwise other roon is inadvisable because it is mostly negative, so better stick with this branch
     # so this branch/root favors weighing input data non-zero generally, which is best when desired variance exceeds the mixing variance (expected)
     
-    # once weight is determined and no errors occur, now we can bother to draw `p2` (could be a large number of them, so do last)
+    # once weight is determined and no errors occur, now we can bother to draw `p_mix` (could be a large number of them, so do last)
     # number of loci
     m <- length( p )
     if ( distr == 'point' ) {
-        p2 <- 0.5 # ok as scalar
+        p_mix <- 0.5 # ok as scalar
     } else if ( distr == 'uniform' ) {
-        p2 <- stats::runif( m )
+        p_mix <- stats::runif( m )
     } else if ( distr == 'beta' ) {
-        p2 <- stats::rbeta( m, alpha, alpha )
+        p_mix <- stats::rbeta( m, alpha, alpha )
     } else
         stop( 'Unimplemented distribution: ', distr )
     
     # undifferentiate by mixing!
-    q <- p * w + ( 1 - w ) * p2
+    p_out <- p * w + ( 1 - w ) * p_mix
     
     return(
         list(
-            p = q,
-            w = w
+            p = p_out,
+            w = w,
+            F_max = F_max,
+            V_in = V_in,
+            V_out = V_out * V_in, # unnormalize
+            V_mix = V_mix * V_in, # unnormalize
+            alpha = alpha
         )
     )
 }
