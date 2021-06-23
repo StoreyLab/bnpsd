@@ -17,7 +17,8 @@ draw_all_admix(
   require_polymorphic_loci = TRUE,
   maf_min = 0,
   beta = NA,
-  p_anc = NULL
+  p_anc = NULL,
+  p_anc_distr = NULL
 )
 }
 \arguments{
@@ -52,10 +53,16 @@ This parameter has no effect if \code{require_polymorphic_loci} is \code{FALSE}.
 
 \item{beta}{Shape parameter for a symmetric Beta for ancestral allele frequencies \code{p_anc}.
 If \code{NA} (default), \code{p_anc} is uniform with range in [0.01, 0.5].
-Otherwise, \code{p_anc} has a symmetric Beta distribution with range in [0, 1].}
+Otherwise, \code{p_anc} has a symmetric Beta distribution with range in [0, 1].
+Has no effect if either \code{p_anc} or \code{p_anc_distr} options are non-\code{NULL}.}
 
 \item{p_anc}{If provided, it is used as the ancestral allele frequencies (instead of drawing random ones).  Must either be a scalar or a length-\code{m_loci} vector.
-If scalar and \code{want_p_anc = TRUE}, then the returned \code{p_anc} is the scalar value repeated \code{m_loci} times (it is always a vector).}
+If scalar and \code{want_p_anc = TRUE}, then the returned \code{p_anc} is the scalar value repeated \code{m_loci} times (it is always a vector).
+If a locus was fixed and has to be redrawn, the ancestral allele frequency in \code{p_anc} is retained and only downstream allele frequencies and genotypes are redrawn (contrast to \code{p_anc_distr} below).}
+
+\item{p_anc_distr}{If provided, ancestral allele frequencies are drawn with replacement from this vector (which may have any length) or function, instead of from \code{\link[=draw_p_anc]{draw_p_anc()}}.
+If a function, must accept a single parameter specifying the number of loci to draw.
+If a locus was fixed and has to be redrawn, the ancestral allele frequency is redrawn from the distribution (contrast to \code{p_anc} above).}
 }
 \value{
 A named list with the following items (which may be missing depending on options):

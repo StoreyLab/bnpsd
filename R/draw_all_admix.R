@@ -28,8 +28,13 @@
 #' @param beta Shape parameter for a symmetric Beta for ancestral allele frequencies `p_anc`.
 #' If `NA` (default), `p_anc` is uniform with range in \[0.01, 0.5\].
 #' Otherwise, `p_anc` has a symmetric Beta distribution with range in \[0, 1\].
+#' Has no effect if either `p_anc` or `p_anc_distr` options are non-`NULL`.
 #' @param p_anc If provided, it is used as the ancestral allele frequencies (instead of drawing random ones).  Must either be a scalar or a length-`m_loci` vector.
 #' If scalar and `want_p_anc = TRUE`, then the returned `p_anc` is the scalar value repeated `m_loci` times (it is always a vector).
+#' If a locus was fixed and has to be redrawn, the ancestral allele frequency in `p_anc` is retained and only downstream allele frequencies and genotypes are redrawn (contrast to `p_anc_distr` below).
+#' @param p_anc_distr If provided, ancestral allele frequencies are drawn with replacement from this vector (which may have any length) or function, instead of from [draw_p_anc()].
+#' If a function, must accept a single parameter specifying the number of loci to draw.
+#' If a locus was fixed and has to be redrawn, the ancestral allele frequency is redrawn from the distribution (contrast to `p_anc` above).
 #'
 #' @return A named list with the following items (which may be missing depending on options):
 #'
@@ -91,7 +96,8 @@ draw_all_admix <- function(
                            require_polymorphic_loci = TRUE,
                            maf_min = 0,
                            beta = NA,
-                           p_anc = NULL
+                           p_anc = NULL,
+                           p_anc_distr = NULL
                            ) {
     # stop if required parameters are missing
     if ( missing( admix_proportions ) )
@@ -104,6 +110,10 @@ draw_all_admix <- function(
     # stop if both *_subpops structures were provided
     if ( !is.null( inbr_subpops ) && !is.null( tree_subpops ) )
         stop( '`inbr_subpops` and `tree_subpops` cannot both be provided!' )
+
+    # stop if both `p_anc` and `p_anc_distr` were provided
+    if ( !is.null( p_anc ) && !is.null( p_anc_distr ) )
+        stop( '`p_anc` and `p_anc_distr` cannot both be provided!' )
     
     # ensure that things that should be matrices are so
     if ( !is.matrix( admix_proportions ) )
@@ -161,6 +171,16 @@ draw_all_admix <- function(
             stop('Provided `p_anc` has negative values!')
         if ( any( p_anc > 1 ) )
             stop('Provided `p_anc` has values exceeding 1!')
+    } else if ( !is.null( p_anc_distr ) ) {
+        # draw allele frequencies from a custom distribution!
+        if (verbose)
+            message('drawing p_anc from p_anc_distr')
+        if ( is.function( p_anc_distr ) ) {
+            p_anc <- p_anc_distr( m_loci ) # ask for these many samples
+        } else if ( is.numeric( p_anc_distr ) ) {
+            # sample from vector, with replacement to trivially handle cases that may otherwise be too small (and to ensure sufficient randomness and exchangeability as we redraw fixed loci).
+            p_anc <- sample( p_anc_distr, m_loci, replace = TRUE )
+        }
     } else {
         # generate the random ancestral allele frequencies, in usual range and with minimum threshold for simplicity
         if (verbose)
@@ -236,7 +256,8 @@ draw_all_admix <- function(
                 require_polymorphic_loci = FALSE, # loop here, avoid recursion in function, which in extreme cases leads to "node stack overflow" errors!
                 maf_min = maf_min,
                 beta = beta,
-                p_anc = p_anc_redo
+                p_anc = p_anc_redo,
+                p_anc_distr = p_anc_distr
             )
             # overwrite fixed loci with redrawn polymorphic data
             X[fixed_loci_indexes, ] <- obj$X # guaranteed to be there
