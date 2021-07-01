@@ -232,7 +232,7 @@ New functions and bug fixes dealing with reordering tree edges and tips.
 # bnpsd 1.3.9.9000 (2021-06-22)
 
 - Function `undiff_af`:
-  - Added several useful informative statistics to return list: `Fmax`, `V_in`, `V_out`, `V_mix`, and `alpha`.
+  - Added several useful informative statistics to return list: `F_max`, `V_in`, `V_out`, `V_mix`, and `alpha`.
   - Debugged `distr = "auto"` cases where mixing variance ended up being smaller than required due to roundoff errors (`alpha` is now larger than given in direct formula by `eps = 10 * .Machine$double.eps`, which is also a new option.
 
 # bnpsd 1.3.10.9000 (2021-06-22)
@@ -241,3 +241,8 @@ New functions and bug fixes dealing with reordering tree edges and tips.
   This differs from the similar preexisting option `p_anc`, which fixed ancestral allele frequencies per locus to those values.
   These two options behave differently when loci have to be re-drawn due to being fixed or having too-low MAFs: passing `p_anc` never changes those values, whereas passing `p_anc_distr` results in drawing new values as necessary.
   The new option is more natural biologically and results in re-drawing fixed loci less often.
+
+# bnpsd 1.3.11.9000 (2021-07-01)
+
+- Function `undiff_af` renamed parameter `F` to `kinship_mean`, and updated all documentation to reflect the correction that this parameter is the mean kinship and not FST (the complete derivation will appear in a manuscript).
+  - One element in the return list previously called `F_max` is similarly now `kinship_mean_max`.

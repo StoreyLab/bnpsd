@@ -6,7 +6,7 @@
 \usage{
 undiff_af(
   p,
-  F,
+  kinship_mean,
   distr = c("auto", "uniform", "beta", "point"),
   alpha = 1,
   eps = 10 * .Machine$double.eps
@@ -15,7 +15,7 @@ undiff_af(
 \arguments{
 \item{p}{A vector of observed allele frequencies.}
 
-\item{F}{The FST value of the differentiation to reverse.}
+\item{kinship_mean}{The mean kinship value of the differentiation to reverse.}
 
 \item{distr}{Name of the mixing distribution to use.
 \itemize{
@@ -34,7 +34,7 @@ A list with the new distribution and several other informative statistics, which
 \itemize{
 \item \code{p}: A new vector of allele frequencies with the same length as input \code{p}, with the desired variance (see details) obtained by weighing the input \code{p} with new random data from distribution \code{distr}.
 \item \code{w}: The weight used for the input data (\code{1-w} for the mixing distribution).
-\item \code{F_max}: The maximum FST possible for undifferentiating this data (equals four times the input variance (see details), which results in zero output variance).
+\item \code{kinship_mean_max}: The maximum mean kinship possible for undifferentiating this data (equals four times the input variance (see details), which results in zero output variance).
 \item \code{V_in}: sample variance of input \code{p}, assuming its expectation is 0.5.
 \item \code{V_out}: target variance of output \code{p}.
 \item \code{V_mix}: variance of mixing distribution.
@@ -42,26 +42,26 @@ A list with the new distribution and several other informative statistics, which
 }
 }
 \description{
-This function takes a vector of allele frequencies and an FST value, and returns a new distribution of allele frequencies that is consistent with reversing differentiation with the given FST, in the sense that the new distribution is more concentrated around the middle (0.5) than the input/original by an amount predicted from theory.
+This function takes a vector of allele frequencies and a mean kinship value, and returns a new distribution of allele frequencies that is consistent with reversing differentiation with the given kinship, in the sense that the new distribution is more concentrated around the middle (0.5) than the input/original by an amount predicted from theory.
 The new distribution is created by weighing the input distribution with a random mixing distribution with a lower variance.
-An automatic method is provided that always selects a Beta distribution with just the right concentration to work for the given data and FST.
+An automatic method is provided that always selects a Beta distribution with just the right concentration to work for the given data and kinship.
 Explicit methods are also provided for more control, but are more likely to result in errors when mixing variances are not small enough (see details below).
 }
 \details{
 Model: Suppose we started from an allele frequency \code{p0} with expectation 0.5 and variance \code{V0}.
-Differentiation creates a new allele frequency \code{p1} without changing its mean (\code{E(p1|p0) = p0}) and with a conditional variance given by FST \code{F}: \code{Var(p1|p0) = p0*(1-p0)*F}.
+Differentiation creates a new (sample) allele frequency \code{p1} without changing its mean (\code{E(p1|p0) = p0}) and with a conditional variance given by the mean kinship \code{phi}: \code{Var(p1|p0) = p0*(1-p0)*phi}.
 The total variance of the new distribution (calculated using the law of total variance) equals
-\code{V1 = Var(p1) = F/4 + (1-F)*V0}.
+\code{V1 = Var(p1) = phi/4 + (1-phi)*V0}.
 (Also \code{E(p1) = 0.5}).
-So the new variance is greater for \code{F>0} (note \code{V0 <= 1/4} for any distribution bounded in (0,1)).
-Thus, given \code{V1} and \code{F}, the goal is to construct a new distribution with the original, lower variance of \code{V0 = (V1-F/4)/(1-F)}.
-An error is thrown if \code{V1 < F/4} in input data, which is inconsistent with this assumed model.
+So the new variance is greater for \code{phi>0} (note \code{V0 <= 1/4} for any distribution bounded in (0,1)).
+Thus, given \code{V1} and \code{phi}, the goal is to construct a new distribution with the original, lower variance of \code{V0 = (V1-phi/4)/(1-phi)}.
+An error is thrown if \code{V1 < phi/4} in input data, which is inconsistent with this assumed model.
 
 Construction of "undifferentiated" allele frequencies:
 \code{p_out = w*p_in + (1-w)*p_mix}, where \code{p_in} is the input with sample variance \code{V_in} (\code{V1} in above model) and \code{p_mix} is a random draw from the mixing distribution \code{distr} with expectation 0.5 and known variance \code{V_mix}.
-The output variance is \code{V_out = w^2*V_in + (1-w)^2*V_mix}, which we set to the desired \code{V_out = (V_in-F/4)/(1-F)} (\code{V0} in above model) and solve for \code{w} (the largest of the two quadratic roots is used).
+The output variance is \code{V_out = w^2*V_in + (1-w)^2*V_mix}, which we set to the desired \code{V_out = (V_in-phi/4)/(1-phi)} (\code{V0} in above model) and solve for \code{w} (the largest of the two quadratic roots is used).
 An error is thrown if \code{V_mix > V_out} (the output variance must be larger than the mixing variance).
-This error is avoided by manually adjusting choice of \code{distr} and \code{alpha} (for \code{distr = "beta"}), or preferably with \code{distr = "auto"} (default), which selects a Beta distribution with \code{alpha = (1/(4*V_out)-1)/2 + eps} that is guaranteed to work for any valid \code{V_out} (assuming \code{V_in < F/4}).
+This error is avoided by manually adjusting choice of \code{distr} and \code{alpha} (for \code{distr = "beta"}), or preferably with \code{distr = "auto"} (default), which selects a Beta distribution with \code{alpha = (1/(4*V_out)-1)/2 + eps} that is guaranteed to work for any valid \code{V_out} (assuming \code{V_in < phi/4}).
 }
 \examples{
 # create random uniform data for these many loci
@@ -73,6 +73,7 @@ nu <- 1 / F - 1
 p2 <- rbeta( m, p * nu, (1 - p) * nu )
 
 # now undifferentiate with this function
+# NOTE in this particular case `F` is also the mean kinship
 # default "automatic" distribution recommended
 # (avoids possible errors for specific distributions)
 p3 <- undiff_af( p2, F )$p

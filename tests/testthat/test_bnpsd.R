@@ -2626,16 +2626,16 @@ test_that( "undiff_af works", {
 
     # cause errors on purpose
     expect_error( undiff_af( p2 ) )
-    expect_error( undiff_af( F = F ) )
+    expect_error( undiff_af( kinship_mean = F ) )
     expect_error( undiff_af( p2, F, distr = 'madeup-nomatch' ) )
 
-    test_undiff_af_generic <- function( p, F, distr, alpha = 1 ) {
+    test_undiff_af_generic <- function( p, kinship_mean, distr, alpha = 1 ) {
         expect_silent(
-            obj <- undiff_af( p = p, F = F, distr = distr, alpha = alpha )
+            obj <- undiff_af( p = p, kinship_mean = kinship_mean, distr = distr, alpha = alpha )
         )
         # test overall list object
         expect_true( is.list( obj ) )
-        expect_equal( names( obj ), c('p', 'w', 'F_max', 'V_in', 'V_out', 'V_mix', 'alpha') )
+        expect_equal( names( obj ), c('p', 'w', 'kinship_mean_max', 'V_in', 'V_out', 'V_mix', 'alpha') )
         # p boring requirements
         p_out <- obj$p
         expect_equal( length( p_out ), m )
@@ -2648,21 +2648,21 @@ test_that( "undiff_af works", {
         expect_true( !is.na( w ) )
         expect_true( w >= 0 )
         expect_true( w <= 1 )
-        # test F_max
-        F_max <- obj$F_max
-        expect_equal( length( F_max ), 1)
-        expect_true( is.numeric( F_max ) )
-        expect_true( !is.na( F_max ) )
-        expect_true( F_max >= 0 )
-        expect_true( F_max <= 1 )
+        # test kinship_mean_max
+        kinship_mean_max <- obj$kinship_mean_max
+        expect_equal( length( kinship_mean_max ), 1)
+        expect_true( is.numeric( kinship_mean_max ) )
+        expect_true( !is.na( kinship_mean_max ) )
+        expect_true( kinship_mean_max >= 0 )
+        expect_true( kinship_mean_max <= 1 )
         # test variances, which must satisfy these inequalities
         # 0 <= V_mix <= V_out <= V_in <= 1/4
-        # F / 4 <= V_in
+        # kinship_mean / 4 <= V_in
         expect_true( 0 <= obj$V_mix )
         expect_true( obj$V_mix <= obj$V_out )
         expect_true( obj$V_out <= obj$V_in )
         expect_true( obj$V_in <= 1/4 )
-        expect_true( F / 4 <= obj$V_in )
+        expect_true( kinship_mean / 4 <= obj$V_in )
         # actual direct numerical tests
         expect_equal( obj$V_in, mean( ( p - 0.5 )^2 ) )
         # alpha should be a valid Dirichlet param
