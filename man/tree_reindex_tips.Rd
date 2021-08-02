@@ -18,7 +18,7 @@ The \code{phylo} object from the \code{ape} package (see \code{\link[ape:read.tr
 This function reindexes edges and tips so that they agree in tip order.
 }
 \details{
-Order mismatches between tip labels vector and edge matrix can lead to disagreeing order downstream, in variables that order tips as in the labels vector (such as the conancestry matrices output by our \code{\link[=coanc_tree]{coanc_tree()}}) and tree plots (whose order is guided by the edge matrix, particularly when the edge matrix is ordered by clade as in \code{\link[ape:reorder.phylo]{ape::reorder.phylo()}}).
+Order mismatches between tip labels vector and edge matrix can lead to disagreeing order downstream, in variables that order tips as in the labels vector (such as the coancestry matrices output by our \code{\link[=coanc_tree]{coanc_tree()}}) and tree plots (whose order is guided by the edge matrix, particularly when the edge matrix is ordered by clade as in \code{\link[ape:reorder.phylo]{ape::reorder.phylo()}}).
 
 This function first reorders the edges of the input tree using \code{\link[ape:reorder.phylo]{ape::reorder.phylo()}} with default option \code{order = 'cladewise'}, which will list edges and tip nodes in plotting order.
 Then tips are indexed so that the first tip to appear has index 1 in the edge matrix (and consequently appears first in the tip labels vector), the second has index 2, and so on.

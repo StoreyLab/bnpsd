@@ -13,7 +13,7 @@ This tree may have a valid root edge (non-NULL \code{tree$root.edge} between 0 a
 }
 \value{
 The \code{k_subpops}-by-\code{k_subpops} coancestry matrix.
-The order of subpopulations along the rows and colums of this matrix matches \code{tree$tip.label}.
+The order of subpopulations along the rows and columns of this matrix matches \code{tree$tip.label}.
 The tip labels of the tree are copied to the row and column names of this matrix.
 }
 \description{

@@ -248,7 +248,7 @@ plot_popkin(
 )
 ```
 
-We can also look at the structure of the two allele frequency matrices, `p_subpops` and `p_ind`, using `popkin_af`, which estimates coancestry from allele frequency matrices (in contrast, `popkin` estimates kinship from genotype matrices, and is prefered when genotypes are available).
+We can also look at the structure of the two allele frequency matrices, `p_subpops` and `p_ind`, using `popkin_af`, which estimates coancestry from allele frequency matrices (in contrast, `popkin` estimates kinship from genotype matrices, and is preferred when genotypes are available).
 ```{r}
 coancestry_subpops_estimate <- popkin_af( p_subpops )
 coancestry_ind_estimate <- popkin_af( p_ind )
