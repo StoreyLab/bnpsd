@@ -252,3 +252,11 @@ New functions and bug fixes dealing with reordering tree edges and tips.
 - 6th CRAN submission.
 - Removed "LazyData: true" from DESCRIPTION (to avoid a new "NOTE" on CRAN).
 - Fixed spelling in documentation.
+
+# bnpsd 1.3.13 (2021-08-09)
+
+- 6th CRAN submission, second attempt.
+- Debugged internal code (`bias_coeff_admix_fit`) shared by `admix_prop_1d_linear` and `admix_prop_1d_circular` for edge cases.
+  - Error was only observed on M1mac architecture (previous code worked on all other systems!).
+  - If a bias coefficient of 1 was desired, expected sigma to be `Inf`, but instead an error was encountered.
+  - Previous error message: "f() values at end points not of opposite sign" (in `stats::uniroot`)

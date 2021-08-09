@@ -60,6 +60,12 @@ bias_coeff_admix_fit <- function(
     if (bias_coeff < 0)
         stop('Desired `bias_coeff` must be >= 0, passed ', bias_coeff)
 
+    # tolerance should be precision-dependent, but when configured with --disable-long-double the value of .Machine$double.eps doesn't change!
+    # so here we test for that config difference (by testing if .Machine$sizeof.longdouble is zero) and reduce the tolerance accordingly
+    tol <- .Machine$double.eps
+    if ( .Machine$sizeof.longdouble == 0 )
+        tol <- sqrt( tol )
+    
     # handle an edge case that is problematic in some systems (looking at you Apple M1)
     if ( bias_coeff == 1 ) {
         # in the existing cases the answer is:
@@ -75,7 +81,8 @@ bias_coeff_admix_fit <- function(
         )
         # get actual bias coefficient of this case
         bias_coeff2 <- bias_coeff_admix(admix_proportions, coanc_subpops)
-        if ( bias_coeff2 == bias_coeff )
+        # equality is not always feasible due to machine precision, but if it's close enough let's do this
+        if ( abs( bias_coeff2 - bias_coeff ) < tol )
             return( sigma )
     }
     
@@ -92,12 +99,6 @@ bias_coeff_admix_fit <- function(
     if (bias_coeff < bias_coeff_min)
         stop('Desired `bias_coeff` must be greater than ', bias_coeff_min, ' (the minimum achievable with `sigma = 0`), passed ', bias_coeff, '.  Tip: This minimum depends most strongly on the input `coanc_subpops`, so the main alternative to increasing `bias_coeff` is to change the shape of `coanc_subpops` (its overall scale does not change the minimum value)')
 
-    # tolerance should be precision-dependent, but when configured with --disable-long-double the value of .Machine$double.eps doesn't change!
-    # so here we test for that config difference (by testing if .Machine$sizeof.longdouble is zero) and reduce the tolerance accordingly
-    tol <- .Machine$double.eps
-    if ( .Machine$sizeof.longdouble == 0 )
-        tol <- sqrt( tol )
-    
     # function whose zero we want!
     # "sigma" is the only parameter to optimize
     # need this function inside here as it depends on extra parameters
@@ -117,14 +118,25 @@ bias_coeff_admix_fit <- function(
         # get bias coefficient, return difference from desired value!
         delta <- bias_coeff_admix(admix_proportions, coanc_subpops) - bias_coeff
         
-        # hack to prevent issues when attempting to fit extreme values (at boundaries)
-        # in particular, without this (and in particular in lower precision settings, such as --disable-long-double), uniroot below complains because delta has the same sign on both extrema (due to machine error, not a real sign issue).  If the sign wasn't checked then the tolerance would find that the solution is at the boundary, so here we force the check earlier.
-        if ( abs(delta) < tol )
-            delta <- 0
+        ## # hack to prevent issues when attempting to fit extreme values (at boundaries)
+        ## # in particular, without this (and in particular in lower precision settings, such as --disable-long-double), uniroot below complains because delta has the same sign on both extrema (due to machine error, not a real sign issue).  If the sign wasn't checked then the tolerance would find that the solution is at the boundary, so here we force the check earlier.
+        ## if ( abs(delta) < tol )
+        ##     delta <- 0
         
         # return delta now
         return( delta )
     }
+
+    # to avoid uniroot dying, check opposite ends and make sure sings are opposite (which is what that function checks and dies of if it fails)
+    # I believe the issue is handled earlier, but just in case, directly assess this problematic case and return hack answers if that happens
+    v0 <- bias_coeff_admix_objective( 0 ) # sigma =   0, s = admix_prop_bias_coeff_min
+    v1 <- bias_coeff_admix_objective( 1 ) # sigma = Inf, s = 1
+    # this function is monotonically increasing, so v0 should be negative and v1 positive
+    # handle cases when this is not so
+    if ( v0 >= 0 )
+        return( 0 )
+    if ( v1 <= 0 )
+        return( Inf )
     
     # default tolerance of .Machine$double.eps^0.25 (~ 1e-4) was not good enough, reduced to ~ 2e-16
     obj <- stats::uniroot(
