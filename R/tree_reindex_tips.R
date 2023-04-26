@@ -56,8 +56,7 @@ tree_reindex_tips <- function( tree ) {
     if ( missing( tree ) )
         stop( '`tree` is required!' )
 
-    # further validations
-    validate_coanc_tree( tree )
+    # NOTE: we skip `validate_coanc_tree` because `tree_additive` will do that anyway, and in it we handle the case that additive edges will be wrong and have to be recalculated (otherwise the validation step trows a fatal error)
     
     # if we don't reorder by edges clade, this doesn't work
     tree <- ape::reorder.phylo( tree )

@@ -23,6 +23,7 @@
 #' If `TRUE`, assumes main edges are additive values, and calculates probabilistic values.
 #' @param force If `FALSE` (default), function stops if input tree already has additive edges (if `tree$edge.length.add` is not `NULL`).
 #' If `TRUE`, these values are ignored and overwritten.
+#' @param validate If `TRUE` (default), validates input `tree`, otherwise validation is skipped.
 #'
 #' @return The input `phylo` object extended so that the main edges (`tree$edge.length`) are probabilistic edges, and the additive edges are stored in `tree$edge.length.add`.
 #' This is so for both values of `rev`
@@ -69,14 +70,11 @@
 #' [coanc_tree()], the key application facilitated by additive edges.
 #' 
 #' @export
-tree_additive <- function( tree, rev = FALSE, force = FALSE ) {
+tree_additive <- function( tree, rev = FALSE, force = FALSE, validate = TRUE ) {
     if ( missing( tree ) )
         stop( '`tree` is required!' )
-    # run through validator for additional checks
-    # NOTE: additive-scale trees always pass this because their edges are non-negative and always below 1 (so input trees in both `rev` cases should pass this)
-    validate_coanc_tree( tree )
-    
-    # input tree shouldn't have additive data calculated already (either way it means there's nothing to do)
+
+    # input tree shouldn't have additive data calculated already (ignore or stop)
     if ( !is.null( tree$edge.length.add ) ) {
         if ( force ) {
             # just pretend we didn't have them
@@ -85,6 +83,13 @@ tree_additive <- function( tree, rev = FALSE, force = FALSE ) {
         } else 
             stop( '`tree$edge.length.add` is not `NULL`, suggests this tree already has probabilistic and additive edges!  Tip: if you want to ignore these values, use option `force = TRUE`!' )
     }
+    
+    # run through validator for additional checks
+    # NOTES:
+    # - additive-scale trees always pass this because their edges are non-negative and always below 1 (so input trees in both `rev` cases should pass this)
+    # - do in this order so when `force = TRUE` we ignore existing additive edges in validation (they are quietly deleted before validating)
+    if ( validate )
+        validate_coanc_tree( tree )
     
     # algorithm is sensitive to edge ordering
     # assumption is that we move from the root up, which is the reverse of postorder

@@ -2552,10 +2552,19 @@ test_that( "scale_tree works", {
     tree <- ape::rtree( k_subpops )
     # factors smaller than 1 always work!
     factor <- 0.5
+    
     # this is the answer we expect
     tree_exp <- tree
-    tree_exp$edge.length <- tree_exp$edge.length * factor
-
+    # calculate additive edges
+    tree_exp <- tree_additive( tree_exp )
+    tree_exp$edge.length.add <- tree_exp$edge.length.add * factor # correct!
+    # keep a copy for additional checks
+    add_edges_orig <- tree_exp$edge.length.add
+    # now overwrite non-additive edges
+    # have to do it in this awkward way, first overwrite main edges with additive ones, then recalculate/overwrite non-additive ones with the second command
+    tree_exp$edge.length <- tree_exp$edge.length.add
+    tree_exp <- tree_additive( tree_exp, rev = TRUE, force = TRUE )
+    
     # cause errors on purpose
     # missing params
     expect_error( scale_tree( ) )
@@ -2576,24 +2585,63 @@ test_that( "scale_tree works", {
     )
     # see if we got back the tree we expected
     expect_equal( tree_obs, tree_exp )
-
+    # since these were recalculated awkwardly, let's test them again
+    expect_equal( tree_obs$edge.length.add, add_edges_orig )
+    # test overall validity of tree
+    expect_silent( validate_coanc_tree( tree_obs ) )
+    # make sure additive edges are recovered correctly (internally code starts from those, reverse-constructs non-additive, here we start from non-additive just to totally confirm)
+    tree_obs <- tree_additive( tree_obs, force = TRUE ) # recalculate
+    # should have recovered same values as before
+    expect_equal( tree_obs$edge.length.add, add_edges_orig )
+    # validate using coancestry matrix too
+    expect_equal( coanc_tree( tree_obs ), coanc_tree( tree ) * factor )
+    
     # add root edge, an extreme but valid case
     tree$root.edge <- 0.9
-    tree_exp$root.edge <- tree$root.edge * factor
-    # repeat test
-    expect_silent(
-        tree_obs <- scale_tree( tree, factor )
-    )
-    expect_equal( tree_obs, tree_exp )
-    
-    # add additive edges separately for both input and expected output
-    tree <- tree_additive( tree )
+    tree_exp <- tree # start all over with expected tree
+    # recalculate additive edges to account for root scaling
     tree_exp <- tree_additive( tree_exp )
+    # reapply manual scaling of additive edges
+    tree_exp$root.edge <- tree_exp$root.edge * factor
+    tree_exp$edge.length.add <- tree_exp$edge.length.add * factor # correct!
+    # keep a copy for additional checks
+    add_edges_orig <- tree_exp$edge.length.add
+    # recalculate non-additive edges
+    tree_exp$edge.length <- tree_exp$edge.length.add
+    tree_exp <- tree_additive( tree_exp, rev = TRUE, force = TRUE )
     # repeat test
     expect_silent(
         tree_obs <- scale_tree( tree, factor )
     )
     expect_equal( tree_obs, tree_exp )
+    # since these were recalculated awkwardly, let's test them again
+    expect_equal( tree_obs$edge.length.add, add_edges_orig )
+    # test overall validity of tree
+    expect_silent( validate_coanc_tree( tree_obs ) )
+    # make sure additive edges are recovered correctly (internally code starts from those, reverse-constructs non-additive, here we start from non-additive just to totally confirm)
+    tree_obs <- tree_additive( tree_obs, force = TRUE ) # recalculate
+    # should have recovered same values as before
+    expect_equal( tree_obs$edge.length.add, add_edges_orig )
+    # validate using coancestry matrix too
+    expect_equal( coanc_tree( tree_obs ), coanc_tree( tree ) * factor )
+
+    # validate that reversing scaling results in original tree
+    expect_silent(
+        tree_obs2 <- scale_tree( tree_obs, 1/factor )
+    )
+    expect_equal( tree_obs2, tree )
+    # same but in two steps
+    # assumes factor is 0.5 = factor = factor1 * factor2
+    # however, from experience both of these new factors had to be larger than some amount or the intermediates are not good (in particular, 0.1 doesn't work, but clearly 0.25 is ok oddly)
+    factor1 <- 2
+    factor2 <- factor / factor1
+    expect_silent(
+        tree_obs2 <- scale_tree( tree_obs, 1/factor1 )
+    )
+    expect_silent(
+        tree_obs3 <- scale_tree( tree_obs2, 1/factor2 )
+    )
+    expect_equal( tree_obs3, tree )
 })
 
 test_that( "diff_af works", {

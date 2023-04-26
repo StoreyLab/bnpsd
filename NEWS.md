@@ -260,3 +260,14 @@ New functions and bug fixes dealing with reordering tree edges and tips.
   - Error was only observed on M1mac architecture (previous code worked on all other systems!).
   - If a bias coefficient of 1 was desired, expected sigma to be `Inf`, but instead an error was encountered.
   - Previous error message: "f() values at end points not of opposite sign" (in `stats::uniroot`)
+
+# bnpsd 1.3.13.9000 (2023-04-26)
+
+- Function `scale_tree` rewrote so scaling is on linear scale as the objective (so its coancestry and FST are scaled by the desired factor), and (non-additive) IBD edges are transformed non-linearly (as is correct to agree scaled additive edges).
+  - Original/previous version scaled all edges (IBD and additive) by the same factor, but this was incorrect as both of these edge types no longer agreed with each other (according to their relationship given by function `tree_additive`), which resulted in a bug when both types of edges were present.  This bug has always been present since the introduction of this function in version 1.3.1.9000 (2021-04-17).
+  - When only IBD edges were present (only those are mandatory in a tree object), there wasn't technically a bug.  However, linearly scaling IBD edges was not a useful behavior (it does not result in a linear scaling of coancestry or FST by the same factor, which was the only intended use case by the author).  For that reason, this case is no longer supported, and only scaling in the linear/additive scale is performed (and now correctly too).
+  - New version always returns the modified tree with additive edges (even when they were not originally there), since they must be calculated anyway.
+  - Updated function's documentation and unit tests, which are much more extensive than before.
+- Function `tree_additive` added option `validate`.
+  - Default `TRUE` value has original behavior.
+  - Added option to turn off since now `tree_additive` itself is used inside the internal validation function `validate_coanc_tree` to make sure that IBD and additive edges agree with each other when both are present, so validation must not be repeated lest we enter an infinite recursion, which results in a stack overflow.

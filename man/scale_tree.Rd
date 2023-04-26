@@ -7,16 +7,23 @@
 scale_tree(tree, factor)
 }
 \arguments{
-\item{tree}{The coancestry tree to edit.}
+\item{tree}{The coancestry tree to edit.
+Must be a \code{phylo} object from the \code{ape} package.}
 
-\item{factor}{The scalar factor to multiply all edges.
+\item{factor}{The scalar factor to multiply all edges in additive scale.
 Must be non-negative, and not be so large that any edge exceeds 1 after scaling.}
 }
 \value{
 The edited tree with all edges scaled as desired.
+This tree will always contain (correctly scaled) additive edges in addition to the default non-additive edges.
 }
 \description{
-Scale by a scalar \code{factor} all the edges (\verb{$edge.length}) of a \code{phylo} object from the \code{ape} package, including the root edge (\verb{$root.edge}) if present, and additive edges (\verb{$edge.length.add}, present in trees returned by \code{\link[=fit_tree]{fit_tree()}}).
+Scale a tree in the additive scale by \code{factor}.
+This results in the coancestry matrix of this tree being scaled by the same factor.
+The (non-additive) IBD edges are transformed in a non-linear fashion.
+}
+\details{
+Internally, additive edges (\verb{$edge.length.add}) are calculated using \code{\link[=tree_additive]{tree_additive()}} if not already present, then they are all scaled, including the root edge (\verb{$root.edge}) if present, and lastly IBD edges (\verb{$edge.length}) are recalculated from the additive edges using \code{\link[=tree_additive]{tree_additive()}} with option \code{rev = TRUE}.
 Stops if any of the edges exceed 1 before or after scaling (since these edges are IBD probabilities).
 }
 \examples{
@@ -31,4 +38,6 @@ tree_scaled <- scale_tree( tree, 0.5 )
 }
 \seealso{
 \code{\link[ape:read.tree]{ape::read.tree()}} for reading \code{phylo} objects and their definition.
+
+\code{\link[=tree_additive]{tree_additive()}} for difference between IBD and additive edges.
 }

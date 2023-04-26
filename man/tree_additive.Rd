@@ -4,7 +4,7 @@
 \alias{tree_additive}
 \title{Calculate additive edges for a coancestry tree, or viceversa}
 \usage{
-tree_additive(tree, rev = FALSE, force = FALSE)
+tree_additive(tree, rev = FALSE, force = FALSE, validate = TRUE)
 }
 \arguments{
 \item{tree}{The coancestry tree with either probabilistic edges (if \code{rev = FALSE}) or additive edges (if \code{rev = TRUE}) as the main edges (stored in \code{tree$edge.length}).
@@ -19,6 +19,8 @@ If \code{TRUE}, assumes main edges are additive values, and calculates probabili
 
 \item{force}{If \code{FALSE} (default), function stops if input tree already has additive edges (if \code{tree$edge.length.add} is not \code{NULL}).
 If \code{TRUE}, these values are ignored and overwritten.}
+
+\item{validate}{If \code{TRUE} (default), validates input \code{tree}, otherwise validation is skipped.}
 }
 \value{
 The input \code{phylo} object extended so that the main edges (\code{tree$edge.length}) are probabilistic edges, and the additive edges are stored in \code{tree$edge.length.add}.

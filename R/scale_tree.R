@@ -1,13 +1,19 @@
 #' Scale a coancestry tree
 #'
-#' Scale by a scalar `factor` all the edges (`$edge.length`) of a `phylo` object from the `ape` package, including the root edge (`$root.edge`) if present, and additive edges (`$edge.length.add`, present in trees returned by [fit_tree()]).
+#' Scale a tree in the additive scale by `factor`.
+#' This results in the coancestry matrix of this tree being scaled by the same factor.
+#' The (non-additive) IBD edges are transformed in a non-linear fashion.
+#' 
+#' Internally, additive edges (`$edge.length.add`) are calculated using [tree_additive()] if not already present, then they are all scaled, including the root edge (`$root.edge`) if present, and lastly IBD edges (`$edge.length`) are recalculated from the additive edges using [tree_additive()] with option `rev = TRUE`.
 #' Stops if any of the edges exceed 1 before or after scaling (since these edges are IBD probabilities).
 #'
 #' @param tree The coancestry tree to edit.
-#' @param factor The scalar factor to multiply all edges.
+#' Must be a `phylo` object from the `ape` package.
+#' @param factor The scalar factor to multiply all edges in additive scale.
 #' Must be non-negative, and not be so large that any edge exceeds 1 after scaling.
 #'
 #' @return The edited tree with all edges scaled as desired.
+#' This tree will always contain (correctly scaled) additive edges in addition to the default non-additive edges.
 #'
 #' @examples
 #' # create a random tree
@@ -20,6 +26,8 @@
 #'
 #' @seealso
 #' [ape::read.tree()] for reading `phylo` objects and their definition.
+#'
+#' [tree_additive()] for difference between IBD and additive edges.
 #'
 #' @export
 scale_tree <- function( tree, factor ) {
@@ -41,18 +49,17 @@ scale_tree <- function( tree, factor ) {
 
     # start editing values, but will check each carefully to make sure we don't go out of bounds!
     # edge lengths are the majority of the work usually:
-    # apply factor
-    tree$edge.length <- tree$edge.length * factor
+    # easiest way to do it is to modify additive edges first, then convert back to non-additive
+    # calculate additive edges if not present
+    if ( is.null( tree$edge.length.add ) )
+        tree <- tree_additive( tree )
+    # apply factor!
+    tree$edge.length.add <- tree$edge.length.add * factor # correct!
     # die if any edge exceeds one now
     # (negatives don't occur given what we've checked already)
-    if ( any( tree$edge.length > 1 ) )
-        stop( 'At least one `tree` edge length exceeds 1 after scaling, max: ', max( tree$edge.length ) )
-    # edit additive edges if present
-    # this case doesn't need any checking (if the previous step worked, all is good)
-    if ( !is.null( tree$edge.length.add ) )
-        tree$edge.length.add <- tree$edge.length.add * factor
-    
-    # edit root edge if present
+    if ( any( tree$edge.length.add > 1 ) )
+        stop( 'At least one `tree` additive edge length exceeds 1 after scaling, max: ', max( tree$edge.length.add ) )
+    # edit root edge the same way if present
     if ( !is.null( tree$root.edge ) ) {
         # this also gets checked
         tree$root.edge <- tree$root.edge * factor
@@ -61,7 +68,16 @@ scale_tree <- function( tree, factor ) {
         if ( any( tree$root.edge > 1 ) )
             stop( 'Root edge length exceeds 1 after scaling: ', tree$root.edge )
     }
-
+    
+    # now recalculate and overwrite non-additive edges
+    # (there's no easy formula for scaling these non-additive values, this is easiest)
+    # have to do it in this awkward way, first overwrite main edges with additive ones, then delete additive edges, then calculate non-additive ones with the second command
+    tree$edge.length <- tree$edge.length.add
+    tree <- tree_additive( tree, rev = TRUE, force = TRUE )
+    # check non-additive edges too
+    if ( any( tree$edge.length > 1 ) )
+        stop( 'At least one `tree` edge length exceeds 1 after scaling, max: ', max( tree$edge.length ) )
+    
     # return now if all was scaled and validated
     return( tree )
 }

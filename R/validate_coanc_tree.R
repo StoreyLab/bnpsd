@@ -58,6 +58,17 @@ validate_coanc_tree <- function( tree, name = 'tree' ) {
     indexes_missing <- !( indexes_all %in% tree$edge )
     if ( any( indexes_missing ) )
         stop( 'These expected node indexes are missing in `', name, '$edge`: ', toString( indexes_missing ) )
+
+    # test additive edges if present
+    if ( !is.null( tree$edge.length.add ) ) {
+        # recalculate them from the default IBD edges
+        # make sure we don't validate, or we enter an infinite recursion, causes stack overflow!
+        tree2 <- tree_additive( tree, force = TRUE, validate = FALSE )
+        # compare these edges, they should be equal up to machine precision!
+        mse <- mean( ( tree2$edge.length.add - tree$edge.length.add )^2 )
+        if ( mse > .Machine$double.eps )
+            stop( 'Additive and IBD (non-additive) edges do not agree!  MSE: ', mse, '!' )
+    }
     
     # if we didn't stop for any reason, we're good! (nothing to return)
 }
