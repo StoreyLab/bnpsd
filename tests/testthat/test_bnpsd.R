@@ -1,5 +1,82 @@
 context('bnpsd')
 
+# define some generic, recurrent tests
+
+validate_admix_proportions <- function( admix_proportions, n_ind, k_subpops, anc_names = NULL ) {
+    # general tests for admixture matrices
+    # rows are number of individuals
+    expect_equal( nrow( admix_proportions ), n_ind )
+    # columns are number of ancestries
+    expect_equal( ncol( admix_proportions ), k_subpops )
+    # no missing data
+    expect_true( !anyNA( admix_proportions ) )
+    # all are non-negative
+    expect_true( all( admix_proportions >= 0 ) )
+    # all are smaller or equal than 1
+    expect_true( all( admix_proportions <= 1 ) )
+    # rows sum to 1, vector length n_ind
+    expect_equal( rowSums( admix_proportions ), rep.int( 1, n_ind ) )
+
+    if ( is.null( anc_names ) ) {
+        # dimnames should be NULL in this case
+        expect_true( is.null( dimnames( admix_proportions ) ) )
+    } else {
+        # dimnames should be non-NULL in this case
+        expect_true( !is.null( dimnames( admix_proportions ) ) )
+        # no row names (individuals don't have natural names here)
+        expect_true( is.null( rownames( admix_proportions ) ) )
+        # but column names should be tree labels!
+        expect_equal( colnames( admix_proportions ), as.character( anc_names ) )
+    }
+}
+
+validate_p_anc <- function( p_anc, m_loci ){
+    # right length
+    expect_equal( length( p_anc ), m_loci )
+    # all are non-negative
+    expect_true( all( p_anc >= 0 ) )
+    # all are smaller or equal than 1
+    expect_true( all( p_anc <= 1 ) )
+    # p_anc was simulated inside function (not passed) so loci don't have names
+    expect_true( is.null( names( p_anc ) ) )
+}
+
+# the most common of the tests
+validate_X <- function( X, m_loci, n_ind, names_loci = NULL, names_ind = NULL, maf_min = 0, af = FALSE ) {
+    # validate dimensions
+    expect_equal( nrow( X ), m_loci )
+    expect_equal( ncol( X ), n_ind )
+    # no missing values
+    expect_true( !anyNA( X ) )
+    # most of the testing is similar for allele frequency matrices, so share code, only here are the major differences
+    if ( af ) {
+        # all are non-negative
+        expect_true( all( X >= 0 ) )
+        # all are smaller or equal than 1
+        expect_true( all( X <= 1 ) )
+    } else {
+        # only three values allowed!
+        expect_true( all( X %in% c(0, 1, 2) ) )
+        # often we don't expect any loci to be fixed (use same MAF threshold here!)
+        if ( !is.na( maf_min ) )
+            expect_true( !any( fixed_loci( X, maf_min = maf_min ) ) )
+    }
+    
+    # test names
+    if ( is.null( names_loci ) && is.null( names_ind ) ) {
+        # dimnames should be NULL in this case
+        expect_true( is.null( dimnames( X ) ) )
+    } else {
+        # dimnames should not be NULL in this case
+        expect_true( !is.null( dimnames( X ) ) )
+        # and test each dimension
+        # these work when individual cases are NULL!
+        expect_equal( rownames( X ), names_loci )
+        expect_equal( colnames( X ), names_ind )
+    }
+
+}
+
 # start with lower-level/internal tests, more informative that higher-level function errors
 
 test_that("fixed_loci works in toy cases", {
@@ -277,45 +354,30 @@ test_that("bias_coeff_admix agrees with explicitly calculated bias_coeff", {
 
 test_that("admix_prop_indep_subpops returns valid admixture coefficients", {
     labs <- c(1, 2, 2, 3, 3, 3, 4, 4, 4, 4)
-    n <- length(labs)
+    n_ind <- length(labs)
     k_subpops <- length(unique(labs))
     admix_proportions <- admix_prop_indep_subpops(labs)
     # general tests for admixture matrices
-    expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
-    expect_true(all(admix_proportions >= 0)) # all are non-negative
-    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
-    expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
+    validate_admix_proportions( admix_proportions, n_ind, k_subpops, sort( unique( labs ) ) )
     # specific tests for admix_prop_indep_subpops
     expect_true(all(admix_proportions %in% c(TRUE, FALSE)))
-    expect_true(all(colnames(admix_proportions) == sort(unique(labs))))
     
     # test with provided subpops
     subpops <- 4:1
     admix_proportions <- admix_prop_indep_subpops(labs, subpops)
     # general tests for admixture matrices
-    expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
-    expect_true(all(admix_proportions >= 0)) # all are non-negative
-    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
-    expect_equal(rowSums(admix_proportions), rep.int(1,n)) # rows sum to 1, vector length n
+    validate_admix_proportions( admix_proportions, n_ind, k_subpops, subpops )
     # specific tests for admix_prop_indep_subpops
     expect_true(all(admix_proportions %in% c(TRUE, FALSE)))
-    expect_true(all(colnames(admix_proportions) == subpops))
     
     # test with provided subpops (additional labels)
     k_subpops <- 10
     subpops <- 1:k_subpops
     admix_proportions <- admix_prop_indep_subpops(labs, subpops)
     # general tests for admixture matrices
-    expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
-    expect_true(all(admix_proportions >= 0)) # all are non-negative
-    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
-    expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
+    validate_admix_proportions( admix_proportions, n_ind, k_subpops, subpops )
     # specific tests for admix_prop_indep_subpops
     expect_true(all(admix_proportions %in% c(TRUE, FALSE)))
-    expect_true(all(colnames(admix_proportions) == subpops))
 
     # test with provided subpops (missing labels, must die!)
     subpops <- 1:3 # missing 4!
@@ -326,172 +388,89 @@ test_that("admix_prop_indep_subpops returns valid admixture coefficients", {
 names_admix_prop_1d <- c('admix_proportions', 'coanc_subpops', 'sigma', 'coanc_factor')
 
 test_that("admix_prop_1d_linear returns valid admixture coefficients", {
-    n <- 10
+    n_ind <- 10
     k_subpops <- 2
-    admix_proportions <- admix_prop_1d_linear(n, k_subpops, sigma = 1)
-    expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
-    expect_true( !anyNA( admix_proportions ) ) # no missing data
-    expect_true(all(admix_proportions >= 0)) # all are non-negative
-    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
-    expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
-    # dimnames should be NULL in this case
-    expect_true( is.null( dimnames( admix_proportions ) ) )
+    admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma = 1)
+    validate_admix_proportions( admix_proportions, n_ind, k_subpops )
 
     # test with sigma == 0 (special case that makes usual formula break)
-    admix_proportions <- admix_prop_1d_linear(n, k_subpops, sigma = 0)
-    expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
-    expect_true( !anyNA( admix_proportions ) ) # no missing data
-    expect_true(all(admix_proportions >= 0)) # all are non-negative
-    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
-    expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
+    admix_proportions <- admix_prop_1d_linear(n_ind, k_subpops, sigma = 0)
+    validate_admix_proportions( admix_proportions, n_ind, k_subpops )
     # in this case it should equal independent subpopulations
     labs <- c( rep.int(1, 5), rep.int(2, 5) ) # two subpops
     admix_proportions2 <- admix_prop_indep_subpops(labs)
     dimnames(admix_proportions2) <- NULL # before comparing, must toss column names
     expect_equal(admix_proportions, admix_proportions2)
-    # dimnames should be NULL in this case
-    expect_true( is.null( dimnames( admix_proportions ) ) )
 
     # test bias_coeff version
     expect_silent(
-        obj <- admix_prop_1d_linear(n, k_subpops, bias_coeff = 0.5, coanc_subpops = 1:k_subpops, fst = 0.1)
+        obj <- admix_prop_1d_linear(n_ind, k_subpops, bias_coeff = 0.5, coanc_subpops = 1:k_subpops, fst = 0.1)
     )
     expect_true( is.list( obj ) )
     expect_equal( names( obj ), names_admix_prop_1d )
-    admix_proportions <- obj$admix_proportions # returns many things in this case, get admix_proportions here
-    expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
-    expect_true( !anyNA( admix_proportions ) ) # no missing data
-    expect_true(all(admix_proportions >= 0)) # all are non-negative
-    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
-    expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
-    # dimnames should be NULL in this case
-    expect_true( is.null( dimnames( admix_proportions ) ) )
+    validate_admix_proportions( obj$admix_proportions, n_ind, k_subpops )
 
     # test edge case that used to give NA coefficients (now dies if that happens)
     # these params were verified to give NAs in the previous version
-    n <- 10
+    n_ind <- 10
     k_subpops <- 10
     sigma <- 0.01
     expect_silent(
-        admix_proportions <- admix_prop_1d_linear( n_ind = n, k_subpops = k_subpops, sigma = sigma)
+        admix_proportions <- admix_prop_1d_linear( n_ind = n_ind, k_subpops = k_subpops, sigma = sigma)
     )
-    expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
-    expect_true( !anyNA( admix_proportions ) ) # no missing data
-    expect_true(all(admix_proportions >= 0)) # all are non-negative
-    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
-    expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
-    # dimnames should be NULL in this case
-    expect_true( is.null( dimnames( admix_proportions ) ) )
+    validate_admix_proportions( admix_proportions, n_ind, k_subpops )
 
     # test transfer of names for coanc_subpops vector version (must be bias_coeff version)
     # NOTE: case of names for matrix coanc_subpops is tested later where we test application for trees
     inbr_subpops <- 1 : k_subpops
     names( inbr_subpops ) <- letters[ inbr_subpops ]
     expect_silent(
-        obj <- admix_prop_1d_linear(n, k_subpops, bias_coeff = 0.5, coanc_subpops = inbr_subpops, fst = 0.1)
+        obj <- admix_prop_1d_linear(n_ind, k_subpops, bias_coeff = 0.5, coanc_subpops = inbr_subpops, fst = 0.1)
     )
     expect_true( is.list( obj ) )
     expect_equal( names( obj ), names_admix_prop_1d )
-    admix_proportions <- obj$admix_proportions # returns many things in this case, get admix_proportions here
-    expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
-    expect_true( !anyNA( admix_proportions ) ) # no missing data
-    expect_true(all(admix_proportions >= 0)) # all are non-negative
-    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
-    expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
-    # dimnames should be non-NULL in this case
-    expect_true( !is.null( dimnames( admix_proportions ) ) )
-    # no row names (individuals don't have natural names here)
-    expect_true( is.null( rownames( admix_proportions ) ) )
-    # but column names should be the inbr_subpops names
-    expect_equal( colnames( admix_proportions ), names( inbr_subpops ) )
+    validate_admix_proportions( obj$admix_proportions, n_ind, k_subpops, names( inbr_subpops ) )
 })
 
 test_that("admix_prop_1d_circular returns valid admixture coefficients", {
-    n <- 10
+    n_ind <- 10
     k_subpops <- 2
-    admix_proportions <- admix_prop_1d_circular(n, k_subpops, sigma = 1)
-    expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
-    expect_true( !anyNA( admix_proportions ) ) # no missing data
-    expect_true(all(admix_proportions >= 0)) # all are non-negative
-    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
-    expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
-    # dimnames should be NULL in this case
-    expect_true( is.null( dimnames( admix_proportions ) ) )
+    admix_proportions <- admix_prop_1d_circular(n_ind, k_subpops, sigma = 1)
+    validate_admix_proportions( admix_proportions, n_ind, k_subpops )
 
     # test with sigma == 0 (special case that makes usual formula break)
-    admix_proportions <- admix_prop_1d_circular(n, k_subpops, sigma = 0)
-    expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
-    expect_true( !anyNA( admix_proportions ) ) # no missing data
-    expect_true(all(admix_proportions >= 0)) # all are non-negative
-    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
-    expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
-    # dimnames should be NULL in this case
-    expect_true( is.null( dimnames( admix_proportions ) ) )
+    admix_proportions <- admix_prop_1d_circular(n_ind, k_subpops, sigma = 0)
+    validate_admix_proportions( admix_proportions, n_ind, k_subpops )
     # though the result is nearly island-like, there is an annoying shift I'd rather not try to figure out for this test...
 
     # test bias_coeff version
     expect_silent(
-        obj <- admix_prop_1d_circular(n, k_subpops, bias_coeff = 0.5, coanc_subpops = 1:k_subpops, fst = 0.1)
+        obj <- admix_prop_1d_circular(n_ind, k_subpops, bias_coeff = 0.5, coanc_subpops = 1:k_subpops, fst = 0.1)
     )
     expect_true( is.list( obj ) )
     expect_equal( names( obj ), names_admix_prop_1d )
-    admix_proportions <- obj$admix_proportions # returns many things in this case, get admix_proportions here
-    expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
-    expect_true( !anyNA( admix_proportions ) ) # no missing data
-    expect_true(all(admix_proportions >= 0)) # all are non-negative
-    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
-    expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
-    # dimnames should be NULL in this case
-    expect_true( is.null( dimnames( admix_proportions ) ) )
+    validate_admix_proportions( obj$admix_proportions, n_ind, k_subpops )
     
     # test edge case that used to give NA coefficients (now dies if that happens)
     # these params were verified to give NAs in the previous version
-    n <- 10
+    n_ind <- 10
     k_subpops <- 10
     sigma <- 0.01
     expect_silent(
-        admix_proportions <- admix_prop_1d_circular( n_ind = n, k_subpops = k_subpops, sigma = sigma)
+        admix_proportions <- admix_prop_1d_circular( n_ind = n_ind, k_subpops = k_subpops, sigma = sigma)
     )
-    expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
-    expect_true( !anyNA( admix_proportions ) ) # no missing data
-    expect_true(all(admix_proportions >= 0)) # all are non-negative
-    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
-    expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
-    # dimnames should be NULL in this case
-    expect_true( is.null( dimnames( admix_proportions ) ) )
+    validate_admix_proportions( admix_proportions, n_ind, k_subpops )
 
     # test transfer of names for coanc_subpops vector version (must be bias_coeff version)
     # NOTE: case of names for matrix coanc_subpops is tested later where we test application for trees
     inbr_subpops <- 1 : k_subpops
     names( inbr_subpops ) <- letters[ inbr_subpops ]
     expect_silent(
-        obj <- admix_prop_1d_circular(n, k_subpops, bias_coeff = 0.5, coanc_subpops = inbr_subpops, fst = 0.1)
+        obj <- admix_prop_1d_circular(n_ind, k_subpops, bias_coeff = 0.5, coanc_subpops = inbr_subpops, fst = 0.1)
     )
     expect_true( is.list( obj ) )
     expect_equal( names( obj ), names_admix_prop_1d )
-    admix_proportions <- obj$admix_proportions # returns many things in this case, get admix_proportions here
-    expect_equal(nrow(admix_proportions), n) # n rows
-    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
-    expect_true( !anyNA( admix_proportions ) ) # no missing data
-    expect_true(all(admix_proportions >= 0)) # all are non-negative
-    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
-    expect_equal(rowSums(admix_proportions), rep.int(1, n)) # rows sum to 1, vector length n
-    # dimnames should be non-NULL in this case
-    expect_true( !is.null( dimnames( admix_proportions ) ) )
-    # no row names (individuals don't have natural names here)
-    expect_true( is.null( rownames( admix_proportions ) ) )
-    # but column names should be the inbr_subpops names
-    expect_equal( colnames( admix_proportions ), names( inbr_subpops ) )
-    
+    validate_admix_proportions( obj$admix_proportions, n_ind, k_subpops, names( inbr_subpops ) )
 })
 
 test_that("bias_coeff_admix_fit agrees with reverse func", {
@@ -761,16 +740,12 @@ test_that("rescale_coanc_subpops agrees with explicitly FST calculation", {
 test_that("draw_p_anc is in range", {
     m_loci <- 1000
     p_anc <- draw_p_anc(m_loci)
-    expect_equal(length(p_anc), m_loci)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
+    validate_p_anc( p_anc, m_loci )
 
     # repeat for Beta version
     beta <- 0.01
     p_anc <- draw_p_anc(m_loci, beta = beta)
-    expect_equal(length(p_anc), m_loci)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
+    validate_p_anc( p_anc, m_loci )
 })
 
 test_that("draw_p_subpops is in range", {
@@ -798,12 +773,7 @@ test_that("draw_p_subpops is in range", {
     expect_silent(
         p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
     )
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # no names in this case
-    expect_true( is.null( dimnames( p_subpops ) ) )
+    validate_X( p_subpops, m_loci, k_subpops, af = TRUE )
 
     # make sure this doesn't die or anything when extra parameters are passed but agree
     expect_silent( p_subpops <- draw_p_subpops(p_anc, inbr_subpops, m_loci = m_loci) )
@@ -812,39 +782,19 @@ test_that("draw_p_subpops is in range", {
 
     # special case of scalar p_anc
     p_subpops <- draw_p_subpops(p_anc = 0.5, inbr_subpops, m_loci = m_loci)
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # no names in this case
-    expect_true( is.null( dimnames( p_subpops ) ) )
+    validate_X( p_subpops, m_loci, k_subpops, af = TRUE )
     
     # special case of scalar inbr_subpops
     p_subpops <- draw_p_subpops(p_anc, inbr_subpops = 0.2, k_subpops = k_subpops)
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # no names in this case
-    expect_true( is.null( dimnames( p_subpops ) ) )
+    validate_X( p_subpops, m_loci, k_subpops, af = TRUE )
     
     # both main parameters scalars but return value still matrix
     p_subpops <- draw_p_subpops(p_anc = 0.5, inbr_subpops = 0.2, m_loci = m_loci, k_subpops = k_subpops)
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # no names in this case
-    expect_true( is.null( dimnames( p_subpops ) ) )
+    validate_X( p_subpops, m_loci, k_subpops, af = TRUE )
     
     # passing scalar parameters without setting dimensions separately results in a 1x1 matrix
     p_subpops <- draw_p_subpops(p_anc = 0.5, inbr_subpops = 0.2)
-    expect_equal(nrow(p_subpops), 1)
-    expect_equal(ncol(p_subpops), 1)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # no names in this case
-    expect_true( is.null( dimnames( p_subpops ) ) )
+    validate_X( p_subpops, 1, 1, af = TRUE )
 
     # now a case with names, in this case for both inputs
     names( p_anc ) <- paste0( 'l', 1 : m_loci )
@@ -852,14 +802,7 @@ test_that("draw_p_subpops is in range", {
     expect_silent(
         p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
     )
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # test names
-    expect_true( !is.null( dimnames( p_subpops ) ) )
-    expect_equal( rownames( p_subpops ), names( p_anc ) )
-    expect_equal( colnames( p_subpops ), names( inbr_subpops ) )
+    validate_X( p_subpops, m_loci, k_subpops, names( p_anc ), names( inbr_subpops ), af = TRUE )
 })
 
 test_that("make_p_ind_admix is in range", {
@@ -876,12 +819,7 @@ test_that("make_p_ind_admix is in range", {
     expect_silent(
         p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
     )
-    expect_equal(nrow(p_ind), m_loci)
-    expect_equal(ncol(p_ind), n_ind)
-    expect_true(all(p_ind >= 0)) # all are non-negative
-    expect_true(all(p_ind <= 1)) # all are smaller or equal than 1
-    # no names in this case
-    expect_true( is.null( dimnames( p_ind ) ) )
+    validate_X( p_ind, m_loci, n_ind, af = TRUE )
 
     # a case with full names for all inputs
     rownames( p_subpops ) <- paste0( 'l', 1 : m_loci )
@@ -892,13 +830,7 @@ test_that("make_p_ind_admix is in range", {
     expect_silent(
         p_ind <- make_p_ind_admix(p_subpops, admix_proportions)
     )
-    expect_equal(nrow(p_ind), m_loci)
-    expect_equal(ncol(p_ind), n_ind)
-    expect_true(all(p_ind >= 0)) # all are non-negative
-    expect_true(all(p_ind <= 1)) # all are smaller or equal than 1
-    # test all names
-    expect_equal( rownames( p_ind ), rownames( p_subpops ) )
-    expect_equal( colnames( p_ind ), rownames( admix_proportions ) )
+    validate_X( p_ind, m_loci, n_ind, rownames( p_subpops ), rownames( admix_proportions ), af = TRUE )
 
     # cause errors on purpose by having admix_proportions names that disagree with p_subpops
     # first just change order of subpopulations (in names only)
@@ -923,21 +855,13 @@ test_that("draw_genotypes_admix is in range", {
     
     # direct test
     X <- draw_genotypes_admix(p_ind)
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    # dimnames should be NULL in this case
-    expect_true( is.null( dimnames( X ) ) )
+    # fixed loci allowed here!
+    validate_X( X, m_loci, n_ind, maf_min = NA )
     
     # indirect draw test (default low_mem now!)
     X <- draw_genotypes_admix(p_subpops, admix_proportions)
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    # dimnames should be NULL in this case
-    expect_true( is.null( dimnames( X ) ) )
+    # fixed loci allowed here!
+    validate_X( X, m_loci, n_ind, maf_min = NA )
     
     # test names transfers
     # first add names to p_ind
@@ -945,15 +869,8 @@ test_that("draw_genotypes_admix is in range", {
     colnames( p_ind ) <- paste0( 'i', 1 : n_ind )
     # now run code
     X <- draw_genotypes_admix(p_ind)
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    # dimnames should be non-NULL in this case
-    expect_true( !is.null( dimnames( X ) ) )
-    # and test each dimension
-    expect_equal( rownames( X ), rownames( p_ind ) )
-    expect_equal( colnames( X ), colnames( p_ind ) )
+    # fixed loci allowed here!
+    validate_X( X, m_loci, n_ind, rownames( p_ind ), colnames( p_ind ), maf_min = NA )
 
     # and the same but for version with admix_proportions
     rownames( p_subpops ) <- rownames( p_ind )
@@ -961,15 +878,8 @@ test_that("draw_genotypes_admix is in range", {
     rownames( admix_proportions ) <- colnames( p_ind )
     colnames( admix_proportions ) <- colnames( p_subpops )
     X <- draw_genotypes_admix(p_subpops, admix_proportions)
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    # dimnames should be non-NULL in this case
-    expect_true( !is.null( dimnames( X ) ) )
-    # and test each dimension
-    expect_equal( rownames( X ), rownames( p_subpops ) )
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
+    # fixed loci allowed here!
+    validate_X( X, m_loci, n_ind, rownames( p_subpops ), rownames( admix_proportions ), maf_min = NA )
 
     # cause errors, suggesting misalignment or inconsistency of p_subpops and admix_proportions, via name disagreements
     # reverse names first
@@ -990,18 +900,8 @@ test_that("draw_genotypes_admix is in range", {
     p_subpops <- draw_p_subpops(p_anc, inbr_subpops)
     # indirect draw test (alternative low-mem algorithm triggered by dimension changes)
     X <- draw_genotypes_admix(p_subpops, admix_proportions)
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    # this is a cool test because only one of the two dimnames is non-NULL
-    # dimnames should be non-NULL in this case, because `admix_proportions` had names
-    expect_true( !is.null( dimnames( X ) ) )
-    # rownames should be null
-    expect_true( is.null( rownames( X ) ) )
-    # column names should match rownames of `admix_proportions`
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-
+    # fixed loci allowed here!
+    validate_X( X, m_loci, n_ind, NULL, rownames( admix_proportions ), maf_min = NA )
 })
 
 # for recurring tests
@@ -1046,48 +946,10 @@ test_that("draw_all_admix works", {
         out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, want_p_ind = TRUE, want_p_subpops = TRUE)
     )
     expect_equal( names(out), draw_all_admix_names_ret_full )
-    X <- out$X # genotypes
-    p_ind <- out$p_ind # IAFs
-    p_subpops <- out$p_subpops # Intermediate AFs
-    p_anc <- out$p_anc # Ancestral AFs
-    
-    # test X
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( X ) ) )
-    # individuals do have names
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-    
-    # test p_ind
-    expect_equal(nrow(p_ind), m_loci)
-    expect_equal(ncol(p_ind), n_ind)
-    expect_true(all(p_ind >= 0)) # all are non-negative
-    expect_true(all(p_ind <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( p_ind ) ) )
-    # individuals do have names
-    expect_equal( colnames( p_ind ), rownames( admix_proportions ) )
-    
-    # test p_subpops
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( p_subpops ) ) )
-    # subpopulations do have names
-    expect_equal( colnames( p_subpops ), colnames( admix_proportions ) )
-    
-    # test p_anc
-    expect_equal(length(p_anc), m_loci)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( names( p_anc ) ) )
+    validate_X( out$X, m_loci, n_ind, NULL, rownames( admix_proportions ) )
+    validate_X( out$p_ind, m_loci, n_ind, NULL, rownames( admix_proportions ), af = TRUE )
+    validate_X( out$p_subpops, m_loci, k_subpops, NULL, colnames( admix_proportions ), af = TRUE )
+    validate_p_anc( out$p_anc, m_loci )
 
     # cause errors on purpose by making labels disagree
     # reverse names
@@ -1106,39 +968,9 @@ test_that("draw_all_admix works", {
         out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, want_p_subpops = TRUE)
     )
     expect_equal( names(out), draw_all_admix_names_ret_low_mem ) # exclude p_ind
-    X <- out$X # genotypes
-    p_ind <- out$p_ind # IAFs
-    p_subpops <- out$p_subpops # Intermediate AFs
-    p_anc <- out$p_anc # Ancestral AFs
-    
-    # test X
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( X ) ) )
-    # individuals do have names
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-    
-    # test p_subpops
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( p_subpops ) ) )
-    # subpopulations do have names
-    expect_equal( colnames( p_subpops ), colnames( admix_proportions ) )
-    
-    # test p_anc
-    expect_equal(length(p_anc), m_loci)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( names( p_anc ) ) )
-    
+    validate_X( out$X, m_loci, n_ind, NULL, rownames( admix_proportions ) )
+    validate_X( out$p_subpops, m_loci, k_subpops, NULL, colnames( admix_proportions ), af = TRUE )
+    validate_p_anc( out$p_anc, m_loci )
 })
 
 test_that("draw_all_admix with `maf_min > 0` works", {
@@ -1166,27 +998,8 @@ test_that("draw_all_admix with `maf_min > 0` works", {
         out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, maf_min = maf_min)
     )
     expect_equal( names(out), draw_all_admix_names_ret_default )
-
-    X <- out$X # genotypes
-    p_anc <- out$p_anc # Ancestral AFs
-    
-    # test X
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    expect_true(!any(fixed_loci( X, maf_min = maf_min ))) # we don't expect any loci to be fixed (use same MAF threshold here!)
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( X ) ) )
-    # individuals do have names
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-    
-    # test p_anc
-    expect_equal(length(p_anc), m_loci)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( names( p_anc ) ) )
+    validate_X( out$X, m_loci, n_ind, NULL, rownames( admix_proportions ), maf_min = maf_min )
+    validate_p_anc( out$p_anc, m_loci )
 
     # repeat test with more stringent threshold
     # here we force our code to redraw most loci lots of times, which in a specific real case (with very rare variants `p_anc`, though `maf_min = 0`, we just want to force large numbers of redraws) resulted in a "node stack overflow".
@@ -1205,27 +1018,8 @@ test_that("draw_all_admix with `maf_min > 0` works", {
         out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, maf_min = maf_min, p_anc = p_anc)
     )
     expect_equal( names(out), draw_all_admix_names_ret_default )
-
-    X <- out$X # genotypes
-    p_anc <- out$p_anc # Ancestral AFs
-    
-    # test X
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    expect_true(!any(fixed_loci( X, maf_min = maf_min ))) # we don't expect any loci to be fixed (use same MAF threshold here!)
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( X ) ) )
-    # individuals do have names
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-    
-    # test p_anc
-    expect_equal(length(p_anc), m_loci)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( names( p_anc ) ) )
+    validate_X( out$X, m_loci, n_ind, NULL, rownames( admix_proportions ), maf_min = maf_min )
+    validate_p_anc( out$p_anc, m_loci )
 })
 
 test_that("draw_all_admix beta works", {
@@ -1246,27 +1040,8 @@ test_that("draw_all_admix beta works", {
     # only test default (p_ind and p_subpops not returned)
     out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, beta = beta)
     expect_equal( names(out), draw_all_admix_names_ret_default )
-
-    X <- out$X # genotypes
-    p_anc <- out$p_anc # Ancestral AFs
-    
-    # test X
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( X ) ) )
-    # individuals do have names
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-    
-    # test p_anc
-    expect_equal(length(p_anc), m_loci)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( names( p_anc ) ) )
+    validate_X( out$X, m_loci, n_ind, NULL, rownames( admix_proportions ) )
+    validate_p_anc( out$p_anc, m_loci )
 
     # NOTE: incompatible labels between admix_proportions and inbr_subpops not retested because that happens early and is independent of this and all subsequent feature tests (except tree case)
 })
@@ -1288,48 +1063,11 @@ test_that("draw_all_admix `require_polymorphic_loci = FALSE` works", {
     # run draw_all_admix
     out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, want_p_ind = TRUE, want_p_subpops = TRUE, require_polymorphic_loci = FALSE)
     expect_equal( names(out), draw_all_admix_names_ret_full )
-    X <- out$X # genotypes
-    p_ind <- out$p_ind # IAFs
-    p_subpops <- out$p_subpops # Intermediate AFs
-    p_anc <- out$p_anc # Ancestral AFs
-    
-    # test X
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    # here loci may be fixed, don't require otherwise
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( X ) ) )
-    # individuals do have names
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-
-    # test p_ind
-    expect_equal(nrow(p_ind), m_loci)
-    expect_equal(ncol(p_ind), n_ind)
-    expect_true(all(p_ind >= 0)) # all are non-negative
-    expect_true(all(p_ind <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( p_ind ) ) )
-    # individuals do have names
-    expect_equal( colnames( p_ind ), rownames( admix_proportions ) )
-
-    # test p_subpops
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( p_subpops ) ) )
-    # subpopulations do have names
-    expect_equal( colnames( p_subpops ), colnames( admix_proportions ) )
-
-    # test p_anc
-    expect_equal(length(p_anc), m_loci)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( names( p_anc ) ) )
+    # fixed loci allowed!
+    validate_X( out$X, m_loci, n_ind, NULL, rownames( admix_proportions ), maf_min = NA )
+    validate_X( out$p_ind, m_loci, n_ind, NULL, rownames( admix_proportions ), af = TRUE )
+    validate_X( out$p_subpops, m_loci, k_subpops, NULL, colnames( admix_proportions ), af = TRUE )
+    validate_p_anc( out$p_anc, m_loci )
 })
 
 test_that("draw_all_admix `want_p_ind = FALSE` works", {
@@ -1348,37 +1086,9 @@ test_that("draw_all_admix `want_p_ind = FALSE` works", {
     # run draw_all_admix
     out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, want_p_subpops = TRUE)
     expect_equal( names(out), draw_all_admix_names_ret_low_mem )
-    X <- out$X # genotypes
-    p_subpops <- out$p_subpops # Intermediate AFs
-    p_anc <- out$p_anc # Ancestral AFs
-    
-    # test X
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( X ) ) )
-    # individuals do have names
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-    
-    # test p_subpops
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( p_subpops ) ) )
-    # subpopulations do have names
-    expect_equal( colnames( p_subpops ), colnames( admix_proportions ) )
-    
-    # test p_anc
-    expect_equal(length(p_anc), m_loci)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( names( p_anc ) ) )
+    validate_X( out$X, m_loci, n_ind, NULL, rownames( admix_proportions ) )
+    validate_X( out$p_subpops, m_loci, k_subpops, NULL, colnames( admix_proportions ), af = TRUE )
+    validate_p_anc( out$p_anc, m_loci )
 })
 
 test_that("draw_all_admix with provided p_anc (scalar) works", {
@@ -1399,25 +1109,12 @@ test_that("draw_all_admix with provided p_anc (scalar) works", {
     # only test default (p_ind and p_subpops not returned)
     out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, p_anc = p_anc)
     expect_equal( names(out), draw_all_admix_names_ret_default )
-
-    X <- out$X # genotypes
-    
-    # test X
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( X ) ) )
-    # individuals do have names
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-    
+    validate_X( out$X, m_loci, n_ind, NULL, rownames( admix_proportions ) )
     # test p_anc, should just match what we passed
     # but always returns vector, compare as vector
     expect_equal( out$p_anc, rep.int( p_anc, m_loci ) )
     # this case shouldn't have names
-    expect_true( is.null( names( p_anc ) ) )
+    expect_true( is.null( names( out$p_anc ) ) )
 })
 
 test_that("draw_all_admix with provided p_anc (vector) works", {
@@ -1440,19 +1137,7 @@ test_that("draw_all_admix with provided p_anc (vector) works", {
     # only test default (p_ind and p_subpops not returned)
     out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, p_anc = p_anc)
     expect_equal( names(out), draw_all_admix_names_ret_default )
-
-    X <- out$X # genotypes
-    
-    # test X
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
-    # loci and individuals have names!
-    expect_equal( rownames( X ), names( p_anc ) )
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-    
+    validate_X( out$X, m_loci, n_ind, names( p_anc ), rownames( admix_proportions ) )
     # test p_anc, should just match what we passed
     # (implicitly tests names too)
     expect_equal( out$p_anc, p_anc )
@@ -1479,79 +1164,29 @@ test_that("draw_all_admix works with p_anc_distr", {
     # run draw_all_admix, only test default (p_ind and p_subpops not returned)
     out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, maf_min = maf_min, p_anc_distr = p_anc_distr)
     expect_equal( names(out), draw_all_admix_names_ret_default )
-    X <- out$X # genotypes
-    p_anc <- out$p_anc # Ancestral AFs
-    # test X
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
-    # only individuals have names!
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-    # test p_anc
-    expect_equal(length(p_anc), m_loci)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( names( p_anc ) ) )
+    validate_X( out$X, m_loci, n_ind, NULL, rownames( admix_proportions ) )
+    validate_p_anc( out$p_anc, m_loci )
 
     # repeat with a distribution with fewer elements than m_loci
     p_anc_distr <- runif( 3 )
     out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, maf_min = maf_min, p_anc_distr = p_anc_distr)
     expect_equal( names(out), draw_all_admix_names_ret_default )
-    X <- out$X # genotypes
-    p_anc <- out$p_anc # Ancestral AFs
-    # test X
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-    # test p_anc
-    expect_equal(length(p_anc), m_loci)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
-    expect_true( is.null( names( p_anc ) ) )
+    validate_X( out$X, m_loci, n_ind, NULL, rownames( admix_proportions ) )
+    validate_p_anc( out$p_anc, m_loci )
 
     # edge case: does scalar work?
     p_anc_distr <- 0.3
     out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, maf_min = maf_min, p_anc_distr = p_anc_distr)
     expect_equal( names(out), draw_all_admix_names_ret_default )
-    X <- out$X # genotypes
-    p_anc <- out$p_anc # Ancestral AFs
-    # test X
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-    # test p_anc
-    expect_equal(length(p_anc), m_loci)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
-    expect_true( is.null( names( p_anc ) ) )
+    validate_X( out$X, m_loci, n_ind, NULL, rownames( admix_proportions ) )
+    validate_p_anc( out$p_anc, m_loci )
 
     # repeat with a function!
     p_anc_distr <- runif
     out <- draw_all_admix(admix_proportions, inbr_subpops, m_loci, maf_min = maf_min, p_anc_distr = p_anc_distr)
     expect_equal( names(out), draw_all_admix_names_ret_default )
-    X <- out$X # genotypes
-    p_anc <- out$p_anc # Ancestral AFs
-    # test X
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-    # test p_anc
-    expect_equal(length(p_anc), m_loci)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
-    expect_true( is.null( names( p_anc ) ) )
+    validate_X( out$X, m_loci, n_ind, NULL, rownames( admix_proportions ) )
+    validate_p_anc( out$p_anc, m_loci )
 })
 
 test_that( "validate_coanc_tree works", {
@@ -1692,14 +1327,7 @@ test_that( "draw_p_subpops_tree works", {
             tree_subpops = tree_subpops
         )
     )
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # names are inherited from tree
-    expect_equal( colnames( p_subpops ), tree_subpops$tip.label )
-    # no names from p_anc
-    expect_true( is.null( rownames( p_subpops ) ) )
+    validate_X( p_subpops, m_loci, k_subpops, NULL, tree_subpops$tip.label, af = TRUE )
 
     # version with names from p_anc
     expect_silent(
@@ -1708,14 +1336,7 @@ test_that( "draw_p_subpops_tree works", {
             tree_subpops = tree_subpops
         )
     )
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # names are inherited from tree
-    expect_equal( colnames( p_subpops ), tree_subpops$tip.label )
-    # match names from p_anc_names!
-    expect_equal( rownames( p_subpops ), names( p_anc_names ) )
+    validate_X( p_subpops, m_loci, k_subpops, names( p_anc_names ), tree_subpops$tip.label, af = TRUE )
     
     # expect a warning if there's a root edge
     tree_subpops_warn <- tree_subpops
@@ -1726,15 +1347,8 @@ test_that( "draw_p_subpops_tree works", {
             tree_subpops = tree_subpops_warn
         )
     )
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # names are inherited from tree
-    expect_equal( colnames( p_subpops ), tree_subpops_warn$tip.label )
-    # no names from p_anc
-    expect_true( is.null( rownames( p_subpops ) ) )
-
+    validate_X( p_subpops, m_loci, k_subpops, NULL, tree_subpops$tip.label, af = TRUE )
+    
     # request AFs for all internal nodes too
     expect_silent(
         p_subpops <- draw_p_subpops_tree(
@@ -1743,16 +1357,10 @@ test_that( "draw_p_subpops_tree works", {
             nodes = TRUE
         )
     )
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), 2 * k_subpops - 1 ) # there should be these many columns instead (assumes bifurcating tree, which rtree does return)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # names are inherited from tree (this only has tip names)
-    expect_equal( colnames( p_subpops )[ 1 : k_subpops ], tree_subpops$tip.label )
-    # test that non-tips names are blank
-    expect_true( all( colnames( p_subpops )[ ( k_subpops + 1 ) : ( 2 * k_subpops - 1 ) ] == '' ) )
-    # no names from p_anc
-    expect_true( is.null( rownames( p_subpops ) ) )
+    # there should be `2 * k_subpops - 1` columns instead (assumes bifurcating tree, which rtree does return)
+    # names are inherited from tree: this only has tip names, non-tips names are blank
+    anc_names <- c( tree_subpops$tip.label, rep.int( '', k_subpops - 1 ) )
+    validate_X( p_subpops, m_loci, 2 * k_subpops - 1, NULL, anc_names, af = TRUE )
     
     # pass scalar p_anc, specify m_loci separately
     expect_silent(
@@ -1762,14 +1370,7 @@ test_that( "draw_p_subpops_tree works", {
             m_loci = m_loci
         )
     )
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # names are inherited from tree
-    expect_equal( colnames( p_subpops ), tree_subpops$tip.label )
-    # no names from p_anc
-    expect_true( is.null( rownames( p_subpops ) ) )
+    validate_X( p_subpops, m_loci, k_subpops, NULL, tree_subpops$tip.label, af = TRUE )
     
     # pass scalar p_anc, but don't specify m_loci
     expect_silent(
@@ -1778,15 +1379,9 @@ test_that( "draw_p_subpops_tree works", {
             tree_subpops = tree_subpops
         )
     )
-    expect_equal(nrow(p_subpops), 1 ) # expect a single locus
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # names are inherited from tree
-    expect_equal( colnames( p_subpops ), tree_subpops$tip.label )
-    # no names from p_anc
-    expect_true( is.null( rownames( p_subpops ) ) )
-
+    # expect a single locus
+    validate_X( p_subpops, 1, k_subpops, NULL, tree_subpops$tip.label, af = TRUE )
+    
     # run a case with a tree without names
     expect_silent(
         p_subpops <- draw_p_subpops_tree(
@@ -1794,14 +1389,7 @@ test_that( "draw_p_subpops_tree works", {
             tree_subpops = tree_subpops_no_names
         )
     )
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # names should be null
-    expect_true( is.null( colnames( p_subpops ) ) )
-    # no names from p_anc
-    expect_true( is.null( rownames( p_subpops ) ) )
+    validate_X( p_subpops, m_loci, k_subpops, af = TRUE )
 
     # run a case with full names, but only tips are returned
     expect_silent(
@@ -1810,15 +1398,8 @@ test_that( "draw_p_subpops_tree works", {
             tree_subpops = tree_subpops_full_names
         )
     )
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # names are inherited from tree
-    expect_equal( colnames( p_subpops ), tree_subpops_full_names$tip.label )
-    # no names from p_anc
-    expect_true( is.null( rownames( p_subpops ) ) )
-
+    validate_X( p_subpops, m_loci, k_subpops, NULL, tree_subpops$tip.label, af = TRUE )
+    
     # run a case with full names, but all nodes are returned
     expect_silent(
         p_subpops <- draw_p_subpops_tree(
@@ -1827,17 +1408,11 @@ test_that( "draw_p_subpops_tree works", {
             nodes = TRUE
         )
     )
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), 2 * k_subpops - 1 ) # there should be these many columns instead (assumes bifurcating tree, which rtree does return)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # names are inherited from tree (this only has tip names)
-    expect_equal( colnames( p_subpops )[ 1 : k_subpops ], tree_subpops_full_names$tip.label )
-    # test that non-tips names are blank
-    expect_equal( colnames( p_subpops )[ ( k_subpops + 1 ) : ( 2 * k_subpops - 1 ) ], tree_subpops_full_names$node.label )
-    # no names from p_anc
-    expect_true( is.null( rownames( p_subpops ) ) )
-
+    # there should be `2 * k_subpops - 1` columns instead (assumes bifurcating tree, which rtree does return)
+    # names are inherited from tree: this only has both tip and non-tip names
+    anc_names <- c( tree_subpops_full_names$tip.label, tree_subpops_full_names$node.label )
+    validate_X( p_subpops, m_loci, 2 * k_subpops - 1, NULL, anc_names, af = TRUE )
+    
     # a successful run with randomized edges (used to cause problems due to assumption that this wasn't allowed)
     tree_subpops_rand <- tree_subpops
     tree_subpops_rand$edge <- tree_subpops_rand$edge[ sample( ape::Nedge( tree_subpops_rand ) ), ]
@@ -1847,15 +1422,7 @@ test_that( "draw_p_subpops_tree works", {
             tree_subpops = tree_subpops_rand
         )
     )
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # names are inherited from tree
-    expect_equal( colnames( p_subpops ), tree_subpops_rand$tip.label )
-    # no names from p_anc
-    expect_true( is.null( rownames( p_subpops ) ) )
-    
+    validate_X( p_subpops, m_loci, k_subpops, NULL, tree_subpops_rand$tip.label, af = TRUE )
 })
 
 test_that( "tree_additive works", {
@@ -2082,48 +1649,10 @@ test_that("draw_all_admix works with a tree", {
         out <- draw_all_admix(admix_proportions, tree_subpops = tree_subpops, m_loci = m_loci, want_p_ind = TRUE, want_p_subpops = TRUE)
     )
     expect_equal( names(out), draw_all_admix_names_ret_full )
-    X <- out$X # genotypes
-    p_ind <- out$p_ind # IAFs
-    p_subpops <- out$p_subpops # Intermediate AFs
-    p_anc <- out$p_anc # Ancestral AFs
-    
-    # test X
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( X ) ) )
-    # individuals do have names
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-    
-    # test p_ind
-    expect_equal(nrow(p_ind), m_loci)
-    expect_equal(ncol(p_ind), n_ind)
-    expect_true(all(p_ind >= 0)) # all are non-negative
-    expect_true(all(p_ind <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( p_ind ) ) )
-    # individuals do have names
-    expect_equal( colnames( p_ind ), rownames( admix_proportions ) )
-    
-    # test p_subpops
-    expect_equal(nrow(p_subpops), m_loci)
-    expect_equal(ncol(p_subpops), k_subpops)
-    expect_true(all(p_subpops >= 0)) # all are non-negative
-    expect_true(all(p_subpops <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( p_subpops ) ) )
-    # subpopulations do have names
-    expect_equal( colnames( p_subpops ), colnames( admix_proportions ) )
-    
-    # test p_anc
-    expect_equal(length(p_anc), m_loci)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( names( p_anc ) ) )
+    validate_X( out$X, m_loci, n_ind, NULL, rownames( admix_proportions ) )
+    validate_X( out$p_ind, m_loci, n_ind, NULL, rownames( admix_proportions ), af = TRUE )
+    validate_X( out$p_subpops, m_loci, k_subpops, NULL, colnames( admix_proportions ), af = TRUE )
+    validate_p_anc( out$p_anc, m_loci )
 
     # repeat tests with randomized edges
     tree_rand <- tree_subpops
@@ -2133,24 +1662,8 @@ test_that("draw_all_admix works with a tree", {
         out <- draw_all_admix(admix_proportions, tree_subpops = tree_rand, m_loci = m_loci)
     )
     expect_equal( names(out), draw_all_admix_names_ret_default )
-    X <- out$X # genotypes
-    p_anc <- out$p_anc # Ancestral AFs
-    # test X
-    expect_equal(nrow(X), m_loci)
-    expect_equal(ncol(X), n_ind)
-    expect_true( !anyNA( X ) ) # no missing values
-    expect_true(all(X %in% c(0, 1, 2))) # only three values allowed!
-    expect_true(!any(fixed_loci(X))) # we don't expect any loci to be fixed
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( rownames( X ) ) )
-    # individuals do have names
-    expect_equal( colnames( X ), rownames( admix_proportions ) )
-    # test p_anc
-    expect_equal(length(p_anc), m_loci)
-    expect_true(all(p_anc >= 0)) # all are non-negative
-    expect_true(all(p_anc <= 1)) # all are smaller or equal than 1
-    # p_anc was simulated inside function (not passed) so loci don't have names
-    expect_true( is.null( names( p_anc ) ) )
+    validate_X( out$X, m_loci, n_ind, NULL, rownames( admix_proportions ) )
+    validate_p_anc( out$p_anc, m_loci )
     
     # expect a warning if there's a root edge
     tree_subpops_warn <- tree_subpops
@@ -2198,18 +1711,7 @@ test_that("admix_prop_1d_linear/circular bias_coeff work with tree", {
     )
     expect_true( is.list( obj ) )
     expect_equal( names( obj ), names_admix_prop_1d )
-    admix_proportions <- obj$admix_proportions # returns many things in this case, get admix_proportions here
-    expect_equal(nrow(admix_proportions), n_ind) # n rows
-    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
-    expect_true(all(admix_proportions >= 0)) # all are non-negative
-    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
-    expect_equal(rowSums(admix_proportions), rep.int(1, n_ind)) # rows sum to 1, vector length n
-    # dimnames should be non-NULL in this case
-    expect_true( !is.null( dimnames( admix_proportions ) ) )
-    # no row names (individuals don't have natural names here)
-    expect_true( is.null( rownames( admix_proportions ) ) )
-    # but column names should be tree labels!
-    expect_equal( colnames( admix_proportions ), tree_subpops$tip.label )
+    validate_admix_proportions( obj$admix_proportions, n_ind, k_subpops, tree_subpops$tip.label )
 
     # repeat with circular rather than linear version
     expect_silent(
@@ -2223,19 +1725,7 @@ test_that("admix_prop_1d_linear/circular bias_coeff work with tree", {
     )
     expect_true( is.list( obj ) )
     expect_equal( names( obj ), names_admix_prop_1d )
-    admix_proportions <- obj$admix_proportions # returns many things in this case, get admix_proportions here
-    expect_equal(nrow(admix_proportions), n_ind) # n rows
-    expect_equal(ncol(admix_proportions), k_subpops) # k_subpops columns
-    expect_true(all(admix_proportions >= 0)) # all are non-negative
-    expect_true(all(admix_proportions <= 1)) # all are smaller or equal than 1
-    expect_equal(rowSums(admix_proportions), rep.int(1, n_ind)) # rows sum to 1, vector length n
-    # dimnames should be non-NULL in this case
-    expect_true( !is.null( dimnames( admix_proportions ) ) )
-    # no row names (individuals don't have natural names here)
-    expect_true( is.null( rownames( admix_proportions ) ) )
-    # but column names should be tree labels!
-    expect_equal( colnames( admix_proportions ), tree_subpops$tip.label )
-
+    validate_admix_proportions( obj$admix_proportions, n_ind, k_subpops, tree_subpops$tip.label )
 })
 
 test_that( "is_ordered_tips_edges, tree_reindex_tips work", {
@@ -2733,4 +2223,90 @@ test_that( "undiff_af works", {
     # finally, "auto" hacks a beta, which always succeeds, so use original (large) F here
     # here a more extreme case: undifferentiate uniform inputs!
     test_undiff_af_generic( p, F, distr = 'auto' )
+})
+
+test_that("draw_all_unstructured works", {
+    n_ind <- 9
+    m_loci <- 10
+
+    # die if both m_ind p_anc are missing
+    expect_error(
+        draw_all_unstructured( n_ind, verbose = FALSE )
+    )
+    
+    # no p_anc, most basic setting
+    expect_silent(
+        obj <- draw_all_unstructured( n_ind, m_loci, verbose = FALSE )
+    )
+    expect_true( is.list( obj ) )
+    expect_equal( names( obj ), c('X', 'p_anc') )
+    validate_X( obj$X, m_loci, n_ind )
+    validate_p_anc( obj$p_anc, m_loci )
+
+    # no p_anc, set non-default beta
+    expect_silent(
+        obj <- draw_all_unstructured( n_ind, m_loci, beta = 0.01, verbose = FALSE )
+    )
+    expect_true( is.list( obj ) )
+    expect_equal( names( obj ), c('X', 'p_anc') )
+    validate_X( obj$X, m_loci, n_ind )
+    validate_p_anc( obj$p_anc, m_loci )
+
+    # no p_anc, set non-default maf_min
+    maf_min <- 0.2
+    expect_silent(
+        obj <- draw_all_unstructured( n_ind, m_loci, maf_min = maf_min, verbose = FALSE )
+    )
+    expect_true( is.list( obj ) )
+    expect_equal( names( obj ), c('X', 'p_anc') )
+    validate_X( obj$X, m_loci, n_ind, maf_min = maf_min )
+    validate_p_anc( obj$p_anc, m_loci )
+
+    # no p_anc, allow fixed loci
+    expect_silent(
+        obj <- draw_all_unstructured( n_ind, m_loci, require_polymorphic_loci = FALSE, verbose = FALSE )
+    )
+    expect_true( is.list( obj ) )
+    expect_equal( names( obj ), c('X', 'p_anc') )
+    validate_X( obj$X, m_loci, n_ind, maf_min = NA )
+    validate_p_anc( obj$p_anc, m_loci )
+
+    # provide scalar p_anc (no names, of course), this case requires m_loci
+    p_anc <- 0.7
+    # cause error by not providing m_loci
+    expect_error(
+        draw_all_unstructured( n_ind, p_anc = p_anc, verbose = FALSE )
+    )
+    # successful run
+    expect_silent(
+        obj <- draw_all_unstructured( n_ind, m_loci, p_anc = p_anc, verbose = FALSE )
+    )
+    expect_true( is.list( obj ) )
+    expect_equal( names( obj ), c('X', 'p_anc') )
+    validate_X( obj$X, m_loci, n_ind, maf_min = NA )
+    # test p_anc, should just match what we passed
+    # but always returns vector, compare as vector
+    expect_equal( obj$p_anc, rep.int( p_anc, m_loci ) )
+
+    # provide vector p_anc without names, omit m_loci
+    p_anc <- runif( m_loci )
+    expect_silent(
+        obj <- draw_all_unstructured( n_ind, p_anc = p_anc, verbose = FALSE )
+    )
+    expect_true( is.list( obj ) )
+    expect_equal( names( obj ), c('X', 'p_anc') )
+    validate_X( obj$X, m_loci, n_ind, maf_min = NA )
+    # test p_anc, should just match what we passed
+    expect_equal( obj$p_anc, p_anc )
+
+    # add names to previous p_anc, make sure they are inherited to X
+    names( p_anc ) <- letters[ 1 : m_loci ]
+    expect_silent(
+        obj <- draw_all_unstructured( n_ind, p_anc = p_anc, verbose = FALSE )
+    )
+    expect_true( is.list( obj ) )
+    expect_equal( names( obj ), c('X', 'p_anc') )
+    validate_X( obj$X, m_loci, n_ind, names( p_anc ), maf_min = NA )
+    # test p_anc, should just match what we passed
+    expect_equal( obj$p_anc, p_anc )
 })

@@ -271,3 +271,8 @@ New functions and bug fixes dealing with reordering tree edges and tips.
 - Function `tree_additive` added option `validate`.
   - Default `TRUE` value has original behavior.
   - Added option to turn off since now `tree_additive` itself is used inside the internal validation function `validate_coanc_tree` to make sure that IBD and additive edges agree with each other when both are present, so validation must not be repeated lest we enter an infinite recursion, which results in a stack overflow.
+
+# bnpsd 1.3.14.9000 (2023-07-21)
+
+- Added function `draw_all_unstructured`, to facilitate drawing unstructured data (where individuals have genotypes drawn independently and identically distributed) with fancy features such as the various ways to define ancestral allele frequences and prevent fixed loci and potentially even rare variants.  Applicable options follow the model of the previous function `draw_all_admix`.
+- Internal: wrote generic testing functions for admixture proportion, genotype, and allele frequency matrices, which saved lots of lines, cleaned the code considerably, and potentially reduced mistakes.

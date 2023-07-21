@@ -240,7 +240,6 @@ draw_all_admix <- function(
                 p_anc_redo <- p_anc_in[ fixed_loci_indexes ]
             }
             # call self with desired number of loci, all the same parameters otherwise
-            # note that since this is also called asking for no fixed loci, it will work recursively within itself and return when all loci desired are not fixed!
             if (verbose)
                 message('re-drawing fixed loci')
             obj <- draw_all_admix(
